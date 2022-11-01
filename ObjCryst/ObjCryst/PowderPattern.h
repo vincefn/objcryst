@@ -365,7 +365,7 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
       const ReflectionProfile& GetProfile()const;
       /// Get reflection profile
       ReflectionProfile& GetProfile();
-      virtual void GenHKLFullSpace();
+      virtual void GenHKLFullSpace()const;
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
       //virtual void XMLInputOld(istream &is,const IOCrystTag &tag);
@@ -556,14 +556,16 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
       bool mFreezeLatticePar;
       /// Local B Matrix, used if mFreezeLatticePar is true
       mutable CrystMatrix_REAL mFrozenBMatrix;
-   #ifdef __WX__CRYST__
+      /// Bmatrix the last time the HKL parameters were generated
+      mutable CrystMatrix_REAL mGenHKLBMatrix;
+  #ifdef __WX__CRYST__
    public:
       virtual WXCrystObjBasic* WXCreate(wxWindow*);
       friend class WXPowderPatternDiffraction;
    #endif
    private:
       // Avoid compiler warnings.  Explicitly hide the base-class method.
-      void GenHKLFullSpace(const REAL, const bool);
+      void GenHKLFullSpace(const REAL, const bool) const;
 };
 
 //######################################################################

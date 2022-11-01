@@ -514,6 +514,13 @@ void ScatteringData::SetHKL(const CrystVector_REAL &h,
                             const CrystVector_REAL &k,
                             const CrystVector_REAL &l)
 {
+  const_cast<const ScatteringData*>(this)->ScatteringData::SetHKL(h,k,l);
+}
+
+void ScatteringData::SetHKL(const CrystVector_REAL &h,
+                            const CrystVector_REAL &k,
+                            const CrystVector_REAL &l) const
+{
    VFN_DEBUG_ENTRY("ScatteringData::SetHKL(h,k,l)",5)
    mNbRefl=h.numElements();
    mH=h;
@@ -525,6 +532,11 @@ void ScatteringData::SetHKL(const CrystVector_REAL &h,
 }
 
 void ScatteringData::GenHKLFullSpace2(const REAL maxSTOL,const bool unique)
+{
+  const_cast<const ScatteringData*>(this)->ScatteringData::GenHKLFullSpace2(maxSTOL, unique);
+}
+
+void ScatteringData::GenHKLFullSpace2(const REAL maxSTOL,const bool unique) const
 {
    //(*fpObjCrystInformUser)("Generating Full HKL list...");
    VFN_DEBUG_ENTRY("ScatteringData::GenHKLFullSpace2()",5)
@@ -622,6 +634,11 @@ void ScatteringData::GenHKLFullSpace2(const REAL maxSTOL,const bool unique)
 
 void ScatteringData::GenHKLFullSpace(const REAL maxTheta,const bool useMultiplicity)
 {
+  const_cast<const ScatteringData*>(this)->ScatteringData::GenHKLFullSpace(maxTheta, useMultiplicity);
+}
+
+void ScatteringData::GenHKLFullSpace(const REAL maxTheta,const bool useMultiplicity) const
+{
    VFN_DEBUG_ENTRY("ScatteringData::GenHKLFullSpace()",5)
    if(this->GetRadiation().GetWavelength()(0) <=.01)
    {
@@ -642,6 +659,7 @@ void ScatteringData::SetCrystal(Crystal &crystal)
    this->AddSubRefObj(crystal);
    crystal.RegisterClient(*this);
    mClockMaster.AddChild(mpCrystal->GetClockLatticePar());
+   mClockMaster.AddChild(mpCrystal->GetSpaceGroup().GetClockSpaceGroup());
    mClockGeomStructFact.Reset();
    mClockStructFactor.Reset();
 }
@@ -914,7 +932,7 @@ void ScatteringData::SetApproximationFlag(const bool allow)
    this->RefinableObj::SetApproximationFlag(allow);
 }
 
-void ScatteringData::PrepareHKLarrays()
+void ScatteringData::PrepareHKLarrays() const
 {
    VFN_DEBUG_ENTRY("ScatteringData::PrepareHKLarrays()"<<mNbRefl<<" reflections",5)
    mFhklCalcReal.resize(mNbRefl);
@@ -996,7 +1014,7 @@ long ScatteringData::GetNbReflBelowMaxSinThetaOvLambda()const
 const RefinableObjClock& ScatteringData::GetClockNbReflBelowMaxSinThetaOvLambda()const
 {return mClockNbReflUsed;}
 
-CrystVector_long ScatteringData::SortReflectionBySinThetaOverLambda(const REAL maxSTOL)
+CrystVector_long ScatteringData::SortReflectionBySinThetaOverLambda(const REAL maxSTOL) const
 {
    TAU_PROFILE("ScatteringData::SortReflectionBySinThetaOverLambda()","void ()",TAU_DEFAULT);
    VFN_DEBUG_ENTRY("ScatteringData::SortReflectionBySinThetaOverLambda()",5)
@@ -1636,6 +1654,7 @@ void ScatteringData::CalcGeomStructFactor() const
    if(  (mClockGeomStructFact>mpCrystal->GetClockScattCompList())
       &&(mClockGeomStructFact>mClockHKL)
       &&(mClockGeomStructFact>mClockNbReflUsed)
+      &&(mClockGeomStructFact>mpCrystal->GetSpaceGroup().GetClockSpaceGroup())
       &&(mClockGeomStructFact>mpCrystal->GetMasterClockScatteringPower())) return;
    TAU_PROFILE("ScatteringData::GeomStructFactor()","void (Vx,Vy,Vz,data,M,M,bool)",TAU_DEFAULT);
    VFN_DEBUG_ENTRY("ScatteringData::GeomStructFactor(Vx,Vy,Vz,...)",3)

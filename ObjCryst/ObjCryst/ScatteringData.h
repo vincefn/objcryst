@@ -292,7 +292,6 @@ class Radiation: public RefinableObj
 * This class only computes structure factor, but no intensity. i.e. it does
 * not include any correction such as absorption, Lorentz or Polarization.
 *
-* Does this really need to be a RefinableObj ?
 * \todo Optimize computation for Bijvoet/Friedel mates. To do this, generate
 * an internal list of 'true independent reflections', with two entries for each,
 * for both mates, and make the 'real' reflections only a reference to these reflections.
@@ -300,6 +299,21 @@ class Radiation: public RefinableObj
 * \todo a \b lot of cleaning is necessary in the computing of structure
 * factors, for (1) the 'preparation' part (deciding what needs to be recomputed)
 * and (2) to allow anisotropic temperature factors (or other anisotropic parts)
+*
+* \note
+* all H,K,L related parameters are mutable so that a PowderPatternDiffraction
+* list of reflections can be updated whenever the spacegroup or
+* lattice parameters are changed, and this needs to automatically happen
+* even when calling const-functions like PowderPatternDiffraction::CalcPowderPattern().
+*
+* \par
+* Nevertheless this 'const' modification of HKL's are meant to be purely internal,
+* so the const functions are all protected, and the non-const ones (such as
+* SetHKL or GenHKLFullSpace) are public.
+*
+* \par
+* Single crystal classes should not make use of the new const functions since
+* changing the list of HKL's is effectively mutating the object.
 */
 //######################################################################
 class ScatteringData: virtual public RefinableObj
@@ -463,13 +477,58 @@ class ScatteringData: virtual public RefinableObj
       /// Clock the last time the number of reflections used was changed
       const RefinableObjClock& GetClockNbReflBelowMaxSinThetaOvLambda()const;
    protected:
+      /** \brief \internal input H,K,L
+      *
+      * \param h,k,l: REAL arrays (vectors with NbRefl elements -same size),
+      *with the h, k and l coordinates of all reflections.
+      */
+      virtual void SetHKL( const CrystVector_REAL &h,
+                           const CrystVector_REAL &k,
+                           const CrystVector_REAL &l) const;
+      /** \brief Generate a list of h,k,l to describe a full reciprocal space,
+      * up to a given maximum theta value
+      *
+      * \param maxTheta:maximum theta value
+      * \param unique: if set to true, only unique reflections will be listed.
+      * Bijvoet (Friedel) pairs
+      * are NOT merged, for 'anomalous' reasons, unless you have chosen to ignore the
+      * imaginary part of the scattering factor.
+      *
+      * The multiplicity is always stored in ScatteringData::mMultiplicity.
+      *
+      * \warning The ScatteringData object must already have been assigned
+      * a crystal object using SetCrystal(), and the experimental wavelength
+      * must also have been set before calling this function.
+      */
+      virtual void GenHKLFullSpace2(const REAL maxsithsl,
+                                   const bool unique=false) const;
+      /** \brief \internal Generate a list of h,k,l to describe a full reciprocal space,
+      * up to a given maximum theta value
+      *
+      * \param maxsithsl:maximum sin(theta)/lambda=1/2d value
+      * \param unique: if set to true, only unique reflections will be listed.
+      * Bijvoet (Friedel) pairs
+      * are NOT merged, for 'anomalous' reasons, unless you have chosen to ignore the
+      * imaginary part of the scattering factor.
+      *
+      * The multiplicity is always stored in ScatteringData::mMultiplicity.
+      *
+      * \warning The ScatteringData object must already have been assigned
+      * a crystal object using SetCrystal(), and the experimental wavelength
+      * must also have been set before calling this function.
+      *
+      * \deprecated Rather use PowderPattern::GenHKLFullSpace2,
+      * with a maximum sin(theta)/lambda value, which also works for dispersive experiments.
+      */
+      virtual void GenHKLFullSpace(const REAL maxTheta,
+                                   const bool unique=false) const;
       /// \internal This function is called after H,K and L arrays have
       /// been initialized or modified.
-      virtual void PrepareHKLarrays() ;
+      virtual void PrepareHKLarrays() const;
       /// \internal sort reflections by theta values (also get rid of [0,0,0] if present)
       /// If maxSTOL >0, then only reflections where sin(theta)/lambda<maxSTOL are kept
       /// \return an array with the subscript of the kept reflections (for inherited classes)
-      virtual CrystVector_long SortReflectionBySinThetaOverLambda(const REAL maxSTOL=-1.);
+      virtual CrystVector_long SortReflectionBySinThetaOverLambda(const REAL maxSTOL=-1.) const;
       /// \internal Get rid of extinct reflections. Useful after GenHKLFullSpace().
       /// Do not use this if you have a list of observed reflections !
       ///
@@ -532,9 +591,9 @@ class ScatteringData: virtual public RefinableObj
       void CalcStructFactVariance()const;
 
       /// Number of H,K,L reflections
-      long mNbRefl;
+      mutable long mNbRefl;
       /// H,K,L coordinates
-      CrystVector_REAL mH, mK, mL ;
+      mutable CrystVector_REAL mH, mK, mL ;
       /// H,K,L integer coordinates
       mutable CrystVector_long mIntH, mIntK, mIntL ;
       /// H,K,L coordinates, multiplied by 2PI
@@ -543,13 +602,13 @@ class ScatteringData: virtual public RefinableObj
       mutable CrystVector_REAL mX, mY, mZ ;
 
       ///Multiplicity for each reflections (mostly for powder diffraction)
-      CrystVector_int mMultiplicity ;
+      mutable CrystVector_int mMultiplicity ;
 
       /** Expected intensity factor for all reflections.
       *
       * See SpaceGroup::GetExpectedIntensityFactor()
       */
-      CrystVector_int mExpectedIntensityFactor;
+      mutable CrystVector_int mExpectedIntensityFactor;
 
       /// real &imaginary parts of F(HKL)calc
       mutable CrystVector_REAL mFhklCalcReal, mFhklCalcImag ;
@@ -609,7 +668,7 @@ class ScatteringData: virtual public RefinableObj
 
       //Public Clocks
          /// Clock for the list of hkl
-         RefinableObjClock mClockHKL;
+         mutable RefinableObjClock mClockHKL;
          /// Clock for the structure factor
          mutable RefinableObjClock mClockStructFactor;
          /// Clock for the square modulus of the structure factor
@@ -676,9 +735,9 @@ class ScatteringData: virtual public RefinableObj
          mutable RefinableObjClock mClockLuzzatiFactor;
          mutable RefinableObjClock mClockFhklCalcVariance;
       /// Observed squared structure factors (zero-sized if none)
-      CrystVector_REAL mFhklObsSq;
+      mutable CrystVector_REAL mFhklObsSq;
       /// Last time observed squared structure factors were altered
-      RefinableObjClock mClockFhklObsSq;
+      mutable RefinableObjClock mClockFhklObsSq;
    #ifdef __WX__CRYST__
       //to access mMaxSinThetaOvLambda
       friend class WXDiffractionSingleCrystal;
