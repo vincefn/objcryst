@@ -22,25 +22,25 @@ endif
 ../newmat: ../newmat.tar.bz2
 	cd .. && tar -xjf newmat.tar.bz2
 
-../fftw-3.3.4.tar.gz:
-	cd .. &&  curl -O http://fftw.org/fftw-3.3.4.tar.gz
+../fftw-3.3.10.tar.gz:
+	cd .. &&  curl -O http://fftw.org/fftw-3.3.10.tar.gz
 
-../static-libs/lib/libfftw3f.a: ../fftw-3.3.4.tar.gz
+../static-libs/lib/libfftw3f.a: ../fftw-3.3.10.tar.gz
 	rm -f $(PWD)/../static-libs/lib/*fftw*
-	cd .. && tar -xzf fftw-3.3.4.tar.gz && mv fftw-3.3.4 fftw
-	cd ../fftw && MACOSX_DEPLOYMENT_TARGET=10.5 ./configure --enable-single --prefix $(PWD)/../static-libs && MACOSX_DEPLOYMENT_TARGET=10.5 make clean && MACOSX_DEPLOYMENT_TARGET=10.5 make -j4 install
+	cd .. && tar -xzf fftw-3.3.10.tar.gz && mv fftw-3.3.10 fftw
+	cd ../fftw && MACOSX_DEPLOYMENT_TARGET=11.0 ./configure --enable-single --prefix $(PWD)/../static-libs CFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=11.0" && MACOSX_DEPLOYMENT_TARGET=11.0 make clean && MACOSX_DEPLOYMENT_TARGET=11.0 make -j4 install
 	rm -Rf ../fftw
 
 libfftw: ../static-libs/lib/libfftw3f.a
 
 
-../wxWidgets-3.1.6.tar.bz2:
-	cd .. && $(DOWNLOAD_COMMAND)  https://github.com/wxWidgets/wxWidgets/releases/download/v3.1.6/wxWidgets-3.1.6.tar.bz2
+../wxWidgets-3.2.1.tar.bz2:
+	cd .. && $(DOWNLOAD_COMMAND)  https://github.com/wxWidgets/wxWidgets/releases/download/v3.2.1/wxWidgets-3.2.1.tar.bz2
 
-../static-libs/bin/wx-config: ../wxWidgets-3.1.6.tar.bz2
-	cd .. && tar -xjf wxWidgets-3.1.6.tar.bz2
-	cd ../wxWidgets-3.1.6 && ./configure --with-opengl --disable-debug --disable-webviewwebkit --enable-optimise --disable-shared  --enable-monolithic --disable-mediactrl --without-libtiff --enable-cxx11 --prefix=$(PWD)/../static-libs && make -j4 install
-	rm -Rf ../wxWidgets-3.1.6
+../static-libs/bin/wx-config: ../wxWidgets-3.2.1.tar.bz2
+	cd .. && tar -xjf wxWidgets-3.2.1.tar.bz2
+	cd ../wxWidgets-3.2.1 && MACOSX_DEPLOYMENT_TARGET=11.0 ./configure --with-opengl --disable-debug --disable-webviewwebkit --enable-optimise --disable-shared  --enable-monolithic --disable-mediactrl --without-libtiff --enable-cxx11 --enable-universal_binary=x86_64,arm64 --prefix=$(PWD)/../static-libs && make -j4 install
+	rm -Rf ../wxWidgets-3.2.1
 
 libwx: ../static-libs/bin/wx-config
 
@@ -60,6 +60,9 @@ dist:Fox
 	rm -Rf Fox-`date "+%Y-%m-%d"`
 
 all: Fox Fox-nogui
+
+tidy:
+	make -f gnu.mak tidy
 
 clean:
 	rm -Rf build/Fox.build

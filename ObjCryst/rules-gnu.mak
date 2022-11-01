@@ -117,10 +117,13 @@ FFTW_LIB :=
 FFTW_FLAGS :=
 endif
 
-ifneq ($(sse),0)
-SSE_FLAGS = -DHAVE_SSE_MATHFUN -DUSE_SSE2 -march=native
-else
+# Using SSE ? Automatically deactivate on ARM64
+UNAME_S := $(shell uname -m)
 SSE_FLAGS =
+ifneq ($(sse),0)
+ifneq ($(UNAME_S),arm64)
+SSE_FLAGS = -DHAVE_SSE_MATHFUN -DUSE_SSE2 -march=native $(UNAME_S)
+endif
 endif
 
 ifneq ($(shared-newmat),1)
@@ -205,17 +208,17 @@ else
 libfreeglut=
 endif
 
-$(BUILD_DIR)/wxWidgets-3.1.6.tar.bz2:
-	cd $(BUILD_DIR) && $(DOWNLOAD_COMMAND) https://github.com/wxWidgets/wxWidgets/releases/download/v3.1.6/wxWidgets-3.1.6.tar.bz2
+$(BUILD_DIR)/wxWidgets-3.2.1.tar.bz2:
+	cd $(BUILD_DIR) && $(DOWNLOAD_COMMAND) https://github.com/wxWidgets/wxWidgets/releases/download/v3.2.1/wxWidgets-3.2.1.tar.bz2
 
-$(BUILD_DIR)/static-libs/include/wx-3.1/wx/wx.h: $(BUILD_DIR)/wxWidgets-3.1.6.tar.bz2
-	cd $(BUILD_DIR) && rm -Rf wxWidgets-3.1.6 && tar -xjf wxWidgets-3.1.6.tar.bz2
-	cd $(BUILD_DIR)/wxWidgets-3.1.6 && ./configure --with-gtk --with-opengl --disable-glcanvasegl --prefix=$(BUILD_DIR)/static-libs --enable-unicode  --enable-optimise --disable-shared --x-includes=/usr/X11R6/include/ && $(MAKE) install
-	rm -Rf $(BUILD_DIR)/wxWidgets-3.1.6
+$(BUILD_DIR)/static-libs/include/wx-3.2/wx/wx.h: $(BUILD_DIR)/wxWidgets-3.2.1.tar.bz2
+	cd $(BUILD_DIR) && rm -Rf wxWidgets-3.2.1 && tar -xjf wxWidgets-3.2.1.tar.bz2
+	cd $(BUILD_DIR)/wxWidgets-3.2.1 && ./configure --with-gtk --with-opengl --disable-glcanvasegl --prefix=$(BUILD_DIR)/static-libs --enable-unicode  --enable-optimise --disable-shared --x-includes=/usr/X11R6/include/ && $(MAKE) install
+	rm -Rf $(BUILD_DIR)/wxWidgets-3.2.1
 
 ifneq ($(wxcryst),0)
 ifneq ($(shared-wxgtk),1)
-libwx = $(BUILD_DIR)/static-libs/include/wx-3.1/wx/wx.h
+libwx = $(BUILD_DIR)/static-libs/include/wx-3.2/wx/wx.h
 else
 libwx=
 endif
@@ -236,13 +239,13 @@ $(DIR_STATIC_LIBS)/lib/libcctbx.a: $(BUILD_DIR)/cctbx.tar.bz2
 
 libcctbx: $(DIR_STATIC_LIBS)/lib/libcctbx.a
 
-$(BUILD_DIR)/fftw-3.3.9.tar.gz:
-	cd $(BUILD_DIR) && $(DOWNLOAD_COMMAND) http://fftw.org/fftw-3.3.9.tar.gz
+$(BUILD_DIR)/fftw-3.3.10.tar.gz:
+	cd $(BUILD_DIR) && $(DOWNLOAD_COMMAND) http://fftw.org/fftw-3.3.10.tar.gz
 
-$(DIR_STATIC_LIBS)/lib/libfftw3f.a: $(BUILD_DIR)/fftw-3.3.9.tar.gz
-	cd $(BUILD_DIR) && tar -xzf fftw-3.3.9.tar.gz
-	cd $(BUILD_DIR)/fftw-3.3.9 && ./configure --enable-single --prefix $(DIR_STATIC_LIBS) && $(MAKE) install
-	rm -Rf $(BUILD_DIR)/fftw-3.3.9
+$(DIR_STATIC_LIBS)/lib/libfftw3f.a: $(BUILD_DIR)/fftw-3.3.10.tar.gz
+	cd $(BUILD_DIR) && tar -xzf fftw-3.3.10.tar.gz
+	cd $(BUILD_DIR)/fftw-3.3.10 && ./configure --enable-single --prefix $(DIR_STATIC_LIBS) && $(MAKE) install
+	rm -Rf $(BUILD_DIR)/fftw-3.3.10
 
 ifneq ($(fftw),0)
 ifneq ($(shared-fftw),1)
