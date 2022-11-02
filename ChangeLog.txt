@@ -1,3 +1,12 @@
+#### 2022.2 (XX 2022)
+NEW FEATURES
+  * The macOS image is now a universal binary for Apple Silicon (ARM64)
+    and X86_64 machines
+
+IMPROVEMENTS
+  * the list of HKL reflections will now be more automatically be re-generated
+    when the spacegroup changes or the lattice parameters change by more than 0.5%
+
 #### 2022.1 (May 2022)
 NEW FEATURES
   * Add cylindrical absorption correction (mu*R)

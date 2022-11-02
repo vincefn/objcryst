@@ -1326,7 +1326,6 @@ void PowderPatternDiffraction::CalcPowderPattern() const
    {
       VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderPattern():"
                         "spacegroup has changed, re-generating HKL's",5)
-      cout<<"PowderPatternDiffraction::CalcPowderPattern(): spacegroup has changed, re-generating HKL's"<<endl;
       this->GenHKLFullSpace();
    }
    else if((!this->IsBeingRefined()) && (this->GetCrystal().GetClockLatticePar()>mClockHKL))
@@ -1349,8 +1348,6 @@ void PowderPatternDiffraction::CalcPowderPattern() const
       {
         VFN_DEBUG_MESSAGE("PowderPatternDiffraction::CalcPowderPattern():"
                           "lattice parameters have changed by more than 0.5%, re-generating HKL's",5)
-        cout<<"PowderPatternDiffraction::CalcPowderPattern():"
-              "lattice parameters have changed by more than 0.5%, re-generating HKL's"<<endl;
          this->GenHKLFullSpace();
       }
    }
