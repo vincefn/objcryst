@@ -24,6 +24,7 @@ shared-newmat=1
 shared-wxgtk=1
 shared-fftw=1
 shared-glut=1
+shared-cctbx=1
 endif
 ### Rules for Linux & GCC
 # C compiler
@@ -237,7 +238,11 @@ $(DIR_STATIC_LIBS)/lib/libcctbx.a: $(BUILD_DIR)/cctbx.tar.bz2
 	#ln -sf $(BUILD_DIR)/boost $(DIR_STATIC_LIBS)/include/
 	#rm -Rf $(BUILD_DIR)/cctbx
 
-libcctbx: $(DIR_STATIC_LIBS)/lib/libcctbx.a
+ifneq ($(shared-cctbx),1)
+libcctbx= $(DIR_STATIC_LIBS)/lib/libcctbx.a
+else
+libcctbx=
+endif
 
 $(BUILD_DIR)/fftw-3.3.10.tar.gz:
 	cd $(BUILD_DIR) && $(DOWNLOAD_COMMAND) http://fftw.org/fftw-3.3.10.tar.gz
@@ -268,13 +273,13 @@ libboost:$(BUILD_DIR)/boost_1_68_0.tar.bz2
 	rm -Rf $(BUILD_DIR)/boost_1_68_0
 
 #ObjCryst++
-libCryst: $(libwx) libcctbx
+libCryst: $(libwx) $(libcctbx)
 	$(MAKE) -f gnu.mak -C ${DIR_LIBCRYST} lib
 
 libcryst: libCryst
 
 #wxCryst++
-libwxCryst: $(libwx) $(libfreeglut) $(libfftw) libcctbx
+libwxCryst: $(libwx) $(libfreeglut) $(libfftw) $(libcctbx)
 	$(MAKE) -f gnu.mak -C ${DIR_WXWCRYST} lib
 
 #Vector computation library
@@ -286,5 +291,5 @@ libQuirks: $(libwx)
 	$(MAKE) -f gnu.mak -C ${DIR_VFNQUIRKS} lib
 
 #Library to take care of refinable parameters, plus Global optimization and Least Squares refinements
-libRefinableObj:$(libnewmat) $(libwx) libcctbx
+libRefinableObj:$(libnewmat) $(libwx) $(libcctbx)
 	$(MAKE) -f gnu.mak -C ${DIR_REFOBJ}/ lib

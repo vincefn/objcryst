@@ -15,7 +15,7 @@ else
 endif
 
 ifeq ($(profile),2)
-%.o :  %.cpp $(libwx) $(libnewmat) libcctbx
+%.o :  %.cpp $(libwx) $(libnewmat) $(libcctbx)
 	@rm -f $(*F).gcda $(*F).gcno
 	@$(MAKEDEPEND)
 	${CXX} ${CPPFLAGS} ${CXXFLAGS} -c $< -o $@
@@ -33,11 +33,11 @@ endif
 libFox: $(OBJ)
 
 #Main Application
-Fox: $(libwx) $(libnewmat)  $(libfftw) $(COD_LIB) libCrystVector libQuirks libRefinableObj libcctbx libCryst libwxCryst
+Fox: $(libwx) $(libnewmat)  $(libfftw) $(COD_LIB) libCrystVector libQuirks libRefinableObj $(libcctbx) libCryst libwxCryst
 	$(MAKE) -f gnu.mak libFox
 	${LINKER} ${CRYST_LDFLAGS} -o $@ ${filter-out %.h %.a %.so lib%, $^} $(OBJ) ${LOADLIBES}
 
-Fox-nogui: $(libnewmat) libcctbx libCrystVector libQuirks libRefinableObj libCryst Fox.o
+Fox-nogui: $(libnewmat) $(libcctbx) libCrystVector libQuirks libRefinableObj libCryst Fox.o
 	${LINKER} ${CRYST_LDFLAGS} -o $@ ${filter-out %.h %.a %.so lib%, $^} ${LOADLIBES}
 
 fox: Fox

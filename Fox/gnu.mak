@@ -8,6 +8,7 @@ shared-wxgtk=1
 shared-fftw=1
 shared-glut=1
 shared-mysql=1
+shared-cctbx=1
 endif
 
 all: Fox
@@ -15,7 +16,7 @@ all: Fox
 default: all
 
 Fox:
-	$(MAKE) -f gnu.mak wxcryst=1 opengl=1 fftw=1 debug=$(debug) unicode=$(unicode) cod=$(cod) shared=$(shared) shared-wxgtk=$(shared-wxgtk) shared-glut=$(shared-glut) shared-newmat=$(shared-newmat) shared-fftw=$(shared-fftw) shared-mysql=$(shared-mysql) -C src Fox
+	$(MAKE) -f gnu.mak wxcryst=1 opengl=1 fftw=1 debug=$(debug) unicode=$(unicode) cod=$(cod) shared=$(shared) shared-wxgtk=$(shared-wxgtk) shared-glut=$(shared-glut) shared-newmat=$(shared-newmat) shared-fftw=$(shared-fftw) shared-mysql=$(shared-mysql) shared-cctbx=$(shared-cctbx) -C src Fox
 
 Fox-nogui:
 	$(MAKE) -f gnu.mak wxcryst=0 opengl=0 fftw=0 cod=0 debug=$(debug) -C src Fox-nogui
