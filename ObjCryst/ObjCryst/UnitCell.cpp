@@ -344,6 +344,9 @@ void UnitCell::Init(const REAL a, const REAL b, const REAL c, const REAL alpha,
    //mSpaceGroup.Print();
    mSpaceGroup.ChangeSpaceGroup(SpaceGroupId);
    //mSpaceGroup.Print();
+   if((alpha<=0)||(alpha>=M_PI)) throw ObjCrystException("alpha must be within ]0;pi[");
+   if((beta<=0) ||(beta>=M_PI)) throw ObjCrystException("beta must be within ]0;pi[");
+   if((gamma<=0)||(gamma>=M_PI)) throw ObjCrystException("gamma must be within ]0;pi[");
    mCellDim(0)=a;
    mCellDim(1)=b;
    mCellDim(2)=c;
