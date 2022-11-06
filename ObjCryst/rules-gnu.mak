@@ -122,7 +122,7 @@ UNAME_S := $(shell uname -m)
 SSE_FLAGS =
 ifneq ($(sse),0)
 ifneq ($(UNAME_S),arm64)
-SSE_FLAGS = -DHAVE_SSE_MATHFUN -DUSE_SSE2 -march=native $(UNAME_S)
+SSE_FLAGS = -DHAVE_SSE_MATHFUN -DUSE_SSE2 -march=native
 endif
 endif
 
