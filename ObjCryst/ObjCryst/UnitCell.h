@@ -161,6 +161,12 @@ class UnitCell:public RefinableObj
       const SpaceGroup & GetSpaceGroup()const;
       /// Access to the SpaceGroup object.
       SpaceGroup & GetSpaceGroup();
+      /** Change the spacegroup. This function should be called
+      * rather than using GetSpaceGroup().ChangeSpaceGroup(),
+      * as the latter does not allow to update the refinable
+      * parameters constraints of the lattive parameters.
+      */
+      void ChangeSpaceGroup(const string &spgId);
 
       // :TODO: ?
       //virtual void XMLOutput(ostream &os,int indent=0)const;

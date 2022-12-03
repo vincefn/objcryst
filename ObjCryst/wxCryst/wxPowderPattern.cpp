@@ -2635,13 +2635,13 @@ void WXCellExplorer::OnSelectCell(wxCommandEvent &event)
             {
                switch(pos->first.mlattice)
                {
-                  case TRICLINIC:mpCrystal->GetSpaceGroup().ChangeSpaceGroup("P-1");break;
-                  case MONOCLINIC:mpCrystal->GetSpaceGroup().ChangeSpaceGroup("P2/m");break;
-                  case ORTHOROMBIC:mpCrystal->GetSpaceGroup().ChangeSpaceGroup("Pmmm");break;
-                  case HEXAGONAL:mpCrystal->GetSpaceGroup().ChangeSpaceGroup("P6/mmm");break;
-                  case RHOMBOEDRAL:mpCrystal->GetSpaceGroup().ChangeSpaceGroup("R-3m");break;
-                  case TETRAGONAL:mpCrystal->GetSpaceGroup().ChangeSpaceGroup("P4/mmm");break;
-                  case CUBIC:mpCrystal->GetSpaceGroup().ChangeSpaceGroup("Pm-3m");break;
+                  case TRICLINIC:mpCrystal->ChangeSpaceGroup("P-1");break;
+                  case MONOCLINIC:mpCrystal->ChangeSpaceGroup("P2/m");break;
+                  case ORTHOROMBIC:mpCrystal->ChangeSpaceGroup("Pmmm");break;
+                  case HEXAGONAL:mpCrystal->ChangeSpaceGroup("P6/mmm");break;
+                  case RHOMBOEDRAL:mpCrystal->ChangeSpaceGroup("R-3m");break;
+                  case TETRAGONAL:mpCrystal->ChangeSpaceGroup("P4/mmm");break;
+                  case CUBIC:mpCrystal->ChangeSpaceGroup("Pm-3m");break;
                }
                break;
             }
@@ -2649,10 +2649,10 @@ void WXCellExplorer::OnSelectCell(wxCommandEvent &event)
             {
                switch(pos->first.mlattice)
                {
-                  case MONOCLINIC:mpCrystal->GetSpaceGroup().ChangeSpaceGroup("I2/m");break;
-                  case ORTHOROMBIC:mpCrystal->GetSpaceGroup().ChangeSpaceGroup("I222");break;
-                  case TETRAGONAL:mpCrystal->GetSpaceGroup().ChangeSpaceGroup("I4/mmm");break;
-                  case CUBIC:mpCrystal->GetSpaceGroup().ChangeSpaceGroup("Im-3m");break;
+                  case MONOCLINIC:mpCrystal->ChangeSpaceGroup("I2/m");break;
+                  case ORTHOROMBIC:mpCrystal->ChangeSpaceGroup("I222");break;
+                  case TETRAGONAL:mpCrystal->ChangeSpaceGroup("I4/mmm");break;
+                  case CUBIC:mpCrystal->ChangeSpaceGroup("Im-3m");break;
                }
                break;
             }
@@ -2660,8 +2660,8 @@ void WXCellExplorer::OnSelectCell(wxCommandEvent &event)
             {
                switch(pos->first.mlattice)
                {
-                  case MONOCLINIC:mpCrystal->GetSpaceGroup().ChangeSpaceGroup("A2/m");break;
-                  case ORTHOROMBIC:mpCrystal->GetSpaceGroup().ChangeSpaceGroup("Amm2");break;
+                  case MONOCLINIC:mpCrystal->ChangeSpaceGroup("A2/m");break;
+                  case ORTHOROMBIC:mpCrystal->ChangeSpaceGroup("Amm2");break;
                }
                break;
             }
@@ -2669,8 +2669,8 @@ void WXCellExplorer::OnSelectCell(wxCommandEvent &event)
             {
                switch(pos->first.mlattice)
                {
-                  case MONOCLINIC:mpCrystal->GetSpaceGroup().ChangeSpaceGroup("C2/m");break;
-                  case ORTHOROMBIC:mpCrystal->GetSpaceGroup().ChangeSpaceGroup("Cmmm");break;
+                  case MONOCLINIC:mpCrystal->ChangeSpaceGroup("C2/m");break;
+                  case ORTHOROMBIC:mpCrystal->ChangeSpaceGroup("Cmmm");break;
                }
                break;
             }
@@ -2678,8 +2678,8 @@ void WXCellExplorer::OnSelectCell(wxCommandEvent &event)
             {
                switch(pos->first.mlattice)
                {
-                  case ORTHOROMBIC:mpCrystal->GetSpaceGroup().ChangeSpaceGroup("Fmmm");break;
-                  case CUBIC:mpCrystal->GetSpaceGroup().ChangeSpaceGroup("Fm-3m");break;
+                  case ORTHOROMBIC:mpCrystal->ChangeSpaceGroup("Fmmm");break;
+                  case CUBIC:mpCrystal->ChangeSpaceGroup("Fm-3m");break;
                }
                break;
             }
@@ -4968,7 +4968,7 @@ void WXProfileFitting::OnExploreSpacegroups(wxCommandEvent &event)
    mpLog->AppendText(wxString::Format(_T("\n\nYou can copy the chosen spacegroup symbol in the Crystal window\n")));
    mpLog->AppendText(wxString::Format(_T("\n\nThe spacegroup with the best nGoF has been applied\n")));
    // Set best solution
-   pCrystal->GetSpaceGroup().ChangeSpaceGroup(vSPG.front().hm);
+   pCrystal->ChangeSpaceGroup(vSPG.front().hm);
    pDiff->GetParentPowderPattern().UpdateDisplay();
    pDiff->SetExtractionMode(true,true);
    pDiff->ExtractLeBail(5);

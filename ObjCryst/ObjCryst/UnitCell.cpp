@@ -93,7 +93,8 @@ CrystVector_REAL UnitCell::GetLatticePar() const
 {
    VFN_DEBUG_MESSAGE("UnitCell::GetLatticePar()",0)
 
-   if(mClockLatticeParUpdate>mClockLatticePar) return mCellDim;
+   if(  (mClockLatticeParUpdate>mClockLatticePar)
+      &&(mClockLatticeParUpdate>mSpaceGroup.GetClockSpaceGroup())) return mCellDim;
    else
    {
       //:NOTE: cannot use this->UpdateLatticePar() because it is not a const member function
@@ -164,7 +165,8 @@ REAL UnitCell::GetLatticePar(int whichPar)const
    if( (whichPar<0) || (whichPar>5))
       throw ObjCrystException("UnitCell::LatticePar(int) :trying to access parameter>5!");
 
-   if(mClockLatticeParUpdate>mClockLatticePar) return mCellDim(whichPar);
+   if(  (mClockLatticeParUpdate>mClockLatticePar)
+      &&(mClockLatticeParUpdate>mSpaceGroup.GetClockSpaceGroup())) return mCellDim(whichPar);
    else
    {
       const int num = mSpaceGroup.GetSpaceGroupNumber();
@@ -320,6 +322,14 @@ void UnitCell::Print(ostream &os)const
 const SpaceGroup & UnitCell::GetSpaceGroup() const {return mSpaceGroup;}
 SpaceGroup & UnitCell::GetSpaceGroup()  {return mSpaceGroup;}
 
+void UnitCell::ChangeSpaceGroup(const string &spgId)
+{
+  this->GetSpaceGroup().ChangeSpaceGroup(spgId);
+  this->InitRefParList();
+  this->UpdateLatticePar();
+}
+
+
 const RefinableObjClock& UnitCell::GetClockLatticePar()const {return mClockLatticePar;}
 const RefinableObjClock& UnitCell::GetClockMetricMatrix()const {return mClockMetricMatrix;}
 
@@ -393,7 +403,8 @@ void UnitCell::InitMatrices() const
 {
    //:NOTE: The Matrices must remain upper triangular, since this is assumed for
    //optimization purposes in some procedures.
-   if(mClockMetricMatrix>mClockLatticePar) return;//no need to update
+   if(  (mClockMetricMatrix>mClockLatticePar)
+      &&(mClockMetricMatrix>mSpaceGroup.GetClockSpaceGroup())) return;//no need to update
    //this->UpdateLatticePar(); we should be able to do this...
 
    VFN_DEBUG_MESSAGE("UnitCell::InitMatrices() for crystal : "+this->GetName(),5)

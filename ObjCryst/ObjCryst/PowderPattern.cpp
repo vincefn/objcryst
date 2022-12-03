@@ -7100,7 +7100,7 @@ void SpaceGroupExplorer::RunAll(const bool fitprofile_all, const bool verbose, c
    if(keep_best)
    {
       if(verbose) cout<<"Restoring best spacegroup: "<<mvSPG.front().hm<<endl;
-      pCrystal->GetSpaceGroup().ChangeSpaceGroup(mvSPG.front().hm);
+      pCrystal->ChangeSpaceGroup(mvSPG.front().hm);
    }
    else
    {

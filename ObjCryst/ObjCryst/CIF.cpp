@@ -1133,7 +1133,7 @@ Crystal* CreateCrystalFromCIF(CIF &cif,const bool verbose,const bool checkSymAsX
                // The origin extension may not make sense, so we need to watch for exception
                try
                {
-                  pCryst->GetSpaceGroup().ChangeSpaceGroup(hmorig+*posOrig);
+                  pCryst->ChangeSpaceGroup(hmorig+*posOrig);
                }
                catch(invalid_argument)
                {
@@ -1179,7 +1179,7 @@ Crystal* CreateCrystalFromCIF(CIF &cif,const bool verbose,const bool checkSymAsX
                }
             }
             if(verbose) cout<<endl<<"Finally using spacegroup name:"<<bestsymbol<<endl;
-            pCryst->GetSpaceGroup().ChangeSpaceGroup(bestsymbol);
+            pCryst->ChangeSpaceGroup(bestsymbol);
          }
          // Try to set name from CIF. If that fails, the computed formula will be used at the end
          if(pos->second.mName!="") pCryst->SetName(pos->second.mName);
