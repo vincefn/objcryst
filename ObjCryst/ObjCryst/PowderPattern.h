@@ -591,6 +591,10 @@ class PowderPattern : public RefinableObj
       * are automatically changed to that of the PowderPattern object.
       */
       void AddPowderPatternComponent(PowderPatternComponent &);
+      /// Remove a powder pattern component
+      void RemovePowderPatternComponent(PowderPatternComponent &);
+      /// Remove a powder pattern component
+      void RemovePowderPatternComponent(const int i);
       /// Number of components
       unsigned int GetNbPowderPatternComponent()const;
       /// Access to a component of the powder pattern

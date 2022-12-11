@@ -39,6 +39,7 @@ class WXPowderPattern: public WXRefinableObj
       void OnMenuAddCompBackgd(wxCommandEvent & WXUNUSED(event));
       void OnMenuAddCompBackgdBayesian(wxCommandEvent & WXUNUSED(event));
       void OnMenuAddCompCryst(wxCommandEvent & WXUNUSED(event));
+      void OnMenuRemoveComp(wxCommandEvent & WXUNUSED(event));
       void OnMenuShowGraph(wxCommandEvent & WXUNUSED(event));
       void OnMenuSaveText(wxCommandEvent & WXUNUSED(event));
       void OnMenuSimulate(wxCommandEvent & WXUNUSED(event));

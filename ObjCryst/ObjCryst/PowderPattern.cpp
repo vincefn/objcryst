@@ -2604,6 +2604,43 @@ void PowderPattern::AddPowderPatternComponent(PowderPatternComponent &comp)
    VFN_DEBUG_EXIT("PowderPattern::AddPowderPatternComponent():"<<comp.GetName(),5)
 }
 
+void PowderPattern::RemovePowderPatternComponent(PowderPatternComponent &comp)
+{
+   VFN_DEBUG_ENTRY("PowderPattern::RemovePowderPatternComponent():"<<comp.GetName(),5)
+   if(comp.IsScalable())
+   {
+      // Remove one scale factor parameter
+      cout<<"PowderPattern::RemovePowderPatternComponent: removing 1 scale paramater"<<endl;
+      this->Print();
+      this->RemovePar(&this->GetPar(mScaleFactor.data()+mPowderPatternComponentRegistry.GetNb()-1));
+      this->Print();
+   }
+   
+   this->RemoveSubRefObj(comp);
+   comp.DeRegisterClient(*this);
+   mClockPowderPatternCalc.Reset();
+   mClockIntegratedFactorsPrep.Reset();
+   mPowderPatternComponentRegistry.DeRegister(comp);
+   
+   // Shift scale factors
+   unsigned int i=0;
+   for(unsigned int i=0;i<this->GetNbPowderPatternComponent();i++)
+      if(&comp == &this->GetPowderPatternComponent(i)) break;
+   for(unsigned int j=i;j<this->GetNbPowderPatternComponent()-1;j++) mScaleFactor(j) = mScaleFactor(j+1);
+
+   mClockScaleFactor.Click();
+   this->UpdateDisplay();
+   VFN_DEBUG_EXIT("PowderPattern::RemovePowderPatternComponent():"<<comp.GetName(),5)
+}
+
+void PowderPattern::RemovePowderPatternComponent(const int i)
+{
+   VFN_DEBUG_ENTRY("PowderPattern::RemovePowderPatternComponent():"<<i,5)
+   this->RemovePowderPatternComponent(mPowderPatternComponentRegistry.GetObj(i));
+   VFN_DEBUG_EXIT("PowderPattern::RemovePowderPatternComponent():"<<i,5)
+}
+
+
 unsigned int PowderPattern::GetNbPowderPatternComponent()const
 {
    return mPowderPatternComponentRegistry.GetNb();

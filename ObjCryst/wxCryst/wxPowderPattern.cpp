@@ -172,9 +172,10 @@ class WXProfileFitting:public wxWindow
 //    WXPowderPattern
 //
 ////////////////////////////////////////////////////////////////////////
-static const long ID_POWDER_MENU_COMP_ADDBACKGD_BAYESIAN=WXCRYST_ID();
-static const long ID_POWDER_MENU_COMP_ADDBACKGD=       WXCRYST_ID();
-static const long ID_POWDER_MENU_COMP_ADDCRYST=        WXCRYST_ID();
+static const long ID_POWDER_MENU_COMP_ADDBACKGD_BAYESIAN=   WXCRYST_ID();
+static const long ID_POWDER_MENU_COMP_ADDBACKGD=            WXCRYST_ID();
+static const long ID_POWDER_MENU_COMP_ADDCRYST=             WXCRYST_ID();
+static const long ID_POWDER_MENU_COMP_REMOVE=               WXCRYST_ID();
 static const long ID_POWDER_MENU_GRAPH=                     WXCRYST_ID();
 static const long ID_POWDER_MENU_SAVETEXT=                  WXCRYST_ID();
 static const long ID_POWDER_MENU_SIMULATE=                  WXCRYST_ID();
@@ -236,6 +237,7 @@ BEGIN_EVENT_TABLE(WXPowderPattern, wxWindow)
    EVT_MENU(ID_POWDER_MENU_COMP_ADDBACKGD,          WXPowderPattern::OnMenuAddCompBackgd)
    EVT_MENU(ID_POWDER_MENU_COMP_ADDBACKGD_BAYESIAN, WXPowderPattern::OnMenuAddCompBackgdBayesian)
    EVT_MENU(ID_POWDER_MENU_COMP_ADDCRYST,           WXPowderPattern::OnMenuAddCompCryst)
+   EVT_MENU(ID_POWDER_MENU_COMP_REMOVE,             WXPowderPattern::OnMenuRemoveComp)
    EVT_MENU(ID_POWDER_MENU_SAVETEXT,                WXPowderPattern::OnMenuSaveText)
    EVT_MENU(ID_POWDER_MENU_SIMULATE,                WXPowderPattern::OnMenuSimulate)
    EVT_MENU(ID_POWDER_MENU_IMPORT_FULLPROF,         WXPowderPattern::OnMenuImportPattern)
@@ -333,6 +335,8 @@ mChi2(0.0),mGoF(0.0),mRwp(0.0),mRp(0.0)
                                 "Add user-supplied Background ");
          mpMenuBar->AddMenuItem(ID_POWDERPATTERN_MENU_COMPONENTS,ID_POWDER_MENU_COMP_ADDCRYST,
                                 "Add Crystalline Phase");
+         mpMenuBar->AddMenuItem(ID_POWDERPATTERN_MENU_COMPONENTS,ID_POWDER_MENU_COMP_REMOVE,
+                                "Remove background or crystalline phase");
       mpMenuBar->AddMenu("Radiation",ID_POWDER_MENU_WAVELENGTH);
          mpMenuBar->AddMenuItem(ID_POWDER_MENU_WAVELENGTH,
                                 ID_POWDER_MENU_WAVELENGTH_NEUTRON,
@@ -728,6 +732,42 @@ void WXPowderPattern::OnMenuAddCompCryst(wxCommandEvent & WXUNUSED(event))
    this->CrystUpdate();
    VFN_DEBUG_EXIT("WXPowderPattern::OnMenuAddCompCryst()",10)
 }
+
+void WXPowderPattern::OnMenuRemoveComp(wxCommandEvent & WXUNUSED(event))
+{
+   VFN_DEBUG_ENTRY("WXPowderPattern::OnMenuRemoveComp()",10)
+   WXCrystValidateAllUserInput();
+   // Update names
+   for(unsigned int i=0;i<this->GetPowderPattern().GetNbPowderPatternComponent();i++)
+   {
+      PowderPatternComponent &comp=this->GetPowderPattern().GetPowderPatternComponent(i);
+      if(comp.GetClassName()=="PowderPatternBackground")
+         comp.SetName("Background");
+      else
+      {
+         PowderPatternDiffraction* pdiff=dynamic_cast<PowderPatternDiffraction*> (&comp);
+         if(pdiff) comp.SetName("Crystal:" + pdiff->GetCrystal().GetName());
+         else cout<<"WXPowderPattern::OnMenuRemoveComp(): could not recognize:"<<comp.GetClassName()<<":"<<comp.GetName()<<endl;
+      }
+   }
+   int choice;
+   PowderPatternComponent *comp= WXDialogChooseFromRegistry(this->GetPowderPattern().mPowderPatternComponentRegistry,(wxWindow*)this,
+         "Choose a component to remove:",choice);
+   if(0==comp)
+   {
+      VFN_DEBUG_EXIT("WXPowderPattern::OnMenuRemoveComp(): Canceled",10)
+      return;
+   }
+   VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuRemoveComp()",10)
+   this->GetPowderPattern().RemovePowderPatternComponent(*comp);
+   VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuRemoveComp()",10)
+   if(mpGraph!=0) mpPowderPattern->Prepare();//else this will be done when opening the graph
+   wxTheApp->GetTopWindow()->Layout();
+   wxTheApp->GetTopWindow()->SendSizeEvent();
+   this->CrystUpdate();
+   VFN_DEBUG_EXIT("WXPowderPattern::OnMenuRemoveComp()",10)
+}
+
 
 class WXPowderPatternGraphFrame :public wxFrame
 {
