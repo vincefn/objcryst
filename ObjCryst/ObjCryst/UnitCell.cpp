@@ -354,9 +354,6 @@ void UnitCell::Init(const REAL a, const REAL b, const REAL c, const REAL alpha,
    //mSpaceGroup.Print();
    mSpaceGroup.ChangeSpaceGroup(SpaceGroupId);
    //mSpaceGroup.Print();
-   if((alpha<=0)||(alpha>=M_PI)) throw ObjCrystException("alpha must be within ]0;pi[");
-   if((beta<=0) ||(beta>=M_PI)) throw ObjCrystException("beta must be within ]0;pi[");
-   if((gamma<=0)||(gamma>=M_PI)) throw ObjCrystException("gamma must be within ]0;pi[");
    mCellDim(0)=a;
    mCellDim(1)=b;
    mCellDim(2)=c;
@@ -364,13 +361,16 @@ void UnitCell::Init(const REAL a, const REAL b, const REAL c, const REAL alpha,
    mCellDim(4)=beta;
    mCellDim(5)=gamma;
    mClockLatticePar.Click();
+   this->UpdateLatticePar();
+   if((mCellDim(3)<=0)||(mCellDim(3)>=M_PI)) throw ObjCrystException("alpha must be within ]0;pi[");
+   if((mCellDim(4)<=0)||(mCellDim(4)>=M_PI)) throw ObjCrystException("beta must be within ]0;pi[");
+   if((mCellDim(5)<=0)||(mCellDim(5)>=M_PI)) throw ObjCrystException("gamma must be within ]0;pi[");
 
    mClockMetricMatrix.Reset();
    mClockLatticeParUpdate.Reset();
 
    this->InitRefParList();
    this->InitMatrices();
-   this->UpdateLatticePar();
    this->SetName(name);
 
    VFN_DEBUG_EXIT("UnitCell::Init(a,b,c,alpha,beta,gamma,Sg,name):End",10)
