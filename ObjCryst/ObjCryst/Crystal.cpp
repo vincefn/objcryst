@@ -59,6 +59,7 @@ mScattererRegistry("List of Crystal Scatterers"),
 mBumpMergeCost(0.0),mBumpMergeScale(1.0),
 mDistTableMaxDistance(1.0),
 mDistTableForInterMolMaxDistance(1.0),
+mDistMaxMultiplier(2),
 mScatteringPowerRegistry("List of Crystal ScatteringPowers"),
 mBondValenceCost(0.0),mBondValenceCostScale(1.0),mDeleteSubObjInDestructor(1),
 mInterMolDistCostScale(1.0),mInterMolDistCost(0.0),mCostCalcMethod(0)
@@ -78,6 +79,7 @@ mScattererRegistry("List of Crystal Scatterers"),
 mBumpMergeCost(0.0),mBumpMergeScale(1.0),
 mDistTableMaxDistance(1.0),
 mDistTableForInterMolMaxDistance(1.0),
+mDistMaxMultiplier(2),
 mScatteringPowerRegistry("List of Crystal ScatteringPowers"),
 mBondValenceCost(0.0),mBondValenceCostScale(1.0),mDeleteSubObjInDestructor(1),
 mInterMolDistCostScale(1.0),mInterMolDistCost(0.0),mCostCalcMethod(0)
@@ -98,6 +100,7 @@ mScattererRegistry("List of Crystal Scatterers"),
 mBumpMergeCost(0.0),mBumpMergeScale(1.0),
 mDistTableMaxDistance(1.0),
 mDistTableForInterMolMaxDistance(1.0),
+mDistMaxMultiplier(2),
 mScatteringPowerRegistry("List of Crystal ScatteringPowers"),
 mBondValenceCost(0.0),mBondValenceCostScale(1.0),mDeleteSubObjInDestructor(1),
 mInterMolDistCostScale(1.0),mInterMolDistCost(0.0),mCostCalcMethod(0)
@@ -117,6 +120,7 @@ mScattererRegistry("List of Crystal Scatterers"),
 mBumpMergeCost(0.0),mBumpMergeScale(1.0),
 mDistTableMaxDistance(1.0),
 mDistTableForInterMolMaxDistance(1.0),
+mDistMaxMultiplier(2),
 mScatteringPowerRegistry("List of Crystal ScatteringPowers"),
 mBondValenceCost(0.0),mBondValenceCostScale(1.0),mDeleteSubObjInDestructor(1),
 mInterMolDistCostScale(1.0),mInterMolDistCost(0.0),mCostCalcMethod(0)
@@ -1046,9 +1050,8 @@ REAL Crystal::GetInterMolDistCost() const
 
    std::vector<NeighbourHood>::const_iterator pos;
    std::vector<Crystal::Neighbour>::const_iterator neigh;
-   REAL tmp;
    string i1,i2;  
-   /* 
+   /*
    cout<<"DistanceTable:\n";
    for(pos=imdTable.begin();pos<imdTable.end();pos++) {
        i1=mScattCompList(pos->mIndex).mName;
@@ -1059,6 +1062,7 @@ REAL Crystal::GetInterMolDistCost() const
        }
    }
    */
+   
    std::vector<InterMolDistPar>::const_iterator imd;
    std::vector<string>::const_iterator itAt2;
    //std::vector<NeighbourHood>::const_iterator pos;
@@ -1077,7 +1081,7 @@ REAL Crystal::GetInterMolDistCost() const
             i1=mScattCompList(pos->mIndex).mName;
             //i1=mScattCompList(pos->mIndex).
           
-            if(i1 != imd->mAt1) continue;
+            if(i1.compare(imd->mAt1)!=0) continue;
             //std::cout<<"found imd->mAt1 ("<<imd->mAt1<<")\n";
             //cout<<mScattCompList(pos->mIndex).
 
@@ -1089,7 +1093,7 @@ REAL Crystal::GetInterMolDistCost() const
                 //there is a list of atomic names. Search for all matches and save the clossest
                 bool matches = false;
                 for(itAt2=imd->mAt2.begin();itAt2 < imd->mAt2.end();itAt2++) {
-                    if(i2 != *itAt2) {
+                    if(i2.compare(*itAt2)==0) {
                         matches = true;
                         break;
                     }
@@ -1098,18 +1102,18 @@ REAL Crystal::GetInterMolDistCost() const
                     if(imd->mDist2 > neigh->mDist2) actdiff = imd->mDist2 - neigh->mDist2;
                     else actdiff = neigh->mDist2 - imd->mDist2;
 
-                    //std::cout<<"actualdiff = "<<actdiff<<"\n";
+                    // std::cout<<"actualdiff = "<<actdiff<<"\n";
                     if(actdiff<mindiff) {
                         mindiff = actdiff;
                         bestDist = neigh->mDist2;
                         //std::cout<<"saving, bestDist="<<bestDist<<"\n";                 
                     }
-                //std::cout<<"found imd->mAt2 ("<<imd->mAt2<<")\n";
+                    //std::cout<<"found imd->mAt2 ("<<imd->mAt2<<")\n";
                 }
                      
             }          
        }
-       if(bestDist<=0) bestDist = 0;
+       if(bestDist<=0) bestDist = 0.00001;
        else bestDist = sqrt(bestDist);
        
        float d = imd->mDist2;
@@ -1127,7 +1131,7 @@ REAL Crystal::GetInterMolDistCost() const
                mInterMolDistCost += pow((bestDist-(d+imd->mDelta))/imd->mSig, 2);
            }              
        } else if(mCostCalcMethod==1) {
-           //Lorentzian
+           //Lorentzian, the inverse
            if((bestDist < (d + imd->mDelta)) && (bestDist > (d - imd->mDelta))) {
                mInterMolDistCost += 0;
            } else if(bestDist<=(d-imd->mDelta)) {
@@ -1136,14 +1140,25 @@ REAL Crystal::GetInterMolDistCost() const
                mInterMolDistCost += 1 - ( 1 / ( 1 + pow( ((bestDist-(d+imd->mDelta)) / imd->mSig), 2)));
            }
        } else if(mCostCalcMethod==2) {
-           //energy
-           if((bestDist < (d + imd->mDelta)) && (bestDist > (d - imd->mDelta))) {
-               mInterMolDistCost += 0;
-           } else if(bestDist<=(d-imd->mDelta)) {
-               
-           } else {
-               
-           }   
+           //energy Lennard-Jones
+           //cost  = 4*eps*[(sig/ri)^12 - (sig/ri)^6] + 1 
+           //where 
+           //eps = 1
+           //sig = r(obs)/(2^(1/6))
+            float sig = d/1.122462;
+            if((bestDist < (d + imd->mDelta)) && (bestDist > (d - imd->mDelta))) {
+                mInterMolDistCost += 0;
+            } else if(bestDist<=(d-imd->mDelta)) {
+   	            float ri = bestDist+imd->mDelta;
+                if(ri<(sig)) {
+                    mInterMolDistCost += 1;
+                } else {
+                    mInterMolDistCost += 4*1*((pow(sig/ri, 12)-pow(sig/ri, 6)))+1;
+                }
+            } else {
+                float ri = bestDist-imd->mDelta;
+	            mInterMolDistCost += 4*1*((pow(sig/ri, 12)-pow(sig/ri, 6)))+1;
+            }   
 
        }
    }
@@ -1466,7 +1481,7 @@ void Crystal::BeginOptimization(const bool allowApproximations,const bool enable
         }
    }      
    if(mInterMolDistList.size()!=0) {
-       mDistTableForInterMolMaxDistance*=2;   
+       mDistTableForInterMolMaxDistance*=mDistMaxMultiplier;   
    }
 
    VFN_DEBUG_MESSAGE("Crystal::BeginOptimization():mDistTableMaxDistance="<<mDistTableMaxDistance,10)
@@ -2344,9 +2359,9 @@ void Crystal::CalcDistTableForInterMolDistCost() const
                 }
             }
         }            
-        mDistTableForInterMolMaxDistance*=2;         
+        mDistTableForInterMolMaxDistance*=mDistMaxMultiplier;         
     }
-
+    //mDistTableForInterMolMaxDistance = 10;
     const long nbComponent=mScattCompList.GetNbComponent();
 
     // Get range and origin of the (pseudo) asymmetric unit
@@ -2441,7 +2456,7 @@ void Crystal::CalcDistTableForInterMolDistCost() const
         const REAL m12=(*pOrthMatrix)(1,2);
         const REAL m22=(*pOrthMatrix)(2,2);
 
-        cout<<"Get the list of all atoms in the asymmetric unit in mInterMolDistList\n";
+        //cout<<"Get the list of all atoms in the asymmetric unit in mInterMolDistList\n";
         // Get the list of all atoms in the asymmetric unit in mInterMolDistList
         vector<int> listOfCurrentScatterers;
         for(long i=0;i<mInterMolDistList.size();i++) {
@@ -2449,7 +2464,7 @@ void Crystal::CalcDistTableForInterMolDistCost() const
             listOfCurrentScatterers.insert(listOfCurrentScatterers.end(), p.begin(), p.end());
         }
         if(listOfCurrentScatterers.size()==0) return;
-        cout<<"listOfCurrentScatterers="<<listOfCurrentScatterers.size()<<"\n";
+        //cout<<"listOfCurrentScatterers="<<listOfCurrentScatterers.size()<<"\n";
 
         // Get the list of all mAt2 atoms in mInterMolDistList
         vector<int> listOfNeigScatterers;
@@ -2465,7 +2480,7 @@ void Crystal::CalcDistTableForInterMolDistCost() const
         //sort and remove duplicates
         sort( listOfNeigScatterers.begin(), listOfNeigScatterers.end() );
         listOfNeigScatterers.erase( unique( listOfNeigScatterers.begin(), listOfNeigScatterers.end() ), listOfNeigScatterers.end() );
-        cout<<"listOfNeigScatterers="<<listOfNeigScatterers.size()<<"\n";
+        //cout<<"listOfNeigScatterers="<<listOfNeigScatterers.size()<<"\n";
 
         for(long i=0;i<nbComponent;i++)
         {

@@ -911,7 +911,12 @@ void Crystal::XMLOutput(ostream &os,int indent)const
        os << tag3<< mCostCalcMethod;
        tag3.SetIsEndTag(true);
        os << tag3<<endl;
-       
+
+       for(int k=0;k<=indent;k++) os << "  " ;
+       XMLCrystTag tag4("mDistMaxMultiplier");
+       os << tag4<< mDistMaxMultiplier;
+       tag4.SetIsEndTag(true);
+       os << tag4<<endl;       
    }
    indent--;
    tag.SetIsEndTag(true);
@@ -1125,7 +1130,12 @@ void Crystal::XMLInput(istream &is,const XMLCrystTag &tagg)
       {
          is>>mCostCalcMethod;
          XMLCrystTag junk(is);
-      }      
+      } 
+      if("mDistMaxMultiplier"==tag.GetName())
+      {
+         is>>mDistMaxMultiplier;
+         XMLCrystTag junk(is);
+      }
       if("Atom"==tag.GetName())
       {
          VFN_DEBUG_ENTRY("Crystal::XMLInput():reading an Atom",5)
