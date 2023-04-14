@@ -339,12 +339,16 @@ class Crystal:public UnitCell
       {
           InterMolDistPar();
           
-          InterMolDistPar(const string At1, const string At2, const REAL actualDist, const REAL dist, const REAL sigma, const REAL delta);
+          InterMolDistPar(const string At1, const vector<string> At2, const REAL actualDist, const REAL dist, const REAL sigma, const REAL delta);
+
+          //set mAt2 from the string of atom names separated by spaces
+          string get_list_At2();
+          void set_At2(string atom_names);
           
           //the first is the atom in the asymmetric part of the unit cell
           string mAt1; 
           //the second one is the neighbour
-          string mAt2;
+          vector<string> mAt2;
           //dummy, just actual distance
           REAL mActDist;
           //defined distance (to be found) as d*d
@@ -354,7 +358,7 @@ class Crystal:public UnitCell
           REAL mDelta;
       };
       
-      void SetNewInterMolDist(const string At1, const string At2, const REAL dist, const REAL sigma, const REAL delta) const;
+      void SetNewInterMolDist(const string At1, const vector<string> At2, const REAL dist, const REAL sigma, const REAL delta) const;
 
       int GetIntermolDistNb() const;
       InterMolDistPar GetIntermolDistPar(int Index) const;
@@ -463,6 +467,8 @@ class Crystal:public UnitCell
 
       //void CalcMyDistTable()const;
       void CalcDistTableForInterMolDistCost()const;
+
+      
       
 
       /** Calculate all Bond Valences.
@@ -491,6 +497,9 @@ class Crystal:public UnitCell
       mutable REAL mInterMolDistCost;
       mutable RefinableObjClock mInterMolDistCostClock;
       REAL mInterMolDistCostScale;
+
+      //0=parabolic, 1=Lorentzian, 2=Energy
+      int mCostCalcMethod;
 
       /// Interatomic distance for a given neighbour
       struct Neighbour
@@ -530,6 +539,8 @@ class Crystal:public UnitCell
       mutable RefinableObjClock mDistTableClock;
       /// The distance up to which the distance table & neighbours needs to be calculated
       mutable REAL mDistTableMaxDistance;
+
+      mutable REAL mDistTableForInterMolMaxDistance;      
 
       /// The list of all scattering components in the crystal
       mutable ScatteringComponentList mScattCompList;
