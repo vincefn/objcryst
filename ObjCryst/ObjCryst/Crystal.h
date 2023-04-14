@@ -345,12 +345,12 @@ class Crystal:public UnitCell
           InterMolDistPar(const string At1, const string At2, const REAL actualDist, const REAL dist, const REAL sigma, const REAL delta);
           
           //the first is the atom in the asymmetric part of the unit cell
-          const string mAt1; 
+          string mAt1; 
           //the second one is the neighbour
-          const string mAt2;
+          string mAt2;
           //dummy, just actual distance
           REAL mActDist;
-          //defined distance (to be found)
+          //defined distance (to be found) as d*d
           REAL mDist2;
           //sigma and delta are the same meaning as for restraints
           REAL mSig;
@@ -361,6 +361,7 @@ class Crystal:public UnitCell
 
       int GetIntermolDistNb() const;
       InterMolDistPar GetIntermolDistPar(int Index) const;
+      InterMolDistPar *GetIntermolDistPar_ptr(int Index) const;
 
       REAL GetInterMolDistCost() const;
 

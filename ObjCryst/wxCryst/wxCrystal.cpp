@@ -1824,15 +1824,18 @@ void WXCrystal::OnMenuShowIntermoDistWindow(wxCommandEvent &event)
 
     mpIntermolDistWin = new WXCrystalScrolledGridWindow(frame,this,ID_CRYSTAL_WIN_INTERMOLDIST_EVENT);
 
-    mpIntermolDistWin->SetDefaultRenderer(new wxGridCellFloatRenderer(5,3));
-    mpIntermolDistWin->SetDefaultEditor(new wxGridCellFloatEditor(5,3));
+    //mpIntermolDistWin->SetDefaultRenderer(new wxGridCellFloatRenderer(5,3));
+    //mpIntermolDistWin->SetDefaultEditor(new wxGridCellFloatEditor(5,3));
     mpIntermolDistWin->SetColMinimalAcceptableWidth(150);
     mpIntermolDistWin->CreateGrid(0,5);
 
     mpIntermolDistWin->SetColLabelValue(0,_T("At1"));
     mpIntermolDistWin->SetColLabelValue(1,_T("At2"));
+    mpIntermolDistWin->SetColFormatFloat(2,5,3);
     mpIntermolDistWin->SetColLabelValue(2,_T("Distance"));
+    mpIntermolDistWin->SetColFormatFloat(3,5,3);
     mpIntermolDistWin->SetColLabelValue(3,_T("Sigma"));
+    mpIntermolDistWin->SetColFormatFloat(4,5,3);
     mpIntermolDistWin->SetColLabelValue(4,_T("Delta"));
     
     mpIntermolDistWin->AutoSizeRows();
@@ -1844,7 +1847,7 @@ void WXCrystal::OnMenuShowIntermoDistWindow(wxCommandEvent &event)
         mpIntermolDistWin->SetCellValue(i, 0, imdp.mAt1);
         mpIntermolDistWin->SetCellValue(i, 1, imdp.mAt2);
         float d = imdp.mDist2;
-        if(d>0) d=sqrt(d);            
+        if(d>0.0) d=sqrt(d);              
         mpIntermolDistWin->SetCellValue(i, 2, wxString::Format(wxT("%f"), d));
         mpIntermolDistWin->SetCellValue(i, 3, wxString::Format(wxT("%f"), imdp.mSig));
         mpIntermolDistWin->SetCellValue(i, 4, wxString::Format(wxT("%f"), imdp.mDelta));

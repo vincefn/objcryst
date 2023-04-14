@@ -980,6 +980,13 @@ Crystal::InterMolDistPar Crystal::GetIntermolDistPar(int Index) const
     }
     return mInterMolDistList[Index];
 }
+Crystal::InterMolDistPar *Crystal::GetIntermolDistPar_ptr(int Index) const
+{
+    if((Index>=mInterMolDistList.size()) || (Index<0)) {
+        return 0;
+    }
+    return &mInterMolDistList[Index];
+}
 REAL Crystal::GetInterMolDistCost() const
 {
 
