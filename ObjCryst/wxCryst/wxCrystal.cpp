@@ -1100,12 +1100,21 @@ void WXCrystal::OnMenuAddIntermolecularDistRestr(wxCommandEvent & event)
    int At1=dialog.GetSelection();
    if((At1<0) || (At1>=nb)) return;
 
-   wxSingleChoiceDialog dialog1(this,_T("Choose name of the second atom"),_T("Select Atom"),choices);
+   wxMultiChoiceDialog dialog1(this,_T("Choose name of the second atom"),_T("Select Atom"),choices);
    if(wxID_OK!=dialog1.ShowModal()) return;
-   int At2=dialog1.GetSelection();
-   if((At2<0) || (At2>=nb)) return;
+   wxArrayInt At2=dialog1.GetSelections();
+   if((At2.size()==0) || (At2.size()>=nb)) return;
 
-   string mes = "Enter bond distance (Angstroems) for "+choices[At1] + " - " + choices[At2];
+   string tmpAt2;
+   vector<string> vectAt2;
+   for(int i=0;i<At2.size();i++) {
+       tmpAt2 += choices[At2[i]];
+       vectAt2.push_back(choices[At2[i]].ToStdString());
+       if(i<(At2.size()-1)) {
+           tmpAt2 += " ";
+       }
+   }
+   string mes = "Enter bond distance (Angstroems) for "+choices[At1] + " - " + tmpAt2;
    wxTextEntryDialog dialog2(this,wxString::FromAscii(mes.c_str()),
                            _T("Intermolecular bond distance"),"3.5",wxOK | wxCANCEL);
    dialog2.SetTextValidator(wxTextValidator(wxFILTER_NUMERIC));
@@ -1127,7 +1136,7 @@ void WXCrystal::OnMenuAddIntermolecularDistRestr(wxCommandEvent & event)
    double delta;
    dialog4.GetValue().ToDouble(&delta);   
 
-   mpCrystal->SetNewInterMolDist(string(choices[At1].c_str()), string(choices[At2].c_str()), d, sigma, delta);
+   mpCrystal->SetNewInterMolDist(string(choices[At1].c_str()), vectAt2, d, sigma, delta);
 
    wxMessageDialog dialog5(this, _T("The restriction was added"));
    dialog5.ShowModal();
@@ -1845,7 +1854,11 @@ void WXCrystal::OnMenuShowIntermoDistWindow(wxCommandEvent &event)
     for(int i=0;i<mpCrystal->GetIntermolDistNb();i++) {
         Crystal::InterMolDistPar imdp = mpCrystal->GetIntermolDistPar(i);
         mpIntermolDistWin->SetCellValue(i, 0, imdp.mAt1);
-        mpIntermolDistWin->SetCellValue(i, 1, imdp.mAt2);
+        string tmpAt2;
+        for(int j=0;j<imdp.mAt2.size();j++) {
+            tmpAt2 += imdp.mAt2[j] + " ";
+        }
+        mpIntermolDistWin->SetCellValue(i, 1, tmpAt2);
         float d = imdp.mDist2;
         if(d>0.0) d=sqrt(d);              
         mpIntermolDistWin->SetCellValue(i, 2, wxString::Format(wxT("%f"), d));
@@ -1920,7 +1933,88 @@ void WXCrystal::OnMenuShowScattPowWindow(wxCommandEvent &event)
 }
 void WXCrystal::OnEditGridIntermolDistWindow(wxGridEvent &e)
 {
+   if(mIsSelfUpdating) return;
+   if(mpCrystal->GetIntermolDistNb() == 0) return;
 
+   const int r=e.GetRow();
+   const int c=e.GetCol();
+
+   Crystal::InterMolDistPar *imdp = mpCrystal->GetIntermolDistPar_ptr(r);
+   if(imdp==0) return;
+
+   wxString s=mpIntermolDistWin->GetCellValue(r,c);      
+   
+   switch(c)
+   {
+      case 0:
+      {//At1 
+         if((s!=_T("")) && (mpCrystal->FindScatterersInComponentList(std::string(s.mb_str())).size()!=0))
+         {            
+            imdp->mAt1 = std::string(s.mb_str());
+         } else {
+            wxMessageBox(_T("Atom with this name does not exist !"), _T("Unknown atom"), wxOK | wxICON_INFORMATION, this);
+         }
+         break;
+      }
+      case 1:
+      {//At2
+         if(s!=_T(""))
+         {
+            stringstream ss(s.ToStdString());  
+            string word;
+            vector<string> At2;
+            while (ss >> word) { 
+                At2.push_back(word);
+            }
+            bool bad=false;
+            for(int i=0;i<At2.size();i++) {
+                if(mpCrystal->FindScatterersInComponentList(At2[i]).size()==0) {
+                    bad=true;                    
+                    wxMessageBox(wxString::Format("Atom with %s name does not exist !", At2[i].c_str()), _T("Unknown atom"), wxOK | wxICON_INFORMATION, this);
+                    break;
+                }
+            }
+            if(!bad) {
+                imdp->mAt2 = At2;
+            }
+         } else {
+            wxMessageBox(_T("The cell is empty, please write there at least one atom name !"), _T("Unknown atom"), wxOK | wxICON_INFORMATION, this);
+         }
+         break;
+      }
+      case 2:
+      {//Distance
+         if(s!=_T(""))
+         {
+            double d;
+            s.ToDouble(&d);
+            imdp->mDist2 = d*d;
+         }
+         break;
+      }
+      case 3:
+      {//Sigma
+         if(s!=_T(""))
+         {
+            double d;
+            s.ToDouble(&d);
+            imdp->mSig = d;            
+         }
+         break;
+      }
+      case 4:
+      {//Delta
+         if(s!=_T(""))
+         {
+            double d;
+            s.ToDouble(&d);
+            imdp->mDelta = d;                 
+         }
+         break;
+      } 
+   }
+   this->CrystUpdate();
+   
 }
 void WXCrystal::OnEditGridScattPow(wxGridEvent &e)
 {
