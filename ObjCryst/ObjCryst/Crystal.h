@@ -540,7 +540,9 @@ class Crystal:public UnitCell
       /// The distance up to which the distance table & neighbours needs to be calculated
       mutable REAL mDistTableMaxDistance;
 
-      mutable REAL mDistTableForInterMolMaxDistance;      
+      mutable REAL mDistTableForInterMolMaxDistance;
+
+      mutable REAL mDistMaxMultiplier;
 
       /// The list of all scattering components in the crystal
       mutable ScatteringComponentList mScattCompList;
