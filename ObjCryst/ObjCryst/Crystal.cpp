@@ -983,18 +983,7 @@ Crystal::InterMolDistPar Crystal::GetIntermolDistPar(int Index) const
 REAL Crystal::GetInterMolDistCost() const
 {
 
-   //REMOVE THIS PART
-   //just for testing - fill something to the intermoldist list
-   /*
-    if(mInterMolDistList.size()==0) {
-       std::cout<<"create testing data for mInterMolDistList\n";
-       if((FindScatterersInComponentList("N6").size()!=0) && (FindScatterersInComponentList("N7").size()!=0)) {
-           SetNewInterMolDist("N6", "N7", 2.83, 0.1, 0.5);
-       }
-   }
-   std::cout<<"mInterMolDistList.size()=="<<mInterMolDistList.size()<<"\n";
-   */
-   //REMOVE THIS PART - END
+   
 
    if(mInterMolDistList.size()==0) return 0;
    if(mInterMolDistCostScale<=0) return 0;
