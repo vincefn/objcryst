@@ -2013,6 +2013,7 @@ void WXCrystal::OnEditGridIntermolDistWindow(wxGridEvent &e)
          break;
       } 
    }
+   mpCrystal->InitializeInterMolDistTableAndScatterers();
    this->CrystUpdate();
    
 }

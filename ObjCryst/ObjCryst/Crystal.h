@@ -338,6 +338,20 @@ class Crystal:public UnitCell
       const VBumpMergePar& GetBumpMergeParList()const;
       VBumpMergePar& GetBumpMergeParList();
 
+      
+        struct DistTableInternalPosition
+        {
+            DistTableInternalPosition(const long atomIndex, const int sym,
+                                        const REAL x,const REAL y,const REAL z);
+
+            /// Index of the atom (order) in the component list
+            long mAtomIndex;
+            /// Which symmetry operation does this symmetric correspond to ?
+            int mSymmetryIndex;
+            /// Fractionnal coordinates
+            REAL mX,mY,mZ;
+        };
+
       struct InterMolDistPar
       {
           InterMolDistPar();
@@ -350,8 +364,18 @@ class Crystal:public UnitCell
           
           //the first is the atom in the asymmetric part of the unit cell
           string mAt1; 
+          vector<int> mAt1Indexes;
+          vector<DistTableInternalPosition> vPosAt1;
+          vector<int> vUniqueIndexAt1;
+          vector<int> mUniquePosSymmetryIndexAt1;
+
           //the second one is the neighbour
-          vector<string> mAt2;
+          vector<string> mAt2;  
+          vector<int> mAt2Indexes;
+          vector<DistTableInternalPosition> vPosAt2;
+          vector<int> vUniqueIndexAt2;
+          vector<int> mUniquePosSymmetryIndexAt2;
+          
           //dummy, just actual distance
           REAL mActDist;
           //defined distance (to be found) as d*d
@@ -366,6 +390,8 @@ class Crystal:public UnitCell
       int GetIntermolDistNb() const;
       InterMolDistPar GetIntermolDistPar(int Index) const;
       InterMolDistPar *GetIntermolDistPar_ptr(int Index) const;
+
+      void InitializeInterMolDistTableAndScatterers() const;
 
       REAL GetInterMolDistCost() const;
 
@@ -458,6 +484,12 @@ class Crystal:public UnitCell
       vector<int> FindScatterersInComponentList(const string &scattName)const;
 
 
+      /*search the list based on atomic label*/
+      bool isScattererInInterMolDistList(string &scattName) const;
+      bool isScattererInInterMolDistListAt1(string &scattName) const;
+      bool isScattererInInterMolDistListAt2(string &scattName) const;
+
+
       /** \internal \brief Compute the distance Table (mDistTable) for all scattering components
       * \param fast : if true, the distance calculations will be made using
       * integers, thus with a lower precision but faster. Less atoms will also
@@ -503,7 +535,13 @@ class Crystal:public UnitCell
       /// Bump-merge scale factor
       REAL mBumpMergeScale;
 
-      mutable std::vector<InterMolDistPar> mInterMolDistList;      
+      //list of intermolecular distances
+      mutable std::vector<InterMolDistPar> mInterMolDistList; 
+
+      //intermolecular distances in the meaning of the indexes of mScattCompList
+      //[i][j]: i=mAt1, j=mAt2
+      mutable vector<vector<int>> mInterMolDistListIndexes;
+
       mutable REAL mInterMolDistCost;
       mutable RefinableObjClock mInterMolDistCostClock;
       REAL mInterMolDistCostScale;
@@ -542,7 +580,13 @@ class Crystal:public UnitCell
       /// The time when the distance table was last calculated
       mutable RefinableObjClock mDistTableForInterMolDistClock;
 
-      mutable std::vector<NeighbourHood> imdTable;
+      mutable std::vector<NeighbourHood> mImdTable;      
+      
+      //list of atoms referenced to mImdTable
+      //mutable vector<int> mlistOfAt1InterMolDistScatterers;
+
+      //list of atoms referenced to mImdTable
+      //mutable vector<int> mlistOfAt2InterMolDistScatterers;
 
       mutable std::vector<NeighbourHood> mvDistTableSq;
       /// The time when the distance table was last calculated
