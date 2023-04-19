@@ -339,8 +339,8 @@ class Crystal:public UnitCell
       VBumpMergePar& GetBumpMergeParList();
 
       
-        struct DistTableInternalPosition
-        {
+      struct DistTableInternalPosition
+      {
             DistTableInternalPosition(const long atomIndex, const int sym,
                                         const REAL x,const REAL y,const REAL z);
 
@@ -350,7 +350,32 @@ class Crystal:public UnitCell
             int mSymmetryIndex;
             /// Fractionnal coordinates
             REAL mX,mY,mZ;
-        };
+      };
+
+      struct Neighbour
+      {
+         Neighbour(const unsigned long neighbourIndex,const int sym,
+                   const REAL dist2);
+         /// The number associated to the neighbour
+         /// (its index in the Crystal's scattering component list)
+         unsigned long mNeighbourIndex;
+         /// The symmetry position associated to the neighbour
+         /// (its index in the Crystal's scattering component list)
+         unsigned int mNeighbourSymmetryIndex;
+         /// The squared distance, in square Angstroems
+         REAL mDist2;
+      };
+      /// Table of neighbours for a given unique atom
+      struct NeighbourHood
+      {
+         /// Index of the atom in the scattering component list
+         unsigned long mIndex;
+         /// Index of the symmetry operation for the chosen unique position in the
+         /// (pseudo) asymmetric unit
+         unsigned int mUniquePosSymmetryIndex;
+         /// List of neighbours
+         std::vector<Crystal::Neighbour> mvNeighbour;
+      };
 
       struct InterMolDistPar
       {
@@ -363,18 +388,18 @@ class Crystal:public UnitCell
           void set_At2(string atom_names);
           
           //the first is the atom in the asymmetric part of the unit cell
-          string mAt1; 
+          string mAt1;           
           vector<int> mAt1Indexes;
-          vector<DistTableInternalPosition> vPosAt1;
-          vector<int> vUniqueIndexAt1;
-          vector<int> mUniquePosSymmetryIndexAt1;
+          vector<DistTableInternalPosition> vUniqueIndexAt1;
 
           //the second one is the neighbour
           vector<string> mAt2;  
           vector<int> mAt2Indexes;
           vector<DistTableInternalPosition> vPosAt2;
-          vector<int> vUniqueIndexAt2;
-          vector<int> mUniquePosSymmetryIndexAt2;
+
+          //table of neighbours based on At1 and list of At2
+          //there could be two atoms with the same name in crystal, thats why it is a vector
+          vector<NeighbourHood> mNbh;
           
           //dummy, just actual distance
           REAL mActDist;
@@ -391,7 +416,9 @@ class Crystal:public UnitCell
       InterMolDistPar GetIntermolDistPar(int Index) const;
       InterMolDistPar *GetIntermolDistPar_ptr(int Index) const;
 
-      void InitializeInterMolDistTableAndScatterers() const;
+      void InitializeInterMolDistList() const;
+
+      mutable bool mInterMolDistListNeedsInit;
 
       REAL GetInterMolDistCost() const;
 
@@ -511,7 +538,7 @@ class Crystal:public UnitCell
       void CalcDistTableForInterMolDistCost()const;
 
       
-      
+      void printInterMolDistList() const;
 
       /** Calculate all Bond Valences.
       *
@@ -549,38 +576,10 @@ class Crystal:public UnitCell
       //0=parabolic, 1=Lorentzian, 2=Energy
       int mCostCalcMethod;
 
-      /// Interatomic distance for a given neighbour
-      struct Neighbour
-      {
-         Neighbour(const unsigned long neighbourIndex,const int sym,
-                   const REAL dist2);
-         /// The number associated to the neighbour
-         /// (its index in the Crystal's scattering component list)
-         unsigned long mNeighbourIndex;
-         /// The symmetry position associated to the neighbour
-         /// (its index in the Crystal's scattering component list)
-         unsigned int mNeighbourSymmetryIndex;
-         /// The squared distance, in square Angstroems
-         REAL mDist2;
-      };
-      /// Table of neighbours for a given unique atom
-      struct NeighbourHood
-      {
-         /// Index of the atom in the scattering component list
-         unsigned long mIndex;
-         /// Index of the symmetry operation for the chosen unique position in the
-         /// (pseudo) asymmetric unit
-         unsigned int mUniquePosSymmetryIndex;
-         /// List of neighbours
-         std::vector<Crystal::Neighbour> mvNeighbour;
-      };
-      /** Interatomic distance table for all unique atoms
-      *
-      */
       /// The time when the distance table was last calculated
       mutable RefinableObjClock mDistTableForInterMolDistClock;
 
-      mutable std::vector<NeighbourHood> mImdTable;      
+      //mutable std::vector<NeighbourHood> mImdTable;      
       
       //list of atoms referenced to mImdTable
       //mutable vector<int> mlistOfAt1InterMolDistScatterers;
