@@ -889,8 +889,10 @@ vector<int> Crystal::FindScatterersInComponentList(const string &scattName)const
 bool Crystal::isScattererInInterMolDistList(string &scattName) const
 {
     for(long i=0;i<mInterMolDistList.size();i++) {
-        if(mInterMolDistList[i].mAt1.compare(scattName)==0) {
-            return true;
+        for(long j=0;j<mInterMolDistList[i].mAt1.size();j++) {
+            if(mInterMolDistList[i].mAt1[j].compare(scattName)==0) {
+                return true;
+            }
         }
         for(long j=0;j<mInterMolDistList[i].mAt2.size();j++) {
             if(mInterMolDistList[i].mAt2[j].compare(scattName)==0) {
@@ -903,9 +905,11 @@ bool Crystal::isScattererInInterMolDistList(string &scattName) const
 bool Crystal::isScattererInInterMolDistListAt1(string &scattName) const
 {
     for(long i=0;i<mInterMolDistList.size();i++) {
-        if(mInterMolDistList[i].mAt1.compare(scattName)==0) {
-            return true;
-        }        
+        for(long j=0;j<mInterMolDistList[i].mAt1.size();j++) {
+            if(mInterMolDistList[i].mAt1[j].compare(scattName)==0) {
+                return true;
+            }
+        }       
     }
     return false;
 }
@@ -1004,9 +1008,20 @@ Crystal::VBumpMergePar& Crystal::GetBumpMergeParList(){return mvBumpMergePar;}
 Crystal::InterMolDistPar::InterMolDistPar():
     mActDist(-1),mDist2(-1),mSig(0.01),mDelta(0.01)
 {}
-Crystal::InterMolDistPar::InterMolDistPar(const string At1, const vector<string> At2, const REAL actualDist, const REAL dist, const REAL sigma, const REAL delta):
+Crystal::InterMolDistPar::InterMolDistPar(const vector<string> At1, const vector<string> At2, const REAL actualDist, const REAL dist, const REAL sigma, const REAL delta):
     mAt1(At1),mAt2(At2),mActDist(actualDist),mDist2(dist*dist),mSig(sigma),mDelta(delta)
 {}
+string Crystal::InterMolDistPar::get_list_At1()
+{
+    string tmpAt1;
+    for(int j=0;j<mAt1.size();j++) {
+        tmpAt1 +=mAt1[j];
+        if(j<(mAt1.size()-1)) {
+            tmpAt1 += " ";
+        }
+    }
+    return tmpAt1;
+}
 string Crystal::InterMolDistPar::get_list_At2()
 {
     string tmpAt2;
@@ -1026,7 +1041,7 @@ void Crystal::InterMolDistPar::set_At2(string atom_names)
         mAt2.push_back(word);
     }
 }
-void Crystal::SetNewInterMolDist(const string At1, const vector<string> At2, const REAL dist, const REAL sigma, const REAL delta) const
+void Crystal::SetNewInterMolDist(const vector<string> At1, const vector<string> At2, const REAL dist, const REAL sigma, const REAL delta) const
 {
     mInterMolDistList.push_back(InterMolDistPar(At1, At2, 0, dist, sigma, delta));
     mInterMolDistListNeedsInit=true;
@@ -2093,7 +2108,11 @@ void Crystal::InitializeInterMolDistList() const
     vector<int> p;
 
     for(long i=0;i<mInterMolDistList.size();i++) {
-        mInterMolDistList[i].mAt1Indexes = FindScatterersInComponentList(mInterMolDistList[i].mAt1);
+        mInterMolDistList[i].mAt1Indexes.clear();
+        for(int j=0;j<mInterMolDistList[i].mAt1.size();j++) {
+            p = FindScatterersInComponentList(mInterMolDistList[i].mAt1[j]);
+            mInterMolDistList[i].mAt1Indexes.insert(mInterMolDistList[i].mAt1Indexes.end(), p.begin(), p.end());
+        }        
         mInterMolDistList[i].mAt2Indexes.clear();
         for(int j=0;j<mInterMolDistList[i].mAt2.size();j++) {
             p = FindScatterersInComponentList(mInterMolDistList[i].mAt2[j]);
@@ -2108,7 +2127,12 @@ void Crystal::printInterMolDistList() const
     cout<<"size: "<<mInterMolDistList.size()<<endl;
     for(int i=0;i<mInterMolDistList.size();i++) {
         cout<<"["<<i<<"]:"<<endl;
-        cout<<"mAt1: "<<mInterMolDistList[i].mAt1<<endl;
+        cout<<"mAt1: ";
+        for(int j=0;j<mInterMolDistList[i].mAt1.size();j++) {
+            cout<<mInterMolDistList[i].mAt1[j]<<" "; 
+        }
+        cout<<endl;
+
         cout<<"mAt1Indexes: ";
         for(int j=0;j<mInterMolDistList[i].mAt1Indexes.size();j++) {
             cout<<mInterMolDistList[i].mAt1Indexes[j]<<" "; 

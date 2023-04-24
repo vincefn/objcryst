@@ -882,7 +882,9 @@ void Crystal::XMLOutput(ostream &os,int indent)const
        for(int i=0;i<mInterMolDistList.size();i++) {
            for(int k=0;k<=indent;k++) os << "  " ;
            XMLCrystTag tagIMD("InterMolecularDistRestr", false, true);
-           tagIMD.AddAttribute("At1",mInterMolDistList[i].mAt1);
+
+           string tmpAt1 = mInterMolDistList[i].get_list_At1();
+           tagIMD.AddAttribute("At1",tmpAt1);
            
            string tmpAt2 = mInterMolDistList[i].get_list_At2();
            /*
@@ -1060,7 +1062,7 @@ void Crystal::XMLInput(istream &is,const XMLCrystTag &tagg)
       }
       if("InterMolecularDistRestr"==tag.GetName())
       {
-         wxString At1;
+         vector<string> At1;
          vector<string> At2;
          string Dist;
          string Sigma;
@@ -1070,10 +1072,17 @@ void Crystal::XMLInput(istream &is,const XMLCrystTag &tagg)
          for(unsigned int i=0;i<tag.GetNbAttribute();i++)
          {
             if("At1"==tag.GetAttributeName(i)) {                
-                At1=tag.GetAttributeValue(i);
-                At1.Trim(true);
-                At1.Trim(false);
-                if(At1.length()==0) {
+                string tmpAt1=tag.GetAttributeValue(i);
+                if(tmpAt1.length()==0) {
+                    er = true;
+                    break;
+                }                
+                stringstream ss(tmpAt1);  
+                string word;
+                while (ss >> word) { 
+                    At1.push_back(word);
+                }
+                if(At1.size()==0) {
                     er = true;
                     break;
                 }
@@ -1117,7 +1126,7 @@ void Crystal::XMLInput(istream &is,const XMLCrystTag &tagg)
             }
          }                  
          if(!er) {
-            this->SetNewInterMolDist(At1.ToStdString(), At2, stof(Dist), stof(Sigma), stof(Delta));
+            this->SetNewInterMolDist(At1, At2, stof(Dist), stof(Sigma), stof(Delta));
          }
          continue;
       }

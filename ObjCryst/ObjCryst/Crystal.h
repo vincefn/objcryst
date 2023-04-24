@@ -381,14 +381,15 @@ class Crystal:public UnitCell
       {
           InterMolDistPar();
           
-          InterMolDistPar(const string At1, const vector<string> At2, const REAL actualDist, const REAL dist, const REAL sigma, const REAL delta);
+          InterMolDistPar(const vector<string> At1, const vector<string> At2, const REAL actualDist, const REAL dist, const REAL sigma, const REAL delta);
 
           //set mAt2 from the string of atom names separated by spaces
+          string get_list_At1();
           string get_list_At2();
           void set_At2(string atom_names);
           
           //the first is the atom in the asymmetric part of the unit cell
-          string mAt1;           
+          vector<string> mAt1;           
           vector<int> mAt1Indexes;
           vector<DistTableInternalPosition> vUniqueIndexAt1;
 
@@ -410,7 +411,7 @@ class Crystal:public UnitCell
           REAL mDelta;
       };
       
-      void SetNewInterMolDist(const string At1, const vector<string> At2, const REAL dist, const REAL sigma, const REAL delta) const;
+      void SetNewInterMolDist(const vector<string> At1, const vector<string> At2, const REAL dist, const REAL sigma, const REAL delta) const;
 
       int GetIntermolDistNb() const;
       InterMolDistPar GetIntermolDistPar(int Index) const;

@@ -1095,15 +1095,25 @@ void WXCrystal::OnMenuAddIntermolecularDistRestr(wxCommandEvent & event)
    for(unsigned int i=0;i<nb;i++)
       choices[i]= wxString::FromAscii(pList(i).mName.c_str());
    
-   wxSingleChoiceDialog dialog(this,_T("Choose name of the first atom"),_T("Select Atom"),choices);
+   wxMultiChoiceDialog dialog(this,_T("Choose name(s) of the first atom(s)"),_T("Select Atom(s)"),choices);
    if(wxID_OK!=dialog.ShowModal()) return;
-   int At1=dialog.GetSelection();
-   if((At1<0) || (At1>=nb)) return;
+   wxArrayInt At1=dialog.GetSelections();
+   if((At1.size()==0) || (At1.size()>=nb)) return;
 
-   wxMultiChoiceDialog dialog1(this,_T("Choose name of the second atom"),_T("Select Atom"),choices);
+   wxMultiChoiceDialog dialog1(this,_T("Choose name(s) of the second atom(s)"),_T("Select Atom(s)"),choices);
    if(wxID_OK!=dialog1.ShowModal()) return;
    wxArrayInt At2=dialog1.GetSelections();
    if((At2.size()==0) || (At2.size()>=nb)) return;
+
+   string tmpAt1;
+   vector<string> vectAt1;
+   for(int i=0;i<At1.size();i++) {
+       tmpAt1 += choices[At2[i]];
+       vectAt1.push_back(choices[At1[i]].ToStdString());
+       if(i<(At1.size()-1)) {
+           tmpAt1 += " ";
+       }
+   }
 
    string tmpAt2;
    vector<string> vectAt2;
@@ -1114,7 +1124,7 @@ void WXCrystal::OnMenuAddIntermolecularDistRestr(wxCommandEvent & event)
            tmpAt2 += " ";
        }
    }
-   string mes = "Enter bond distance (Angstroems) for "+choices[At1] + " - " + tmpAt2;
+   string mes = "Enter bond distance (Angstroems) for "+ tmpAt1 + " - " + tmpAt2;
    wxTextEntryDialog dialog2(this,wxString::FromAscii(mes.c_str()),
                            _T("Intermolecular bond distance"),"3.5",wxOK | wxCANCEL);
    dialog2.SetTextValidator(wxTextValidator(wxFILTER_NUMERIC));
@@ -1136,7 +1146,7 @@ void WXCrystal::OnMenuAddIntermolecularDistRestr(wxCommandEvent & event)
    double delta;
    dialog4.GetValue().ToDouble(&delta);   
 
-   mpCrystal->SetNewInterMolDist(string(choices[At1].c_str()), vectAt2, d, sigma, delta);
+   mpCrystal->SetNewInterMolDist(vectAt1, vectAt2, d, sigma, delta);
 
    wxMessageDialog dialog5(this, _T("The restriction was added"));
    dialog5.ShowModal();
@@ -1852,8 +1862,13 @@ void WXCrystal::OnMenuShowIntermoDistWindow(wxCommandEvent &event)
 
     mpIntermolDistWin->AppendRows(mpCrystal->GetIntermolDistNb());
     for(int i=0;i<mpCrystal->GetIntermolDistNb();i++) {
-        Crystal::InterMolDistPar imdp = mpCrystal->GetIntermolDistPar(i);
-        mpIntermolDistWin->SetCellValue(i, 0, imdp.mAt1);
+        Crystal::InterMolDistPar imdp = mpCrystal->GetIntermolDistPar(i);        
+        string tmpAt1;
+        for(int j=0;j<imdp.mAt1.size();j++) {
+            tmpAt1 += imdp.mAt1[j] + " ";
+        }
+        mpIntermolDistWin->SetCellValue(i, 0, tmpAt1);
+
         string tmpAt2;
         for(int j=0;j<imdp.mAt2.size();j++) {
             tmpAt2 += imdp.mAt2[j] + " ";
@@ -1948,11 +1963,27 @@ void WXCrystal::OnEditGridIntermolDistWindow(wxGridEvent &e)
    {
       case 0:
       {//At1 
-         if((s!=_T("")) && (mpCrystal->FindScatterersInComponentList(std::string(s.mb_str())).size()!=0))
-         {            
-            imdp->mAt1 = std::string(s.mb_str());
+         if(s!=_T(""))
+         {
+            stringstream ss(s.ToStdString());  
+            string word;
+            vector<string> At1;
+            while (ss >> word) { 
+                At1.push_back(word);
+            }
+            bool bad=false;
+            for(int i=0;i<At1.size();i++) {
+                if(mpCrystal->FindScatterersInComponentList(At1[i]).size()==0) {
+                    bad=true;                    
+                    wxMessageBox(wxString::Format("Atom with %s name does not exist !", At1[i].c_str()), _T("Unknown atom"), wxOK | wxICON_INFORMATION, this);
+                    break;
+                }
+            }
+            if(!bad) {
+                imdp->mAt1 = At1;
+            }
          } else {
-            wxMessageBox(_T("Atom with this name does not exist !"), _T("Unknown atom"), wxOK | wxICON_INFORMATION, this);
+            wxMessageBox(_T("The cell is empty, please write there at least one atom name !"), _T("Unknown atom"), wxOK | wxICON_INFORMATION, this);
          }
          break;
       }
