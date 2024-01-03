@@ -20,6 +20,10 @@
 *  This file includes only documentation, to be formatted automatically by doxygen.
 */
 
+// Using thr namespace allows links to classes to be generated without the ObjCryst:: prefix
+namespace ObjCryst
+{
+
 /*! \mainpage %ObjCryst++ Object-Oriented Crystallographic Library
 **
 *\section index Index
@@ -36,7 +40,28 @@
 * refinement methods such as simulated annealing, for example).
 *
 *\par
-* To have an overview of all available libraries, go to the <a href="hierarchy.html">Class Hierarchy</a>.
+* To have an <b>overview of all available libraries</b>, go to the <a href="hierarchy.html">Class Hierarchy</a>.
+* You are probably interested in the main Crystallographic classes, including:
+* * Crystal: the base class describing a complete crystal structure
+* * Scatterer: the base class for a scatterer, including:
+*   * Atom
+*   * Molecule
+* * ScatteringData, including:
+*   * DiffractionDataSingleCrystal
+*   * PowderPatternDiffraction
+* * PowderPattern: describing a complete powder pattern with multiple phases, background
+* * PowderPatternComponent: can be derived to:
+*   * PowderPatternBackground
+*   * PowderPatternDiffraction
+* * SpaceGroup: with all the spacegroup and symmetry information, interfacing with cctbx
+* * RefinableObj: the base refinable object with a list of parameters - all
+*   objects are derived from it.
+* * RefinablePar: the base refinable paremeter, which is used in all RefinableObj
+* * Algorithm classes:
+*   * OptimizationObj, from which MonteCarloObj is derived
+*   * LSQNumObj: least-squares minimisation
+*   * CellExplorer: class for the volume dichotomy algorithm
+*
 *\par
 * Even if we intend to use this library mainly for the development of a global optimization
 * program from powder diffraction, this library is programmed in a general way so that
@@ -44,13 +69,24 @@
 * The library was designed to be reusable, by adding new kind of experiments, new algorithms,
 * new Scatterer type, new ScatteringPower,...
 *
+*\par
+* <b>There are two main usage of the ObjCryst++ library today, and you are encouraged
+* to start using those, unless you already know you want to use the C++ library</b>:
+* * \b Fox, 'Free Objects for Xtallography' is an application for Linux, macOS and windows
+*   which can be <a href="https://github.com/vincefn/objcryst/releases">downloaded from GitHub</a>,
+*   and can be used mainly to solve crystal structures from powder diffraction
+* * \b pyobjcryst is the python module which can be used as an interface to a large
+*   part of the ObjCryst++ library: see the <a href="https://pyobjcryst.readthedocs.io/">documentation</a>
+*   and the <a href="https://github.com/diffpy/pyobjcryst">github project</a>), including
+*   <a href="https://pyobjcryst.readthedocs.io/en/latest/examples/index.html"> example notebooks</a>.
+*
 *\par Contributors
 * Design & implementation: Vincent Favre-Nicolin (http://v.favrenicolin.free.fr/),
 * <a href="mailto:vincefn@users.sourceforge.net">vincefn@users.sourceforge.net</a>
 *\par
 * This project was initiated in the laboratory of Crystallography of the University
-* of Geneva (http://www.unige.ch/crystal/), and is part of the development of a global
-* optimization program with Radovan Cerny (http://www.unige.ch/crystal/cerny/rcerny.htm).
+* of Geneva (http://www.unige.ch/), and is part of the development of a global
+* optimization program with Radovan Cerny (https://www.unige.ch/societes/SSCr/w3cerny/rcerny.htm).
 * \par
 * This project has been supported by the <a href="http://www.snf.ch/">Swiss
 * National Science Foundation (#21-53847.98)</a>.
@@ -92,3 +128,5 @@
 *\par
 *
 */
+
+} //namespace
