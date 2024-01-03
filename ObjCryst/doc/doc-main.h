@@ -116,15 +116,14 @@ namespace ObjCryst
 * these are the cctbx and newmat package. You should
 * refer to the documentation and legal notes included in their respective directories:
 *\par
-* <a href="newmat.htm">The newmat matrix library</a> (Robert B Davies).
+* <a href="https://github.com/rzr/newmat">The newmat matrix library</a> (Robert B Davies).
 * This library is only used
-* for matrix SVD decomposition and inversion in Least Squares methods (Least Squares
-* method was written only for tests purposes... Don't expect anything from it...).
+* for matrix SVD decomposition and inversion in Least Squares methods.
 *\par
 * <a href="https://cctbx.github.io/">The cctbx library</a>(Ralf Grosse-Kunstleve).
 * This library is used to determine the atomic scattering factors for X-Ray,
 * neutrons, as well as anomalous scattering factors and the atomic number,
-* and for all spacegroup interpretation.
+* and for all spacegroup/symmetry interpretation.
 *\par
 *
 */

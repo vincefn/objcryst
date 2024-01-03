@@ -9,4 +9,6 @@ build:
   jobs:
     post_build:
       - cd ObjCryst/doc && doxygen
-      - cp -Rf ObjCryst/doc/build/html/ "$READTHEDOCS_OUTPUT/html/"
+      - mv ObjCryst/doc/build/html/* "$READTHEDOCS_OUTPUT/html/"
+sphinx:
+  configuration: ObjCryst/doc/sphinx-objcryst/conf.py
