@@ -1,0 +1,18 @@
+/*default is 60em*/
+.bd-main .bd-content .bd-article-container {
+  max-width: 120em;
+}
+
+/* default is 88rem*/
+.bd-page-width {
+  max-width: 120em;
+}
+
+/* Larger header/navbar for Fox logo*/
+.navbar-brand img{
+  height: auto;
+}
+
+.navbar {
+    height: 6em;
+}
