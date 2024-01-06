@@ -4,9 +4,10 @@ Bibliography: structures solved using Fox
 =========================================
 Note: the references for Fox can be found on the :ref:`Fox bibliography page<biblio>` .
 
-On this page you can find a list of articles with new structures solved using Fox: **[[#2012|2012]]** **[[#2011|2011]]** **[[#2010|2010]]** **[[#2009|2009]]** **[[#2008|2008]]** **[[#2007|2007]]** **[[#2006|2006]]** **[[#2005|2005]]** **[[#2004|2004]]** **[[#2003|2003]]** **[[#2002|2002]]**
+On this page you can find a list of articles with new structures solved using Fox:
 
 Note: This page ceased to be updated circa 2012, you can have a more recent list of Fox citations through google scholar:
+
 * `Citations for J. Appl. Cryst. 35 (2002), 734-743 <https://scholar.google.com/citations?view_op=view_citation&hl=fr&user=PFyCb70AAAAJ&citation_for_view=PFyCb70AAAAJ:u5HHmVD_uO8C>`_
 * `Citations for Z. Kristallogr. 219 (2004) 847–856 <https://scholar.google.com/citations?view_op=view_citation&hl=fr&user=PFyCb70AAAAJ&citation_for_view=PFyCb70AAAAJ:d1gkVwhDpl0C>`_
 
