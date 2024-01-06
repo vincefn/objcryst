@@ -7,3 +7,9 @@ build:
 
 sphinx:
   configuration: Fox/doc/source/conf.py
+
+# Python requirements to build your documentation
+# See https://docs.readthedocs.io/en/stable/guides/reproducible-builds.html
+python:
+  install:
+    - requirements: Fox/doc/requirements.txt
