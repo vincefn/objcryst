@@ -6,4 +6,4 @@ build:
     python: "3.12"
 
 sphinx:
-  configuration: Fox/doc/conf.py
+  configuration: Fox/doc/source/conf.py
