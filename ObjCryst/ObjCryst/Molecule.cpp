@@ -5373,6 +5373,13 @@ void Molecule::BuildConnectivityTable()const
    VFN_DEBUG_ENTRY("Molecule::BuildConnectivityTable()",5)
    TAU_PROFILE("Molecule::BuildConnectivityTable()","void ()",TAU_DEFAULT);
    mConnectivityTable.clear();
+
+   // First create an entry for all atoms in the table - avoids empty pointers
+   // in the (pathological) case where some (or all) atoms are not connected
+   for (unsigned long i = 0; i < mvpAtom.size(); ++i)
+       mConnectivityTable[mvpAtom[i]];
+
+   // Then build the table from existing bonds
    for(unsigned long i=0;i<mvpBond.size();++i)
    {
       mConnectivityTable[&(mvpBond[i]->GetAtom1())].insert(&(mvpBond[i]->GetAtom2()));
@@ -5396,6 +5403,13 @@ void Molecule::BuildConnectivityTable()const
       }
    }
    #endif
+   // No atom should be un-connected, so warn if that happens
+   // In fact all atoms should be inter-connected to all others...
+   for (unsigned long i = 0; i < mvpAtom.size(); ++i)
+       if (mConnectivityTable[mvpAtom[i]].size() == 0)
+           cout << "Warning: Molecule '" << this->GetName() << "' ConnectivityTable: Atom #"
+           << i << "(" << mvpAtom[i]->GetName() << ") has no bond !" << endl;
+
    mClockConnectivityTable.Click();
    VFN_DEBUG_EXIT("Molecule::BuildConnectivityTable()",5)
 }
