@@ -97,7 +97,7 @@ private:
     bool LoadFile(wxString filename, wxString &in);
     void SaveDataAsFile(wxString out, wxString filename);
     wxString getResult(wxString message, long pos);
-    void SaveResult(wxString result, int JobID, float ResultCost, float Rwp);
+    void SaveResult(wxString result, int JobID, float ResultCost);
     //this will return N of available jobs (or lower no.)
     vector<FoxJob > getJobsToCalculate(int n);
     void AddResultToJobList(int id);
