@@ -410,6 +410,13 @@ class Crystal:public UnitCell
           REAL mSig;
           REAL mDelta;
       };
+
+      struct NamedScatteringComponent: public ScatteringComponent  {          
+          string mName;
+      };
+      mutable vector<NamedScatteringComponent> mNamedScattCompList;
+
+      const vector<NamedScatteringComponent>& GetNamedScatteringComponentList() const;
       
       void SetNewInterMolDist(const vector<string> At1, const vector<string> At2, const REAL dist, const REAL sigma, const REAL delta) const;
 
@@ -508,7 +515,7 @@ class Crystal:public UnitCell
       /// \warning There should be no duplicate names !!! :TODO: test in AddScatterer()
       int FindScatterer(const string &scattName)const;
 
-      /*returns array of indexes in the mScattCompList*/
+      /*returns array of indexes in the mNamedScattCompList */
       vector<int> FindScatterersInComponentList(const string &scattName)const;
 
 

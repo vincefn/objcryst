@@ -1084,26 +1084,26 @@ void WXCrystal::OnMenuRemoveScattPow(wxCommandEvent & WXUNUSED(event))
 }
 void WXCrystal::OnMenuAddIntermolecularDistRestr(wxCommandEvent & event)
 {
+    
    VFN_DEBUG_ENTRY("WXMolecule::OnMenuAddBond()",6)
    WXCrystValidateAllUserInput();
    int choice;
-   const ScatteringComponentList pList=mpCrystal->GetScatteringComponentList();
+   const vector<Crystal::NamedScatteringComponent> pList=mpCrystal->GetNamedScatteringComponentList();
    
-   const unsigned int nb=pList.GetNbComponent();
    wxArrayString choices;
-   choices.resize(nb);
-   for(unsigned int i=0;i<nb;i++)
-      choices[i]= wxString::FromAscii(pList(i).mName.c_str());
+   choices.resize(pList.size());
+   for(unsigned int i=0;i<pList.size();i++)
+      choices[i]= wxString::FromAscii(pList[i].mName.c_str());
    
    wxMultiChoiceDialog dialog(this,_T("Choose name(s) of the first atom(s)"),_T("Select Atom(s)"),choices);
    if(wxID_OK!=dialog.ShowModal()) return;
    wxArrayInt At1=dialog.GetSelections();
-   if((At1.size()==0) || (At1.size()>=nb)) return;
+   if((At1.size()==0) || (At1.size()>=pList.size())) return;
 
    wxMultiChoiceDialog dialog1(this,_T("Choose name(s) of the second atom(s)"),_T("Select Atom(s)"),choices);
    if(wxID_OK!=dialog1.ShowModal()) return;
    wxArrayInt At2=dialog1.GetSelections();
-   if((At2.size()==0) || (At2.size()>=nb)) return;
+   if((At2.size()==0) || (At2.size()>=pList.size())) return;
 
    string tmpAt1;
    vector<string> vectAt1;
@@ -1153,6 +1153,7 @@ void WXCrystal::OnMenuAddIntermolecularDistRestr(wxCommandEvent & event)
 
    wxTheApp->GetTopWindow()->Layout();
    wxTheApp->GetTopWindow()->SendSizeEvent();
+   
 }
 void WXCrystal::OnMenuAddScatterer(wxCommandEvent &event)
 {

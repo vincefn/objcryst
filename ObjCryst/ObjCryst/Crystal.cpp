@@ -878,13 +878,13 @@ int Crystal::FindScatterer(const string &scattName)const
 }
 vector<int> Crystal::FindScatterersInComponentList(const string &scattName)const
 {
-   vector<int> res;
-   for(int i=0;i<mScattCompList.GetNbComponent();i++) {
-        if(mScattCompList(i).mName.compare(scattName)==0) {
+    vector<int> res;
+    for(int i=0;i<mNamedScattCompList.size();i++) {
+        if(mNamedScattCompList[i].mName.compare(scattName)==0) {
             res.push_back(i);
         }
-   }
-   return res;
+    }
+    return res;
 }
 bool Crystal::isScattererInInterMolDistList(string &scattName) const
 {
@@ -1489,7 +1489,10 @@ void Crystal::BeginOptimization(const bool allowApproximations,const bool enable
                 mDistTableForInterMolMaxDistance = d;
             }
         }
-   }      
+   }  
+
+   mInterMolDistListNeedsInit = true;
+
    if(mInterMolDistList.size()!=0) {
        mDistTableForInterMolMaxDistance*=mDistMaxMultiplier;   
    }
@@ -2105,7 +2108,9 @@ Crystal::DistTableInternalPosition::DistTableInternalPosition(const long atomInd
 
 void Crystal::InitializeInterMolDistList() const
 {    
-    vector<int> p;
+    vector<int> p;    
+    
+    GetNamedScatteringComponentList();
 
     for(long i=0;i<mInterMolDistList.size();i++) {
         mInterMolDistList[i].mAt1Indexes.clear();
@@ -2120,6 +2125,36 @@ void Crystal::InitializeInterMolDistList() const
         }
     }
     mInterMolDistListNeedsInit = false;
+}
+const vector<Crystal::NamedScatteringComponent>& Crystal::GetNamedScatteringComponentList() const
+{
+    this->GetScatteringComponentList();  
+
+    if(mNamedScattCompList.size()!=mScattCompList.GetNbComponent()) {
+        mNamedScattCompList.resize(mScattCompList.GetNbComponent());
+    }    
+    int counts = 0;
+
+    //this part of code has to be derived from the GetScatteringComponentList() to be sure, that 
+    //mNamedScattCompList and mScattCompList have the same size!
+    for(int i=0;i<mScattererRegistry.GetNb();i++) {
+        const ScatteringComponentList list=this->GetScatt(i).GetScatteringComponentList();
+        for(int j=0;j<list.GetNbComponent();j++) {
+
+            mNamedScattCompList[counts].mDynPopCorr = list(j).mDynPopCorr;
+            mNamedScattCompList[counts].mOccupancy = list(j).mOccupancy;
+            mNamedScattCompList[counts].mpScattPow = list(j).mpScattPow;
+            mNamedScattCompList[counts].mX = list(j).mX;
+            mNamedScattCompList[counts].mY = list(j).mY;
+            mNamedScattCompList[counts].mZ = list(j).mZ;
+            mNamedScattCompList[counts].mName = this->GetScatt(i).GetComponentName(j);       
+            counts++;
+        }
+    }
+    //this part of code has to be derived from the GetScatteringComponentList() to be sure, that 
+    //mNamedScattCompList and mScattCompList have the same size!
+
+    return mNamedScattCompList;
 }
 void Crystal::printInterMolDistList() const
 {
@@ -2233,10 +2268,14 @@ void Crystal::CalcDistTableForInterMolDistCost() const
               
     CrystMatrix_REAL symmetricsCoords;
     const int nbSymmetrics=this->GetSpaceGroup().GetNbSymmetrics(false,false);
-        
-    //mInterMolDistList has to be initiallized first! => InitializeInterMolDistList()
+ 
+    //mInterMolDistList has to be initiallized first! 
     if(mInterMolDistListNeedsInit) {
+        //GetNamedScatteringComponentList(); is part of InitializeInterMolDistList(), we dont need to call it again...
         InitializeInterMolDistList();
+    } else {
+        //Update the mNamedScattCompList
+        GetNamedScatteringComponentList();
     }
 
     //recalculation of mInterMolDistList
@@ -2245,11 +2284,12 @@ void Crystal::CalcDistTableForInterMolDistCost() const
 
         //calculate equiv positions for all At1 atoms and identify which one is in ASU
         for(int k=0;k<mInterMolDistList[i].mAt1Indexes.size();k++) {
-
-            symmetricsCoords=this->GetSpaceGroup().GetAllSymmetrics(mScattCompList(mInterMolDistList[i].mAt1Indexes[k]).mX,
-                                                                    mScattCompList(mInterMolDistList[i].mAt1Indexes[k]).mY,
-                                                                    mScattCompList(mInterMolDistList[i].mAt1Indexes[k]).mZ,
-                                                                    false,false,false);        
+            
+            symmetricsCoords=this->GetSpaceGroup().GetAllSymmetrics(mNamedScattCompList[mInterMolDistList[i].mAt1Indexes[k]].mX,
+                                                                    mNamedScattCompList[mInterMolDistList[i].mAt1Indexes[k]].mY,
+                                                                    mNamedScattCompList[mInterMolDistList[i].mAt1Indexes[k]].mZ,
+                                                                    false,false,false);     
+            
             bool hasUnique=false;
             for(int j=0;j<nbSymmetrics;j++)
             {
@@ -2279,10 +2319,11 @@ void Crystal::CalcDistTableForInterMolDistCost() const
 
         //calculate equiv positions for all At2 atoms and save it
         for(int k=0;k<mInterMolDistList[i].mAt2Indexes.size();k++) {
-            symmetricsCoords=this->GetSpaceGroup().GetAllSymmetrics(mScattCompList(mInterMolDistList[i].mAt2Indexes[k]).mX,
-                                                                    mScattCompList(mInterMolDistList[i].mAt2Indexes[k]).mY,
-                                                                    mScattCompList(mInterMolDistList[i].mAt2Indexes[k]).mZ,
-                                                                    false,false,false);        
+
+            symmetricsCoords=this->GetSpaceGroup().GetAllSymmetrics(mNamedScattCompList[mInterMolDistList[i].mAt2Indexes[k]].mX,
+                                                                    mNamedScattCompList[mInterMolDistList[i].mAt2Indexes[k]].mY,
+                                                                    mNamedScattCompList[mInterMolDistList[i].mAt2Indexes[k]].mZ,
+                                                                    false,false,false);
             for(int j=0;j<nbSymmetrics;j++)
             {
                 // take the closest position (using lattice translations) to the center of the ASU
