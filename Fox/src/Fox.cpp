@@ -79,7 +79,7 @@
 #ifdef __WX__CRYST__
    #include "ObjCryst/wxCryst/wxCrystal.h"
 //FOXGrid
-   #include "WXGridWindow.h"
+   #include "foxgrid/WXGridWindow.h"
    #if defined(__WXGTK__) || defined(__WXMOTIF__) || defined(__WXMAC__) || defined(__WXMGL__) || defined(__WXX11__)
       #include "Fox.xpm"
    #endif
@@ -1556,10 +1556,10 @@ int main (int argc, char *argv[])
       mpFrame->mpGridWindow->StartClientWindow();
 
       if(nbCPUs!=-1) {
-          mpFrame->mpGridWindow->m_WXFoxClient->setNbCPU(nbCPUs);
+          mpFrame->mpGridWindow->m_WXFoxSlave->setNbCPU(nbCPUs);
       }
-      mpFrame->mpGridWindow->m_WXFoxClient->m_IPWindow->SetValue(wxString::FromAscii(IP.c_str()));
-      mpFrame->mpGridWindow->m_WXFoxClient->OnConnectClient(com);
+      mpFrame->mpGridWindow->m_WXFoxSlave->m_IPWindow->SetValue(wxString::FromAscii(IP.c_str()));
+      mpFrame->mpGridWindow->m_WXFoxSlave->OnConnectClient(com);
    }
 
    return TRUE;
@@ -2059,15 +2059,15 @@ void WXCrystMainFrame::OnClose(wxCloseEvent& event)
 }
 void WXCrystMainFrame::SafeQuit()
 {
-   if(mpGridWindow->m_WXFoxServer!=NULL)
+   if(mpGridWindow->m_WXFoxMaster!=NULL)
    {
       wxMessageDialog d(this,_T("You are trying to close the FOX GRID server. Are you sure?"), _T(""), wxYES | wxNO | wxCENTER | wxSTAY_ON_TOP);
       if(wxID_YES!=d.ShowModal()) return;
    }
-   if(mpGridWindow->m_WXFoxClient!=NULL){
+   if(mpGridWindow->m_WXFoxSlave!=NULL){
        wxMessageDialog d(this,_T("You are trying to close the FOX GRID client. Are you sure?"), _T(""), wxYES | wxNO | wxCENTER | wxSTAY_ON_TOP);
        if(wxID_YES!=d.ShowModal()) return;
-       mpGridWindow->m_WXFoxClient->CloseClient();
+       mpGridWindow->m_WXFoxSlave->CloseClient();
    }
    bool safe=true;
    wxConfigBase::Get()->Read(_T("Fox/BOOL/Ask confirmation before exiting Fox"),&safe);
@@ -2234,7 +2234,7 @@ void WXCrystMainFrame::OnRedo(wxCommandEvent &ev)
 //FOXGrid
 void WXCrystMainFrame::OnStartGridServer(wxCommandEvent &event)
 {
-   if((mpGridWindow->m_WXFoxServer!=NULL)||(mpGridWindow->m_WXFoxClient!=NULL))
+   if((mpGridWindow->m_WXFoxMaster!=NULL)||(mpGridWindow->m_WXFoxSlave!=NULL))
    {
       wxMessageDialog d(this,"You have already either a Grid client or server\n running in this instance of Fox !","Error",wxOK|wxICON_ERROR);
       d.ShowModal();
@@ -2257,7 +2257,7 @@ void WXCrystMainFrame::OnStartGridServer(wxCommandEvent &event)
 }
 void WXCrystMainFrame::OnStartGridClient(wxCommandEvent &event)
 {
-   if((mpGridWindow->m_WXFoxServer!=NULL)||(mpGridWindow->m_WXFoxClient!=NULL))
+   if((mpGridWindow->m_WXFoxMaster!=NULL)||(mpGridWindow->m_WXFoxSlave!=NULL))
    {
       wxMessageDialog d(this,"You have already either a Grid client or server\n running in this instance of Fox !","Error",wxOK|wxICON_ERROR);
       d.ShowModal();

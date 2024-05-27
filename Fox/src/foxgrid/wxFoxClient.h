@@ -37,14 +37,14 @@
 #include "ObjCryst/ObjCryst/PowderPattern.h"
 #include "ObjCryst/ObjCryst/DiffractionDataSingleCrystal.h"
 #include "ObjCryst/RefinableObj/GlobalOptimObj.h"
-#include "FoxClient.h"
+#include "foxgrid/FoxGridSlave.h"
 
 
-class WXFoxClient : public wxWindow
+class WXFoxSlave : public wxWindow
 {
 public:
-   WXFoxClient(wxWindow* parent, wxString working_dir);
-   ~WXFoxClient(void);
+   WXFoxSlave(wxWindow* parent, wxString working_dir);
+   ~WXFoxSlave(void);
    void Clear();
    void ConnectClient(wxString IP);
    void OnConnectClient(wxCommandEvent& event);
@@ -56,10 +56,10 @@ private:
 
    void OnConnectTimer(wxTimerEvent& event);
    void OnUpdateProcessTimer(wxTimerEvent& event);
-   void UpdateListOfProcesses(vector<FoxProcess> p);
+   //void UpdateListOfProcesses(vector<FoxProcess> p);
    void InitClient();
+   
 
-   FoxClient    * m_FoxClient;
    wxWindow     * m_parent;
    //wxTextCtrl   * m_EventsWindow;
    wxTextCtrl   * m_nbCPUs;
@@ -71,6 +71,7 @@ private:
    wxString       m_working_dir;
    wxGrid       * m_process_table;
    wxGrid       * m_job_table;
+   FoxGridSlave * m_grid_slave;
 
       DECLARE_EVENT_TABLE()
 };

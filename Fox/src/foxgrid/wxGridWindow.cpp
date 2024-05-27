@@ -1,18 +1,4 @@
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #ifdef __WX__CRYST__
    #include "ObjCryst/wxCryst/wxCrystal.h"
 
@@ -30,29 +16,29 @@ WXGrigWindow::WXGrigWindow(wxWindow *parent):
 wxWindow(parent,-1)
 {
    dataLoaded = false;
-   m_WXFoxServer = NULL;
-   m_WXFoxClient = NULL;
+   m_WXFoxMaster = NULL;
+   m_WXFoxSlave = NULL;
 }
 WXGrigWindow::~WXGrigWindow(void)
 {
-    if (m_WXFoxServer != NULL) {
-        m_WXFoxServer->Clear();
-        delete m_WXFoxServer;
+    if (m_WXFoxMaster != NULL) {
+        m_WXFoxMaster->Clear();
+        delete m_WXFoxMaster;
     }
-    if (m_WXFoxClient != NULL) {
-        m_WXFoxClient->Clear();
-        delete m_WXFoxClient;
+    if (m_WXFoxSlave != NULL) {
+        m_WXFoxSlave->Clear();
+        delete m_WXFoxSlave;
     }
 }
-WXFoxServer *WXGrigWindow::StartServer()
+WXFoxMaster *WXGrigWindow::StartServer()
 {
    //if client or server exist return NULL
-   if(m_WXFoxClient!=NULL) return NULL;
-   if(m_WXFoxServer!=NULL) return NULL;
-   m_WXFoxServer = new WXFoxServer(this, m_working_dir);
-   m_WXFoxServer->m_dataLoaded = dataLoaded;
+   if(m_WXFoxSlave!=NULL) return NULL;
+   if(m_WXFoxMaster!=NULL) return NULL;
+   m_WXFoxMaster = new WXFoxMaster(this, m_working_dir);
+   m_WXFoxMaster->m_dataLoaded = dataLoaded;
    if(this->GetSizer()==NULL) this->SetSizer(new wxBoxSizer(wxVERTICAL));
-   this->GetSizer()->Add(m_WXFoxServer);
+   this->GetSizer()->Add(m_WXFoxMaster);
    this->Layout();
    wxTopLevelWindow *ptopwin = dynamic_cast<wxTopLevelWindow*>( wxTheApp->GetTopWindow());
    if(ptopwin!=NULL)
@@ -66,17 +52,17 @@ WXFoxServer *WXGrigWindow::StartServer()
    }
    wxTheApp->GetTopWindow()->Layout();
    wxTheApp->GetTopWindow()->SendSizeEvent();
-   return m_WXFoxServer;
+   return m_WXFoxMaster;
 }
 
-WXFoxClient *WXGrigWindow::StartClientWindow()
+WXFoxSlave *WXGrigWindow::StartClientWindow()
 {
    //if client or server exist return NULL
-   if(m_WXFoxClient!=NULL) return NULL;
-   if(m_WXFoxServer!=NULL) return NULL;
-   m_WXFoxClient = new WXFoxClient(this, m_working_dir);
+   if(m_WXFoxSlave!=NULL) return NULL;
+   if(m_WXFoxMaster!=NULL) return NULL;
+   m_WXFoxSlave = new WXFoxSlave(this, m_working_dir);
    if(this->GetSizer()==NULL) this->SetSizer(new wxBoxSizer(wxVERTICAL));
-   this->GetSizer()->Add(m_WXFoxClient);
+   this->GetSizer()->Add(m_WXFoxSlave);
    this->Layout();
    wxTopLevelWindow *ptopwin = dynamic_cast<wxTopLevelWindow*>( wxTheApp->GetTopWindow());
    if(ptopwin!=NULL)
@@ -90,27 +76,27 @@ WXFoxClient *WXGrigWindow::StartClientWindow()
    }
    wxTheApp->GetTopWindow()->Layout();
    wxTheApp->GetTopWindow()->SendSizeEvent();
-   return m_WXFoxClient;
+   return m_WXFoxSlave;
 }
 void WXGrigWindow::DataLoaded()
 {
    dataLoaded = true;
 
-   if(m_WXFoxServer!=NULL) {
-      m_WXFoxServer->m_dataLoaded = true;
+   if(m_WXFoxMaster!=NULL) {
+      m_WXFoxMaster->m_dataLoaded = true;
    }
 }
 void WXGrigWindow::Clear()
 {
-   if(m_WXFoxServer!=NULL) {
-      m_WXFoxServer->Clear();
-      delete m_WXFoxServer;
-      m_WXFoxServer=NULL;
+   if(m_WXFoxMaster!=NULL) {
+      m_WXFoxMaster->Clear();
+      delete m_WXFoxMaster;
+      m_WXFoxMaster=NULL;
    }
 
-   if(m_WXFoxClient!=NULL) {
-      m_WXFoxClient->Clear();
-      delete m_WXFoxClient;
-      m_WXFoxClient=NULL;
+   if(m_WXFoxSlave!=NULL) {
+      m_WXFoxSlave->Clear();
+      delete m_WXFoxSlave;
+      m_WXFoxSlave=NULL;
    }
 }

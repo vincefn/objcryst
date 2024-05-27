@@ -124,7 +124,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;NDEBUG;_WINDOWS;%(PreprocessorDefinitions);__WX__CRYST__;HAVE_SSE_MATHFUN;USE_SSE2;OBJCRYST_GL;HAVE_FFTW;__FOX_COD__</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;NDEBUG;_WINDOWS;%(PreprocessorDefinitions);__WX__CRYST__;HAVE_SSE_MATHFUN;USE_SSE2;OBJCRYST_GL;HAVE_FFTW;__FOX_COD__;BOOST_MULTI_INDEX_DISABLE_SERIALIZATION</PreprocessorDefinitions>
       <SDLCheck>false</SDLCheck>
       <AdditionalIncludeDirectories>$(SolutionDir)..\;$(SolutionDir)..\cctbx\include;$(SolutionDir)..\ObjCryst;$(SolutionDir)..\wxWidgets\include\msvc;$(SolutionDir)..\wxWidgets\include;$(SolutionDir)..\fftw\api;$(ProjectDir)\..\boost;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ObjectFileName>$(IntDir)\%(RelativeDir)</ObjectFileName>
@@ -145,11 +145,12 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(SolutionDir)..\wxWidgets\lib\vc_lib;$(SolutionDir)$(Configuration);$(SolutionDir)..\fftw\fftw-3.3-libs\Static-Release;$(ProjectDir)\..\boost\stage\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <IgnoreSpecificDefaultLibraries>
-      </IgnoreSpecificDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>libboost_date_time-vc141-mt-s-x32-1_68.lib</IgnoreSpecificDefaultLibraries>
       <AdditionalDependencies>newmat.lib;cctbx.lib;libfftwf-3.3.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ShowProgress>LinkVerbose</ShowProgress>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <IgnoreAllDefaultLibraries>
+      </IgnoreAllDefaultLibraries>
     </Link>
     <ResourceCompile>
       <AdditionalIncludeDirectories>$(SolutionDir)..\wxWidgets\include\msvc;$(SolutionDir)..\wxWidgets\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -284,14 +285,18 @@
     <ClCompile Include="..\ObjCryst\wxCryst\wxTrackerGraph.cpp" />
     <ClCompile Include="..\ObjCryst\wxCryst\wxZScatterer.cpp" />
     <ClCompile Include="src\Fox.cpp" />
-    <ClCompile Include="src\FoxClient.cpp" />
-    <ClCompile Include="src\FoxJob.cpp" />
-    <ClCompile Include="src\FoxServer.cpp" />
-    <ClCompile Include="src\GridResult.cpp" />
-    <ClCompile Include="src\IOSocket.cpp" />
-    <ClCompile Include="src\WXFoxClient.cpp" />
-    <ClCompile Include="src\WXFoxServer.cpp" />
-    <ClCompile Include="src\WXGridWindow.cpp" />
+    <ClCompile Include="src\foxgrid\FoxGridMaster.cpp" />
+    <ClCompile Include="src\foxgrid\FoxGridSlave.cpp" />
+    <ClCompile Include="src\foxgrid\GridClient.cpp" />
+    <ClCompile Include="src\foxgrid\GridCommunication.cpp" />
+    <ClCompile Include="src\foxgrid\GridMasterBase.cpp" />
+    <ClCompile Include="src\foxgrid\GridServer.cpp" />
+    <ClCompile Include="src\foxgrid\GridSlaveBase.cpp" />
+    <ClCompile Include="src\foxgrid\SocketThreadClient.cpp" />
+    <ClCompile Include="src\foxgrid\SocketThreadServer.cpp" />
+    <ClCompile Include="src\foxgrid\wxFoxMaster.cpp" />
+    <ClCompile Include="src\foxgrid\wxFoxSlave.cpp" />
+    <ClCompile Include="src\foxgrid\wxGridWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\Fox.icns" />
