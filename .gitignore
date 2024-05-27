@@ -38,3 +38,10 @@ Fox/wikihtml
 boost_1_68_0
 GridRslt
 
+/cctbx
+/Fox/.vs
+/Fox/Debug
+/Fox/Release
+Fox/cctbx_vc12.vcxproj.user
+Fox/Fox_vc12.vcxproj.user
+Fox/newmat_vc12.vcxproj.user
