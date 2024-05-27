@@ -713,24 +713,24 @@ void WXFoxMaster::UpdateResultList()
         q+=jobs[i].results.size();
     }
     if(nb == q) return;
-
-    vector<MasterResult> results;
+    
+    m_Results.clear();
     for(int i=0;i<jobs.size();i++) {
-        results.insert(results.begin(), jobs[i].results.begin(), jobs[i].results.end());
+        m_Results.insert(m_Results.begin(), jobs[i].results.begin(), jobs[i].results.end());
     }
 
-    std::sort(results.begin(), results.end());
+    std::sort(m_Results.begin(), m_Results.end());
     wxString tmp;
     //rewrite already present rows (because we sorted/changed results before) and insert new ones.
-    for(int i=0;i<results.size();i++) {        
+    for(int i=0;i<m_Results.size();i++) {        
         if(i>=nb) {
             m_ResultTable->InsertRows(i, 1, false);
         }
-        tmp.Printf(_T("%d"), results[i].JobID);
+        tmp.Printf(_T("%d"), m_Results[i].JobID);
         m_ResultTable->SetCellValue(i, 0, tmp);//Nb
-        tmp.Printf(_T("%0.2f"), results[i].Cost);
+        tmp.Printf(_T("%0.2f"), m_Results[i].Cost);
         m_ResultTable->SetCellValue(i, 1, tmp);//Job ID
-        tmp.Printf(_T("%0.4f"), results[i].Rwp);
+        tmp.Printf(_T("%0.4f"), m_Results[i].Rwp);
         m_ResultTable->SetCellValue(i, 2, tmp);//Cost
     }
 }
@@ -826,35 +826,18 @@ void WXFoxMaster::OnShowResultsServer(wxCommandEvent& event)
     {
         wxMessageBox(_T("Select one result!"), _T("Error"), wxOK, this);
         return;
-    }
-
-    vector<MasterJob> jobs = m_grid_master->getJobs();   
-    vector<MasterResult> results;
-    for(int i=0;i<jobs.size();i++) {
-        results.insert(results.begin(), jobs[i].results.begin(), jobs[i].results.end());
-    }
+    }    
 
     int r = m_ResultTable->GetSelectedRows().Item(0);
     long JobID;
     double Cost, Rwp;
-    m_ResultTable->GetCellValue(r, 0).ToLong(&JobID);
-    m_ResultTable->GetCellValue(r, 1).ToDouble(&Cost);
-    m_ResultTable->GetCellValue(r, 2).ToDouble(&Rwp);
-
-    MasterResult mr;
-    for (auto& element : results) {
-        if ((element.JobID == JobID) && (element.Cost == (float) Cost) && (element.Rwp == (float) Rwp)) {
-            mr = element;
-            break;
-        }
-    }
-    if(mr.JobID<0) {
-        wxMessageBox(_T("Result not found!\n Try it again"), _T("Error"), wxOK, this);
-        return;
-    }    
     
-    (*fpObjCrystInformUser)(wxString::Format("Show Results: opening file: "+mr.filename).ToStdString());
-
+    if(r<0 || r>=m_Results.size()) {
+        wxMessageBox(_T("The selection os out of range!"), _T("Error"), wxOK, this);
+        return;
+    }   
+    
+    (*fpObjCrystInformUser)(wxString::Format("Show Results: opening file: "+m_Results[r].filename).ToStdString());
 
     if(m_dataLoaded) {
         gOptimizationObjRegistry.DeleteAll();
@@ -867,8 +850,8 @@ void WXFoxMaster::OnShowResultsServer(wxCommandEvent& event)
         m_dataLoaded = false;
     }
 
-    if(mr.filename.size()>4 && mr.filename.Mid(mr.filename.size()-4)==wxString(_T(".xml"))) {    
-        wxFileInputStream is(mr.filename);
+    if(m_Results[r].filename.size()>4 && m_Results[r].filename.Mid(m_Results[r].filename.size()-4)==wxString(_T(".xml"))) {    
+        wxFileInputStream is(m_Results[r].filename);
         stringstream in;
         if(is.GetSize()>0)
         {
@@ -881,7 +864,7 @@ void WXFoxMaster::OnShowResultsServer(wxCommandEvent& event)
         try{XMLCrystFileLoadAllObject(in);}
         catch(const ObjCrystException &except)
         {
-            wxMessageDialog d(this,_T("Failed loading file1:\n")+mr.filename,_T("Error loading file"),wxOK|wxICON_ERROR);
+            wxMessageDialog d(this,_T("Failed loading file1:\n")+m_Results[r].filename,_T("Error loading file"),wxOK|wxICON_ERROR);
             d.ShowModal();
             return;
         };
@@ -895,41 +878,23 @@ void WXFoxMaster::OnShowResults(wxCommandEvent& event)
     {
         wxMessageBox(_T("Select one result!"), _T("Error"), wxOK, this);
         return;
-    }
-
-    vector<MasterJob> jobs = m_grid_master->getJobs();   
-    vector<MasterResult> results;
-    for(int i=0;i<jobs.size();i++) {
-        results.insert(results.begin(), jobs[i].results.begin(), jobs[i].results.end());
-    }
+    }    
 
     int r = m_ResultTable->GetSelectedRows().Item(0);
-    long JobID;
-    double Cost, Rwp;
-    m_ResultTable->GetCellValue(r, 0).ToLong(&JobID);
-    m_ResultTable->GetCellValue(r, 1).ToDouble(&Cost);
-    m_ResultTable->GetCellValue(r, 2).ToDouble(&Rwp);
-
-    MasterResult mr;
-    for (auto& element : results) {
-        if ((element.JobID == JobID) && (element.Cost == (float) Cost) && (element.Rwp == (float) Rwp)) {
-            mr = element;
-            break;
-        }
-    }
-    if(mr.JobID<0) {
-        wxMessageBox(_T("Result not found!\n Try it again"), _T("Error"), wxOK, this);
+    if(r<0 || r>=m_Results.size()) {
+        wxMessageBox(_T("The selection os out of range!"), _T("Error"), wxOK, this);
         return;
-    }    
-    
-    (*fpObjCrystInformUser)(wxString::Format("Show Results: opening file: "+mr.filename).ToStdString());
+    }       
+        
+    (*fpObjCrystInformUser)(wxString::Format("Show Results: opening file: "+m_Results[r].filename).ToStdString());
 
     wxString cmd;
     #ifdef WIN32
     cmd = wxApp::GetInstance()->argv[0];
     cmd +=_T(" ");
-    cmd += mr.filename;
+    cmd += m_Results[r].filename;
     wxExecute(cmd);
+    (*fpObjCrystInformUser)(cmd.ToStdString());
     #else
     wxString appname = wxStandardPaths::Get().GetExecutablePath();
     wxString com=appname+_T(" ")+mr.filename;

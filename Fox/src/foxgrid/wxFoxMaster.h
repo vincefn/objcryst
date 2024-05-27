@@ -73,6 +73,7 @@ private:
 
    wxWindow          * m_parent;
    wxGrid            * m_ResultTable;
+   vector<MasterResult> m_Results;
    wxGrid            * m_ClientTable;
    wxGrid            * m_JobListTable;
    wxStaticText      * m_ServerStatus;
