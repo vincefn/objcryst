@@ -94,7 +94,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;_DEBUG;_WINDOWS;%(PreprocessorDefinitions);__WX__CRYST__;HAVE_SSE_MATHFUN;USE_SSE2;OBJCRYST_GL;HAVE_FFTW;__FOX_COD__;__DEBUG__</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;_DEBUG;_WINDOWS;%(PreprocessorDefinitions);__WX__CRYST__;HAVE_SSE_MATHFUN;USE_SSE2;OBJCRYST_GL;HAVE_FFTW;__FOX_COD__;__DEBUG__;WIN32_LEAN_AND_MEAN;BOOST_MULTI_INDEX_DISABLE_SERIALIZATION</PreprocessorDefinitions>
       <SDLCheck>false</SDLCheck>
       <AdditionalIncludeDirectories>$(SolutionDir)..\;$(SolutionDir)..\cctbx\include;$(SolutionDir)..\ObjCryst;$(SolutionDir)..\wxWidgets\include\msvc;$(SolutionDir)..\wxWidgets\lib\vc_lib\mswu;$(SolutionDir)..\wxWidgets\include;$(SolutionDir)..\fftw\api;$(ProjectDir)\..\boost;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ObjectFileName>$(IntDir)\%(RelativeDir)</ObjectFileName>
@@ -111,7 +111,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)..\wxWidgets\lib\vc_lib;$(SolutionDir)$(Configuration);$(SolutionDir)..\fftw\fftw-3.3-libs\Static-Release;$(ProjectDir)\..\boost\stage\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>newmat.lib;cctbx.lib;libfftwf-3.3.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <IgnoreSpecificDefaultLibraries>MSVCRT.lib;LIBCMT.lib</IgnoreSpecificDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>MSVCRT.lib;LIBCMT.lib;libboost_date_time-vc141-mt-sgd-x32-1_68.lib</IgnoreSpecificDefaultLibraries>
     </Link>
     <ResourceCompile>
       <AdditionalIncludeDirectories>$(SolutionDir)..\wxWidgets\include\msvc;$(SolutionDir)..\wxWidgets\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>

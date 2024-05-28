@@ -157,24 +157,14 @@ void WXFoxSlave::OnConnectClient(wxCommandEvent& event)
       m_connecting=false;
       if(m_ConnectTimer->IsRunning()) m_ConnectTimer->Stop();
       m_ConnectButton->SetLabel(_T("Connect"));
-
-   } else if(m_grid_slave->isConnectedToMaster()) {
-      wxMessageDialog d(this,_T("Are you sure you want to disconnect?\n It aborts conmuting of this client."), _T(""), wxYES | wxNO);
-      if(wxID_YES!=d.ShowModal()) return;
-      //TODO
-
-      //m_grid_slave->Disconnect();
-      //m_grid_slave->KillProcesses();
-      //m_ConnectButton->SetLabel(_T("Connect"));
-
+      m_ConnectButton->Show();
    } else {
       long nbCPUs;
       long port;
       m_nbCPUs->GetValue().ToLong((long *) &nbCPUs);
       m_portWindow->GetValue().ToLong(&port);
       this->setNbCPU((int) nbCPUs);
-      m_connecting = true;
-      //m_ConnectTimer->Start(2000, true);
+      m_connecting = true;      
       ConnectClient(m_IPWindow->GetValue(), port);
    }   
 }
@@ -202,8 +192,17 @@ void WXFoxSlave::CloseClient()
 void WXFoxSlave::OnUpdateProcessTimer(wxTimerEvent& event)
 {    
     if(m_grid_slave==0) {
+        m_ConnectButton->Show(true);
+        m_ConnectButton->SetLabel(_T("Connect"));
+        Layout();
         m_UpdateProcessTimer->Start(3*1000, true);
         return;
+    }
+
+    if(!m_grid_slave->isConnectedToMaster()) {
+        m_ConnectButton->Show(true);
+        m_ConnectButton->SetLabel(_T("Connect"));
+        Layout();
     }
 
     vector<FOX_PROCESS> p = m_grid_slave->getProcesses();            
@@ -304,7 +303,7 @@ void WXFoxSlave::OnUpdateProcessTimer(wxTimerEvent& event)
 
         m_job_table->SetCellValue(i,4,jobs[i].average_calc_time.Format());
         m_job_table->SetReadOnly(i,4);
-    }  
+    }      
 
     m_UpdateProcessTimer->Start(3*1000, true);
 }
@@ -320,20 +319,15 @@ void WXFoxSlave::OnConnectTimer(wxTimerEvent& event)
 }
 void WXFoxSlave::ConnectClient(wxString IP, int port)
 {   
-   //m_EventsWindow->Clear();
-   //m_EventsWindow->SetValue(_T("Connecting to: \"") + IP + _T("\"... "));
    if(!m_grid_slave->isConnectedToMaster()) {       
-       m_ConnectButton->SetLabel(_T("Stop"));   
-       if(m_grid_slave->ConnectToMaster(1, IP, port)) {
-          m_ConnectButton->SetLabel(_T("Disconnect"));      
+       m_ConnectButton->SetLabel(_T("Cancel Connecting"));   
+       if(m_grid_slave->ConnectToMaster(1, IP, port)) {           
+          m_ConnectButton->Hide();
+          Layout();
           wxString CPUs;
-          //CPUs.Printf(_T("Number of available CPUs is: %d\n"), m_FoxClient->getNbOfAvailCPUs());
-          //m_EventsWindow->AppendText(CPUs);
           m_connecting=false;
        }else{
-          m_ConnectTimer->Start(10000, true);
-       
+          m_ConnectTimer->Start(10000, true);       
        }
-   }
-   
+   }   
 }

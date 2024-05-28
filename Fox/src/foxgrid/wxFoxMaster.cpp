@@ -780,11 +780,14 @@ void WXFoxMaster::UpdateLists(wxTimerEvent& event)
 
    if(m_grid_master->isServerListening()) {
        if(m_ServerStatus!=NULL) {
-            m_ServerStatus->SetLabelText("Master status: Server is listening on port "+to_string(port));
+            m_ServerStatus->SetForegroundColour(wxColour(0, 128, 0));
+            m_ServerStatus->SetLabelText("Master status: Server is listening on port "+to_string(port));  
+
        }
    } else {
        if(m_ServerStatus!=NULL) {
-            m_ServerStatus->SetLabelText("Master status: ERROR - server is not listenning");
+            m_ServerStatus->SetForegroundColour(wxColour(128, 0, 0));
+            m_ServerStatus->SetLabelText("Master status: ERROR - server is not listenning");            
        }
    }
    
@@ -851,7 +854,7 @@ void WXFoxMaster::OnShowResultsServer(wxCommandEvent& event)
     }
 
     if(m_Results[r].filename.size()>4 && m_Results[r].filename.Mid(m_Results[r].filename.size()-4)==wxString(_T(".xml"))) {    
-        wxFileInputStream is(m_Results[r].filename);
+        wxFileInputStream is(this->m_working_dir + "\\GridRslt\\" + m_Results[r].filename);
         stringstream in;
         if(is.GetSize()>0)
         {
@@ -884,20 +887,18 @@ void WXFoxMaster::OnShowResults(wxCommandEvent& event)
     if(r<0 || r>=m_Results.size()) {
         wxMessageBox(_T("The selection os out of range!"), _T("Error"), wxOK, this);
         return;
-    }       
-        
-    (*fpObjCrystInformUser)(wxString::Format("Show Results: opening file: "+m_Results[r].filename).ToStdString());
+    }                       
 
     wxString cmd;
     #ifdef WIN32
-    cmd = wxApp::GetInstance()->argv[0];
+    cmd = "\"" + wxApp::GetInstance()->argv[0] + "\"";
     cmd +=_T(" ");
-    cmd += m_Results[r].filename;
+    cmd += "\"" + this->m_working_dir + "\\GridRslt\\" + m_Results[r].filename + "\"";
     wxExecute(cmd);
     (*fpObjCrystInformUser)(cmd.ToStdString());
     #else
     wxString appname = wxStandardPaths::Get().GetExecutablePath();
-    wxString com=appname+_T(" ")+mr.filename;
+    wxString com=appname+_T(" ")+ this->m_working_dir + "/GridRslt/" +mr.filename;
     long result= wxExecute(com);
     (*fpObjCrystInformUser)(com.ToStdString());    
     #endif
