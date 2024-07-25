@@ -1050,6 +1050,15 @@ int Crystal::GetIntermolDistNb() const
 {
     return mInterMolDistList.size();
 }
+void Crystal::RemoveIntermolDistPar(int Index) const
+{
+    if((Index>=mInterMolDistList.size()) || (Index<0)) return;
+
+    mInterMolDistList.erase(mInterMolDistList.begin() + Index);
+    mInterMolDistListNeedsInit=true;
+
+    return;
+}
 Crystal::InterMolDistPar Crystal::GetIntermolDistPar(int Index) const
 {
     if((Index>=mInterMolDistList.size()) || (Index<0)) {

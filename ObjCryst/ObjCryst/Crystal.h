@@ -420,6 +420,8 @@ class Crystal:public UnitCell
       
       void SetNewInterMolDist(const vector<string> At1, const vector<string> At2, const REAL dist, const REAL sigma, const REAL delta) const;
 
+      void RemoveIntermolDistPar(int Index) const;
+
       int GetIntermolDistNb() const;
       InterMolDistPar GetIntermolDistPar(int Index) const;
       InterMolDistPar *GetIntermolDistPar_ptr(int Index) const;

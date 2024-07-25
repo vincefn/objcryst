@@ -109,6 +109,7 @@ class WXCrystal: public WXRefinableObj
       void OnMenuRemoveScattPow(wxCommandEvent & WXUNUSED(event));
       void OnMenuAddScatterer(wxCommandEvent & event);
       void OnMenuAddIntermolecularDistRestr(wxCommandEvent & event);
+      void OnMenuRemoveIntermolecularDistRestr(wxCommandEvent & event);
       void OnMenuRemoveScatterer(wxCommandEvent & WXUNUSED(event));
       void OnMenuDuplicateScatterer(wxCommandEvent & WXUNUSED(event));
       void OnMenuImportMoleculeFromFenskeHallZMatrix(wxCommandEvent &event);

@@ -324,6 +324,7 @@ static const long ID_CRYSTAL_MENU_SCATT_ADDICOSAHEDRON          =WXCRYST_ID();
 static const long ID_CRYSTAL_MENU_SCATT_REMOVESCATTERER         =WXCRYST_ID();
 static const long ID_CRYSTAL_MENU_SCATT_DUPLICSCATTERER         =WXCRYST_ID();
 static const long ID_CRYSTAL_MENU_ADD_INTERMOLECULARDIST        =WXCRYST_ID();
+static const long ID_CRYSTAL_MENU_REMOVE_INTERMOLDIST_WIN       =WXCRYST_ID();
 static const long ID_CRYSTAL_SPACEGROUP                         =WXCRYST_ID();
 static const long ID_GLCRYSTAL_MENU_UPDATE                      =WXCRYST_ID();
 static const long ID_GLCRYSTAL_WINDOW                           =WXCRYST_ID();
@@ -381,6 +382,7 @@ BEGIN_EVENT_TABLE(WXCrystal,wxWindow)
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_ADDPRISMTRIGONAL,   WXCrystal::OnMenuAddScatterer)
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_ADDICOSAHEDRON,     WXCrystal::OnMenuAddScatterer)
    EVT_MENU(ID_CRYSTAL_MENU_ADD_INTERMOLECULARDIST,   WXCrystal::OnMenuAddIntermolecularDistRestr)
+   EVT_MENU(ID_CRYSTAL_MENU_REMOVE_INTERMOLDIST_WIN,   WXCrystal::OnMenuRemoveIntermolecularDistRestr)
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_REMOVESCATTERER,    WXCrystal::OnMenuRemoveScatterer)
    EVT_MENU(ID_CRYSTAL_MENU_SCATT_DUPLICSCATTERER,    WXCrystal::OnMenuDuplicateScatterer)
    EVT_MENU(ID_CRYSTAL_MENU_SHOW_SCATTPOW_WIN,        WXCrystal::OnMenuShowScattPowWindow)
@@ -474,6 +476,8 @@ mpCrystalGL(0)
                                 "Add Intermolecular Distance Restraint");
          mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_SCATT,ID_CRYSTAL_MENU_SHOW_INTERMOLDIST_WIN,
                                 "Show Intermolecular Distance Restraints");
+         mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_SCATT,ID_CRYSTAL_MENU_REMOVE_INTERMOLDIST_WIN,
+                                "Remove Intermolecular Distance Restraints");
          
 
       mpMenuBar->AddMenu("Display",ID_CRYSTAL_MENU_DISPLAY);
@@ -1082,6 +1086,37 @@ void WXCrystal::OnMenuRemoveScattPow(wxCommandEvent & WXUNUSED(event))
    wxTheApp->GetTopWindow()->Layout();
    wxTheApp->GetTopWindow()->SendSizeEvent();
 }
+void WXCrystal::OnMenuRemoveIntermolecularDistRestr(wxCommandEvent & event)
+{//OnMenuShowIntermoDistWindow
+    WXCrystValidateAllUserInput();
+
+    wxArrayString choices;
+    choices.resize(mpCrystal->GetIntermolDistNb());
+    for(int i=0;i<choices.size();i++) {
+        Crystal::InterMolDistPar imdp = mpCrystal->GetIntermolDistPar(i);        
+        string myline;
+        for(int j=0;j<imdp.mAt1.size();j++) {
+            myline += imdp.mAt1[j] + " ";
+        }
+        myline += "-> ";
+        for(int j=0;j<imdp.mAt2.size();j++) {
+            myline += imdp.mAt2[j] + " ";
+        }
+
+        choices[i] = myline;
+    }
+
+    wxSingleChoiceDialog dialog(this,_T("Choose restraints you want to delete"),_T("Select line"),choices);
+    if(wxID_OK!=dialog.ShowModal()) return;
+    int pos = dialog.GetSelection();    
+
+    mpCrystal->RemoveIntermolDistPar(pos);
+    wxMessageDialog dialog5(this, _T("The restriction was removed"));
+    dialog5.ShowModal();
+
+    wxTheApp->GetTopWindow()->Layout();
+    wxTheApp->GetTopWindow()->SendSizeEvent();
+}
 void WXCrystal::OnMenuAddIntermolecularDistRestr(wxCommandEvent & event)
 {
     
@@ -1108,7 +1143,7 @@ void WXCrystal::OnMenuAddIntermolecularDistRestr(wxCommandEvent & event)
    string tmpAt1;
    vector<string> vectAt1;
    for(int i=0;i<At1.size();i++) {
-       tmpAt1 += choices[At2[i]];
+       tmpAt1 += choices[At1[i]];
        vectAt1.push_back(choices[At1[i]].ToStdString());
        if(i<(At1.size()-1)) {
            tmpAt1 += " ";
