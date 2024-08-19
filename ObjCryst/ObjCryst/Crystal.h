@@ -577,7 +577,7 @@ class Crystal:public UnitCell
 
       //intermolecular distances in the meaning of the indexes of mScattCompList
       //[i][j]: i=mAt1, j=mAt2
-      mutable vector<vector<int>> mInterMolDistListIndexes;
+      mutable vector<vector<int> > mInterMolDistListIndexes;
 
       mutable REAL mInterMolDistCost;
       mutable RefinableObjClock mInterMolDistCostClock;
