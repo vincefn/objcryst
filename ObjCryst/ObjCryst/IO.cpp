@@ -878,7 +878,48 @@ void Crystal::XMLOutput(ostream &os,int indent)const
       tag2.SetIsEndTag(true);
       os << tag2<<endl;
    }
+   if(mInterMolDistList.size()>0) {
+       for(int i=0;i<mInterMolDistList.size();i++) {
+           for(int k=0;k<=indent;k++) os << "  " ;
+           XMLCrystTag tagIMD("InterMolecularDistRestr", false, true);
 
+           string tmpAt1 = mInterMolDistList[i].get_list_At1();
+           tagIMD.AddAttribute("At1",tmpAt1);
+           
+           string tmpAt2 = mInterMolDistList[i].get_list_At2();
+           /*
+           for(int j=0;j<mInterMolDistList[i].mAt2.size();j++) {
+               tmpAt2 +=mInterMolDistList[i].mAt2[j];
+               if(j<(mInterMolDistList[i].mAt2.size()-1)) {
+                   tmpAt2 += " ";
+               }
+           }
+           */
+           tagIMD.AddAttribute("At2",tmpAt2);
+           tagIMD.AddAttribute("Dist",std::to_string(sqrt(mInterMolDistList[i].mDist2)));
+           tagIMD.AddAttribute("Delta",std::to_string(mInterMolDistList[i].mDelta));
+           tagIMD.AddAttribute("Sigma",std::to_string(mInterMolDistList[i].mSig));           
+           os<<tagIMD;
+           os<<endl;
+       }
+       for(int k=0;k<=indent;k++) os << "  " ;
+       XMLCrystTag tag2("InterMolDistScale");
+       os << tag2<< mInterMolDistCostScale;
+       tag2.SetIsEndTag(true);
+       os << tag2<<endl;
+       
+       for(int k=0;k<=indent;k++) os << "  " ;
+       XMLCrystTag tag3("mCostCalcMethod");
+       os << tag3<< mCostCalcMethod;
+       tag3.SetIsEndTag(true);
+       os << tag3<<endl;
+
+       for(int k=0;k<=indent;k++) os << "  " ;
+       XMLCrystTag tag4("mDistMaxMultiplier");
+       os << tag4<< mDistMaxMultiplier;
+       tag4.SetIsEndTag(true);
+       os << tag4<<endl;       
+   }
    indent--;
    tag.SetIsEndTag(true);
    for(int i=0;i<indent;i++) os << "  " ;
@@ -1017,6 +1058,91 @@ void Crystal::XMLInput(istream &is,const XMLCrystTag &tagg)
       if("BondValenceCostScale"==tag.GetName())
       {
          is>>mBondValenceCostScale;
+         XMLCrystTag junk(is);
+      }
+      if("InterMolecularDistRestr"==tag.GetName())
+      {
+         vector<string> At1;
+         vector<string> At2;
+         string Dist;
+         string Sigma;
+         string Delta;
+
+         bool er=false;
+         for(unsigned int i=0;i<tag.GetNbAttribute();i++)
+         {
+            if("At1"==tag.GetAttributeName(i)) {                
+                string tmpAt1=tag.GetAttributeValue(i);
+                if(tmpAt1.length()==0) {
+                    er = true;
+                    break;
+                }                
+                stringstream ss(tmpAt1);  
+                string word;
+                while (ss >> word) { 
+                    At1.push_back(word);
+                }
+                if(At1.size()==0) {
+                    er = true;
+                    break;
+                }
+            }
+            if("At2"==tag.GetAttributeName(i)) {
+                string tmpAt2=tag.GetAttributeValue(i);
+                if(tmpAt2.length()==0) {
+                    er = true;
+                    break;
+                }                
+                stringstream ss(tmpAt2);  
+                string word;
+                while (ss >> word) { 
+                    At2.push_back(word);
+                }
+                if(At2.size()==0) {
+                    er = true;
+                    break;
+                }
+            }
+            if("Dist"==tag.GetAttributeName(i)) {
+                Dist=tag.GetAttributeValue(i);
+                if(Dist.length()==0) {
+                    er = true;
+                    break;
+                }
+            }
+            if("Sigma"==tag.GetAttributeName(i)) {
+                Sigma=tag.GetAttributeValue(i);
+                if(Sigma.length()==0) {
+                    er = true;
+                    break;
+                }
+            }
+            if("Delta"==tag.GetAttributeName(i)) {
+                Delta=tag.GetAttributeValue(i);
+                if(Delta.length()==0) {
+                    er = true;
+                    break;
+                }
+            }
+         }                  
+         if(!er) {
+            this->SetNewInterMolDist(At1, At2, stof(Dist), stof(Sigma), stof(Delta));
+         }
+         continue;
+      }
+      if("InterMolDistScale"==tag.GetName())
+      {
+         is>>mInterMolDistCostScale;
+         XMLCrystTag junk(is);
+      }
+      if("mCostCalcMethod"==tag.GetName())
+      {
+         is>>mCostCalcMethod;
+         XMLCrystTag junk(is);
+      } 
+      if("mDistMaxMultiplier"==tag.GetName())
+      {
+         is>>mDistMaxMultiplier;
          XMLCrystTag junk(is);
       }
       if("Atom"==tag.GetName())
