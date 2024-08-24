@@ -20,9 +20,6 @@ build
 *.tar.bz2
 *.tar.gz
 cctbx_install_script.csh
-cctbx_sources
-newmat11
-.idea
 /wxWidgets*
 *.pyc
 /ObjCryst/rules.mak
@@ -31,17 +28,19 @@ newmat11
 JOB*.xml*
 /Fox/src/Fox
 /Fox/src/Fox-nogui
-/Fox/example/client
+
 *.dmg
 Fox/wikihtml
+Fox/.vs*
+Fox/Debug*
+Fox/Release*
 *.pov
 boost_1_68_0
-GridRslt
+/cctbx*
+cctbx/gnu.mak
 
-/cctbx
 /Fox/.vs
 /Fox/Debug
 /Fox/Release
-Fox/cctbx_vc12.vcxproj.user
-Fox/Fox_vc12.vcxproj.user
-Fox/newmat_vc12.vcxproj.user
+cctbx/gnu.mak
+*.vcxproj.user

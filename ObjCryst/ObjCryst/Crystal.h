@@ -337,6 +337,102 @@ class Crystal:public UnitCell
       typedef std::map<pair<const ScatteringPower*, const ScatteringPower*>,Crystal::BumpMergePar > VBumpMergePar;
       const VBumpMergePar& GetBumpMergeParList()const;
       VBumpMergePar& GetBumpMergeParList();
+
+      
+      struct DistTableInternalPosition
+      {
+            DistTableInternalPosition(const long atomIndex, const int sym,
+                                        const REAL x,const REAL y,const REAL z);
+
+            /// Index of the atom (order) in the component list
+            long mAtomIndex;
+            /// Which symmetry operation does this symmetric correspond to ?
+            int mSymmetryIndex;
+            /// Fractionnal coordinates
+            REAL mX,mY,mZ;
+      };
+
+      struct Neighbour
+      {
+         Neighbour(const unsigned long neighbourIndex,const int sym,
+                   const REAL dist2);
+         /// The number associated to the neighbour
+         /// (its index in the Crystal's scattering component list)
+         unsigned long mNeighbourIndex;
+         /// The symmetry position associated to the neighbour
+         /// (its index in the Crystal's scattering component list)
+         unsigned int mNeighbourSymmetryIndex;
+         /// The squared distance, in square Angstroems
+         REAL mDist2;
+      };
+      /// Table of neighbours for a given unique atom
+      struct NeighbourHood
+      {
+         /// Index of the atom in the scattering component list
+         unsigned long mIndex;
+         /// Index of the symmetry operation for the chosen unique position in the
+         /// (pseudo) asymmetric unit
+         unsigned int mUniquePosSymmetryIndex;
+         /// List of neighbours
+         std::vector<Crystal::Neighbour> mvNeighbour;
+      };
+
+      struct InterMolDistPar
+      {
+          InterMolDistPar();
+          
+          InterMolDistPar(const vector<string> At1, const vector<string> At2, const REAL actualDist, const REAL dist, const REAL sigma, const REAL delta);
+
+          //set mAt2 from the string of atom names separated by spaces
+          string get_list_At1();
+          string get_list_At2();
+          void set_At2(string atom_names);
+          
+          //the first is the atom in the asymmetric part of the unit cell
+          vector<string> mAt1;           
+          vector<int> mAt1Indexes;
+          vector<DistTableInternalPosition> vUniqueIndexAt1;
+
+          //the second one is the neighbour
+          vector<string> mAt2;  
+          vector<int> mAt2Indexes;
+          vector<DistTableInternalPosition> vPosAt2;
+
+          //table of neighbours based on At1 and list of At2
+          //there could be two atoms with the same name in crystal, thats why it is a vector
+          vector<NeighbourHood> mNbh;
+          
+          //dummy, just actual distance
+          REAL mActDist;
+          //defined distance (to be found) as d*d
+          REAL mDist2;
+          //sigma and delta are the same meaning as for restraints
+          REAL mSig;
+          REAL mDelta;
+      };
+
+      struct NamedScatteringComponent: public ScatteringComponent  {          
+          string mName;
+      };
+      mutable vector<NamedScatteringComponent> mNamedScattCompList;
+
+      const vector<NamedScatteringComponent>& GetNamedScatteringComponentList() const;
+      
+      void SetNewInterMolDist(const vector<string> At1, const vector<string> At2, const REAL dist, const REAL sigma, const REAL delta) const;
+
+      void RemoveIntermolDistPar(int Index) const;
+
+      int GetIntermolDistNb() const;
+      InterMolDistPar GetIntermolDistPar(int Index) const;
+      InterMolDistPar *GetIntermolDistPar_ptr(int Index) const;
+
+      void InitializeInterMolDistList() const;
+
+      mutable bool mInterMolDistListNeedsInit;
+
+      REAL GetInterMolDistCost() const;
+
+
       /// When was the list of scatterers last changed ?
       const RefinableObjClock& GetClockScattererList()const;
 
@@ -421,6 +517,16 @@ class Crystal:public UnitCell
       /// \warning There should be no duplicate names !!! :TODO: test in AddScatterer()
       int FindScatterer(const string &scattName)const;
 
+      /*returns array of indexes in the mNamedScattCompList */
+      vector<int> FindScatterersInComponentList(const string &scattName)const;
+
+
+      /*search the list based on atomic label*/
+      bool isScattererInInterMolDistList(string &scattName) const;
+      bool isScattererInInterMolDistListAt1(string &scattName) const;
+      bool isScattererInInterMolDistListAt2(string &scattName) const;
+
+
       /** \internal \brief Compute the distance Table (mDistTable) for all scattering components
       * \param fast : if true, the distance calculations will be made using
       * integers, thus with a lower precision but faster. Less atoms will also
@@ -438,6 +544,12 @@ class Crystal:public UnitCell
       */
       void CalcDistTable(const bool fast)const;
 
+      //void CalcMyDistTable()const;
+      void CalcDistTableForInterMolDistCost()const;
+
+      
+      void printInterMolDistList() const;
+
       /** Calculate all Bond Valences.
       *
       */
@@ -448,6 +560,9 @@ class Crystal:public UnitCell
 
       /// Anti-bump parameters map
       VBumpMergePar mvBumpMergePar;
+
+      
+
       /// Last Time Anti-bump parameters were changed
       RefinableObjClock mBumpMergeParClock;
       /// Last Time Anti-bump parameters were changed
@@ -457,40 +572,40 @@ class Crystal:public UnitCell
       /// Bump-merge scale factor
       REAL mBumpMergeScale;
 
+      //list of intermolecular distances
+      mutable std::vector<InterMolDistPar> mInterMolDistList; 
 
-      /// Interatomic distance for a given neighbour
-      struct Neighbour
-      {
-         Neighbour(const unsigned long neighbourIndex,const int sym,
-                   const REAL dist2);
-         /// The number associated to the neighbour
-         /// (its index in the Crystal's scattering component list)
-         unsigned long mNeighbourIndex;
-         /// The symmetry position associated to the neighbour
-         /// (its index in the Crystal's scattering component list)
-         unsigned int mNeighbourSymmetryIndex;
-         /// The squared distance, in square Angstroems
-         REAL mDist2;
-      };
-      /// Table of neighbours for a given unique atom
-      struct NeighbourHood
-      {
-         /// Index of the atom in the scattering component list
-         unsigned long mIndex;
-         /// Index of the symmetry operation for the chosen unique position in the
-         /// (pseudo) asymmetric unit
-         unsigned int mUniquePosSymmetryIndex;
-         /// List of neighbours
-         std::vector<Crystal::Neighbour> mvNeighbour;
-      };
-      /** Interatomic distance table for all unique atoms
-      *
-      */
+      //intermolecular distances in the meaning of the indexes of mScattCompList
+      //[i][j]: i=mAt1, j=mAt2
+      mutable vector<vector<int> > mInterMolDistListIndexes;
+
+      mutable REAL mInterMolDistCost;
+      mutable RefinableObjClock mInterMolDistCostClock;
+      REAL mInterMolDistCostScale;
+
+      //0=parabolic, 1=Lorentzian, 2=Energy
+      int mCostCalcMethod;
+
+      /// The time when the distance table was last calculated
+      mutable RefinableObjClock mDistTableForInterMolDistClock;
+
+      //mutable std::vector<NeighbourHood> mImdTable;      
+      
+      //list of atoms referenced to mImdTable
+      //mutable vector<int> mlistOfAt1InterMolDistScatterers;
+
+      //list of atoms referenced to mImdTable
+      //mutable vector<int> mlistOfAt2InterMolDistScatterers;
+
       mutable std::vector<NeighbourHood> mvDistTableSq;
       /// The time when the distance table was last calculated
       mutable RefinableObjClock mDistTableClock;
       /// The distance up to which the distance table & neighbours needs to be calculated
       mutable REAL mDistTableMaxDistance;
+
+      mutable REAL mDistTableForInterMolMaxDistance;
+
+      mutable REAL mDistMaxMultiplier;
 
       /// The list of all scattering components in the crystal
       mutable ScatteringComponentList mScattCompList;

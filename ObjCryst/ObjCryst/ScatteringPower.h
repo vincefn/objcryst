@@ -476,6 +476,7 @@ struct ScatteringComponent
    REAL mX,mY,mZ,mOccupancy;
    /// The ScatteringPower associated with this position
    const ScatteringPower *mpScattPow;
+
    /// Dynamical Population Correction.
    ///
    /// The population of any atom is given by mOccupancy*mDynPopCorr.
