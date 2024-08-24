@@ -20,7 +20,7 @@
 #endif
 
 
-#include "WXFoxMaster.h"
+#include "wxFoxMaster.h"
 #include "wxFoxSlave.h"
 
 

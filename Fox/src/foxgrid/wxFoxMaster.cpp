@@ -13,7 +13,7 @@
 using namespace ObjCryst;
 using namespace std;
 
-#include "WXFoxMaster.h"
+#include "wxFoxMaster.h"
 #include <iostream>
 
 

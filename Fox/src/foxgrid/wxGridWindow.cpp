@@ -10,7 +10,7 @@
 using namespace ObjCryst;
 using namespace std;
 
-#include "WXGridWindow.h"
+#include "wxGridWindow.h"
 
 WXGrigWindow::WXGrigWindow(wxWindow *parent):
 wxWindow(parent,-1)

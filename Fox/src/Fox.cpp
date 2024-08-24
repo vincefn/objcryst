@@ -79,7 +79,7 @@
 #ifdef __WX__CRYST__
    #include "ObjCryst/wxCryst/wxCrystal.h"
 //FOXGrid
-   #include "foxgrid/WXGridWindow.h"
+   #include "foxgrid/wxGridWindow.h"
    #if defined(__WXGTK__) || defined(__WXMOTIF__) || defined(__WXMAC__) || defined(__WXMGL__) || defined(__WXX11__)
       #include "Fox.xpm"
    #endif

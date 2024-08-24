@@ -1,7 +1,7 @@
 BUILD_DIR = $(CURDIR)/../..
 include $(BUILD_DIR)/ObjCryst/rules.mak
 
-OBJ = Fox.o FoxJob.o GridResult.o IOSocket.o FoxServer.o FoxClient.o WXFoxClient.o WXFoxServer.o WXGridWindow.o
+OBJ = Fox.o foxgrid/FoxGridMaster.o foxgrid/GridClient.o foxgrid/GridMasterBase.o foxgrid/GridSlaveBase.o foxgrid/SocketThreadServer.o foxgrid/wxFoxSlave.o foxgrid/FoxGridSlave.o foxgrid/GridCommunication.o foxgrid/GridServer.o foxgrid/SocketThreadClient.o foxgrid/wxFoxMaster.o foxgrid/wxGridWindow.o
 
 ifeq ($(profile),2)
 %.o : %.c

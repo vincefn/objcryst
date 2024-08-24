@@ -12,7 +12,7 @@
 using namespace ObjCryst;
 using namespace std;
 
-#include "WXFoxSlave.h"
+#include "wxFoxSlave.h"
 
 static long CONNECT_CLIENT_BUTTON=                        WXCRYST_ID();
 static long CONNECT_TIMER=                          WXCRYST_ID();
