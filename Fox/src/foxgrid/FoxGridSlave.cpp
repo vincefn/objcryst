@@ -1,3 +1,4 @@
+#include <wx/stdpaths.h>
 #include "FoxGridSlave.h"
 
 #define EVT_PROCESS_MY(func) DECLARE_EVENT_TABLE_ENTRY( wxEVT_PROCESS_MY, -1, -1, (wxObjectEventFunction) (wxEventFunction) (ProcessEventFunction) & func, (wxObject *) NULL ),
@@ -181,11 +182,11 @@ void FoxGridSlave::OnProcessEvent(ProcessMyEvent& pEvent)
        #ifdef WIN32
        SaveResult(pEvent.m_dir + _T("\\") + filename, Cost, Rwp, jobID, startingtime, false);
        #else
-       SaveResult(pEvent.m_dir + _T("/") + filename, cost, ID, false);
-       #endif               
+       SaveResult(pEvent.m_dir + _T("/") + filename, Cost, Rwp, jobID, startingtime, false);
+       #endif
    }      
   
-    #  ifdef WIN32
+    #ifdef WIN32
     if(filename.length()!=0) {
         if(wxFileExists(pEvent.m_dir + _T("\\") + filename)) wxRemoveFile(pEvent.m_dir + _T("\\") + filename);
     }
@@ -342,36 +343,39 @@ void FoxGridSlave::CheckJobsAndStartCalculation()
                 return;
             }
             wxString cmd_content;
-		    wxString appname = wxApp::GetInstance()->argv[0];
+            wxString appname = wxApp::GetInstance()->argv[0];
             if(rand) {
 			    cmd_content.Printf(_T("%3$s \"%1$s\\input.xml\" --nogui -n %2$d --randomize -o \"%1$s\\out#cost#Rwp.xml\""), proc->dir, m_jobs[i].nb_trial, appname);
             } else {
                 cmd_content.Printf(_T("%3$s \"%1$s\\input.xml\" --nogui -n %2$d -o \"%1$s\\out#cost#Rwp.xml\""), proc->dir, m_jobs[i].nb_trial, appname);
             }
             #else
-            //WriteMessageLog(_T("saving data as file - input.xml"));
+            //WriteLogMessage(_T("saving data as file - input.xml"));
             DeleteXMLFilesInDirectory(proc->dir);
-            SaveDataAsFile(job, proc->getTmpDir() + _T("/input.xml"));
+            if(!SaveDataAsFile(m_jobs[i].data,proc->dir + _T("/input.xml"))) {
+               WriteLogMessage("ERROR: Can't write a file " + proc->dir + _T("/input.xml"));
+               return;
+            }
             wxFile *batFile = new wxFile();
-            batFile->Create(proc->getTmpDir() + _T("/run.sh"), true, wxS_IRUSR|wxS_IWUSR|wxS_IXUSR|wxS_IRGRP|wxS_IWGRP|wxS_IXGRP|wxS_IROTH|wxS_IWOTH|wxS_IXOTH);
+            batFile->Create(proc->dir + _T("/run.sh"), true, wxS_IRUSR|wxS_IWUSR|wxS_IXUSR|wxS_IRGRP|wxS_IWGRP|wxS_IXGRP|wxS_IROTH|wxS_IWOTH|wxS_IXOTH);
             if(!batFile->IsOpened()) {
-                batFile->Open(proc->getTmpDir() + _T("/run.sh"),  wxFile::write);
+                batFile->Open(proc->dir + _T("/run.sh"),  wxFile::write);
             }
             wxString content;
             wxString appname = wxStandardPaths::Get().GetExecutablePath();
-            WriteMessageLog(appname);
+            WriteLogMessage(appname);
             //if(appname(0,1)!=_T("/")) appname=wxGetCwd()+_T("/")+appname;
-            //WriteMessageLog(appname);
+            //WriteLogMessage(appname);
             wxString tr;
-            tr.Printf(_T("%d"), nbTrial);
+            tr.Printf(_T("%d"), m_jobs[i].nb_trial);
             if(rand) {
-                content = appname+_T(" ")+proc->getTmpDir()+_T("/input.xml --nogui -n ")+tr+_T(" --randomize --silent -o ")+proc->getTmpDir()+_T("/out#cost#Rwp.xml > ")+proc->getTmpDir()+_T("/out.txt");
+                content = appname+_T(" ")+proc->dir+_T("/input.xml --nogui -n ")+tr+_T(" --randomize --silent -o ")+proc->dir+_T("/out#cost#Rwp.xml > ")+proc->dir+_T("/out.txt");
             } else {
-                content = appname+_T(" ")+proc->getTmpDir()+_T("/input.xml --nogui -n ")+tr+_T(" --silent -o ")            +proc->getTmpDir()+_T("/out#cost#Rwp.xml > ")+proc->getTmpDir()+_T("/out.txt");
+                content = appname+_T(" ")+proc->dir+_T("/input.xml --nogui -n ")+tr+_T(" --silent -o ")            +proc->dir+_T("/out#cost#Rwp.xml > ")+proc->dir+_T("/out.txt");
             }
             //wxString path_to_input;
             //path_to_input = proc->getTmpDir();
-            //WriteMessageLog(path_to_input);
+            //WriteLogMessage(path_to_input);
     /*
             if(rand) {
                 content = appname+_T(" ")+path_to_input+_T("/input.xml --nogui -n ")+tr+_T(" --randomize -o ")+path_to_input+_T("/out#cost.xml");
@@ -379,9 +383,9 @@ void FoxGridSlave::CheckJobsAndStartCalculation()
                 content = _T(".") + appname+_T(" ")+path_to_input+_T("/input.xml --nogui -n ")+tr+_T(" -o ")+path_to_input+_T("/out#cost.xml");
             }
     */
-            WriteMessageLog(content);
-            //cout<<content.ToAscii()<<endl;
-	        batFile->Write(content);
+            WriteLogMessage(content);
+            cout<<content.ToAscii()<<endl;
+	         batFile->Write(content);
             batFile->Close();
             delete batFile;
             #endif
@@ -390,11 +394,11 @@ void FoxGridSlave::CheckJobsAndStartCalculation()
             #ifdef WIN32
             //wxString cmd = proc->getTmpDir() + _T("\\!run.bat");
             #else
-            wxString cmd_content = _T("sh ")+ proc->getTmpDir() + _T("/run.sh");
+            wxString cmd_content = _T("sh ")+ proc->dir + _T("/run.sh");
             #endif
-            //WriteMessageLog(_T("creating process"));
+            //WriteLogMessage(_T("creating process"));
             wxProcess *process = new MyProcess(this, cmd_content, proc->dir);
-            //WriteMessageLog(_T("executing process"));
+            //WriteLogMessage(_T("executing process"));
             int pid = wxExecute(cmd_content, wxEXEC_ASYNC|wxEXEC_MAKE_GROUP_LEADER, process);
             if ( !pid ) {
                 delete process;
@@ -496,31 +500,31 @@ void FoxGridSlave::ProcessMsgs(vector<GridCommunication::MSGINFO_REC> &msgs)
                 if(true==in_string.eof()) break;
                 if( ("ClientJob"==tag.GetName()) && (!tag.IsEndTag()) ) {
 
-                    //WriteMessageLog(_T("New job found"));                                       
+                    //WriteLogMessage(_T("New job found"));
                     for(int j=tag.GetNbAttribute()-1;j>=0;j--) {
                         if(tag.GetAttributeName(j)=="Name") {
-                            //WriteMessageLog(_T("ID found"));
-                            name = wxString::FromAscii(tag.GetAttributeValue(j).c_str());                            
+                            //WriteLogMessage(_T("ID found"));
+                            name = wxString::FromAscii(tag.GetAttributeValue(j).c_str());
                         }
                         if(tag.GetAttributeName(j)=="ID") {
-                            //WriteMessageLog(_T("ID found"));
+                            //WriteLogMessage(_T("ID found"));
                             wxString ID = wxString::FromAscii(tag.GetAttributeValue(j).c_str());
-                            if(!ID.ToLong((long *) &id)) WriteLogMessage(_T("Can't convert ID attribute to long"));
+                            if(!ID.ToInt(&id)) WriteLogMessage(_T("Can't convert ID attribute to int"));
                         }
                         if(tag.GetAttributeName(j)=="nbOfTrial"){
-                            //WriteMessageLog(_T("nbTrials found"));
+                            //WriteLogMessage(_T("nbTrials found"));
                             wxString nbTrial = wxString::FromAscii(tag.GetAttributeValue(j).c_str());
-                            if(!nbTrial.ToLong((long *) &trial)) WriteLogMessage(_T("Can't convert nbTrials attribute to long"));
+                            if(!nbTrial.ToInt(&trial)) WriteLogMessage(_T("Can't convert nbTrials attribute to int"));
                         }
                         if(tag.GetAttributeName(j)=="nbRun") {
-                            //WriteMessageLog(_T("nbOfRuns found"));
+                            //WriteLogMessage(_T("nbOfRuns found"));
                             wxString nbRuns = wxString::FromAscii(tag.GetAttributeValue(j).c_str());
-                            if(!nbRuns.ToLong((long *) &runs)) WriteLogMessage(_T("Can't convert nbOfRuns attribute to long"));
+                            if(!nbRuns.ToInt(&runs)) WriteLogMessage(_T("Can't convert nbOfRuns attribute to int"));
                         }
                         if(tag.GetAttributeName(j)=="rand") {
-                            //WriteMessageLog(_T("rand found"));
+                            //WriteLogMessage(_T("rand found"));
                             wxString Rand = wxString::FromAscii(tag.GetAttributeValue(j).c_str());
-                            if(!Rand.ToLong((long *) &rand)) WriteLogMessage(_T("Can't convert rand attribute to long"));
+                            if(!Rand.ToInt(&rand)) WriteLogMessage(_T("Can't convert rand attribute to int"));
                         }
                     }
                 

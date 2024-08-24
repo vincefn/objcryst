@@ -161,7 +161,7 @@ void WXFoxSlave::OnConnectClient(wxCommandEvent& event)
    } else {
       long nbCPUs;
       long port;
-      m_nbCPUs->GetValue().ToLong((long *) &nbCPUs);
+      m_nbCPUs->GetValue().ToLong(&nbCPUs);
       m_portWindow->GetValue().ToLong(&port);
       this->setNbCPU((int) nbCPUs);
       m_connecting = true;      

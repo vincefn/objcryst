@@ -52,7 +52,7 @@ class FoxGridMaster: public GridMasterBase, wxEvtHandler
         wxString createJobHeader(wxString name, int ID, int nb_trial, int nb_runs, int randomize);
         void CheckIfJobsReceived();
 
-        vector<SLAVE_FOX_INFO> FoxGridMaster::getFoxSlaveInfo();
+        vector<SLAVE_FOX_INFO> getFoxSlaveInfo();
 
     protected:
 

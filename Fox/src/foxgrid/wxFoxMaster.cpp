@@ -312,20 +312,20 @@ bool WXFoxMaster::isFileFoxJob(wxString path, wxString &name, long &id, int &nbO
         }
         if(tag.GetAttributeName(i)=="ID"){
            ID = wxString::FromAscii(tag.GetAttributeValue(i).c_str());
-           ID.ToLong((long*) &id);
+           ID.ToLong(&id);
         }
         if(tag.GetAttributeName(i)=="nbOfTrial"){
            Tr = wxString::FromAscii(tag.GetAttributeValue(i).c_str());
-           Tr.ToInt((int*) &nbOfTrial);
+           Tr.ToInt(&nbOfTrial);
         }
         if(tag.GetAttributeName(i)=="nbRun"){
            Run = wxString::FromAscii(tag.GetAttributeValue(i).c_str());
-           Run.ToInt((int*) &nbRun);
+           Run.ToInt(&nbRun);
         }
         if(tag.GetAttributeName(i)=="rand"){
            long r;
            Rand = wxString::FromAscii(tag.GetAttributeValue(i).c_str());
-           Rand.ToLong((long*) &r);
+           Rand.ToLong(&r);
            rand = (bool) r;
         }
     }
@@ -358,7 +358,7 @@ void WXFoxMaster::loadMultipleJobs(wxArrayString jobfiles)
                 if(!wxFileExists(filename)) wxCopyFile(jobfiles[i], filename);
                 #else
                  filename = m_working_dir + _T("/") + filename;
-                if(!wxFileExists(filename)) wxCopyFile(path, filename);
+                if(!wxFileExists(filename)) wxCopyFile(jobfiles[i], filename);
                 #endif          
                 ChangeJobHeader(filename, newID, Name, nbOfTrial, nbRun, randomize, jobdata);
                 AddServerJob(filename, Name, jobdata, newID, nbOfTrial, nbRun, randomize);
@@ -399,7 +399,7 @@ void WXFoxMaster::OnLoadJob(wxCommandEvent& event)
         if(!isJobLoaded(newID)) {
             do {//show setup window
                 if(!ShowEditJobWindow(newID, Name, nbOfTrial, nbRun, randomize, false)) return;
-                cout<<nbRun<<","<<nbOfTrial<<","<<Name<<endl;
+                VFN_DEBUG_MESSAGE("WXFoxMaster::OnLoadJob() nbrun="<<nbRun<<", nbtrial="<<nbOfTrial<<", name="<<Name,10);
             } while((nbRun<=0)||(nbOfTrial<=0)||(Name==_T("")));
             filename.Printf(_T("JOB_%d.xml"), newID);
             #ifdef WIN32
@@ -421,7 +421,7 @@ void WXFoxMaster::OnLoadJob(wxCommandEvent& event)
         nbRun = 10;
         do{//show setup window
             if(!ShowEditJobWindow(newID, Name, nbOfTrial, nbRun, randomize, false)) return;
-            cout<<nbRun<<","<<nbOfTrial<<","<<Name<<endl;
+            VFN_DEBUG_MESSAGE("WXFoxMaster::OnLoadJob() nbrun="<<nbRun<<", nbtrial="<<nbOfTrial<<", name="<<Name,10);
         }while((nbRun<=0)||(nbOfTrial<=0)||(Name==_T("")));
 
         filename.Printf(_T("JOB_%d.xml"), newID);
@@ -455,7 +455,7 @@ void WXFoxMaster::OnLoadJob(wxCommandEvent& event)
 
            do{//show setup window
                if(!ShowEditJobWindow(newID, Name, nbOfTrial, nbRun, randomize, false)) return;
-               cout<<nbRun<<","<<nbOfTrial<<","<<Name<<endl;
+               VFN_DEBUG_MESSAGE("WXFoxMaster::OnLoadJob() nbrun="<<nbRun<<", nbtrial="<<nbOfTrial<<", name="<<Name,10);
            }while((nbRun<=0)||(nbOfTrial<=0)||(Name==_T("")));
 
            filename.Printf(_T("JOB_%d.xml"), newID);
@@ -527,9 +527,10 @@ bool WXFoxMaster::ShowEditJobWindow(long ID, wxString &name, int &trials, int &r
       wxString Runs = RunText->GetValue();
       name = NameText->GetValue();
       rand = xrand->GetValue();
-      Trials.ToLong((long *) &trials);
-      Runs.ToLong((long *) &runs);
+      Trials.ToInt(&trials);
+      Runs.ToInt(&runs);
       InfoWindow->Destroy();
+      VFN_DEBUG_MESSAGE("WXFoxMaster::ShowEditJobWindow:runs="<<runs<<", trials="<<trials<<", name="<<name, 10);
       return true;
    }
    InfoWindow->Destroy();
@@ -638,7 +639,10 @@ void WXFoxMaster::RunLocalClient(wxCommandEvent& event)
        //wxExecute(appname+_T(" --runclient localhost --CPUs ") + nbCPUs);
        wxString ClientDir = m_working_dir + _T("/client");
        if(!wxDirExists(ClientDir)) wxMkdir(ClientDir);
-       long result= wxExecute(appname+ _T(" --runclient localhost:") + to_string(port) + _T(" --CPUs ") + nbCPUs + _T(" --working_dir ") + ClientDir);
+       wxString cmd = appname+ _T(" --runclient localhost:") + to_string(port) + _T(" --CPUs ") + nbCPUs + _T(" --working_dir ") + ClientDir;
+       VFN_DEBUG_MESSAGE("WXFoxMaster::RunLocalClient() command="<<cmd,10);
+       long result= wxExecute(cmd);
+       VFN_DEBUG_MESSAGE("WXFoxMaster::RunLocalClient() result="<<result,10);
        //if(result==0) result=wxExecute(wxGetCwd()+_T("/")+appname+_T(" --runclient localhost --CPUs ") + nbCPUs);
        //if(result==0) result=wxExecute(_T("/usr/bin/")+appname+_T(" --runclient localhost --CPUs ") + nbCPUs);
        //if(result==0) result=wxExecute(_T("/usr/local/bin/")+appname+_T(" --runclient localhost --CPUs ") + nbCPUs);
@@ -898,7 +902,8 @@ void WXFoxMaster::OnShowResults(wxCommandEvent& event)
     (*fpObjCrystInformUser)(cmd.ToStdString());
     #else
     wxString appname = wxStandardPaths::Get().GetExecutablePath();
-    wxString com=appname+_T(" ")+ this->m_working_dir + "/GridRslt/" +mr.filename;
+    wxString com=appname+_T(" ")+ this->m_working_dir + "/GridRslt/" +m_Results[r].filename;
+   VFN_DEBUG_MESSAGE("WXFoxMaster::OnShowResults() command: "<<com, 10)
     long result= wxExecute(com);
     (*fpObjCrystInformUser)(com.ToStdString());    
     #endif
