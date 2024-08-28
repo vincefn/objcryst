@@ -132,6 +132,7 @@ mInterMolDistCostScale(1.0),mInterMolDistCost(0.0),mCostCalcMethod(0),mInterMolD
    gCrystalRegistry.Register(*this);
    gTopRefinableObjRegistry.Register(*this);
    mClockMaster.AddChild(mLatticeClock);
+   mClockMaster.AddChild(mClockScattererList); // Is that a duplicate with the next line ?
    mClockMaster.AddChild(this->mScattererRegistry.GetRegistryClock());
    mClockMaster.AddChild(this->mScatteringPowerRegistry.GetRegistryClock());
 
@@ -299,6 +300,7 @@ const ScatteringComponentList& Crystal::GetScatteringComponentList()const
    if(mClockScattCompList>mClockMaster) return mScattCompList;
    bool update=false;
    if(mClockScattCompList<this->GetClockLatticePar()) update=true;
+   if(mClockScattCompList<this->GetClockScattererList()) update=true;
    if(update==false)
       for(long i=0;i<mScattererRegistry.GetNb();i++)
       {

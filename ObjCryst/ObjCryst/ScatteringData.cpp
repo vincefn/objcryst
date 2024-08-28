@@ -659,6 +659,7 @@ void ScatteringData::SetCrystal(Crystal &crystal)
    this->AddSubRefObj(crystal);
    crystal.RegisterClient(*this);
    mClockMaster.AddChild(mpCrystal->GetClockLatticePar());
+   mClockMaster.AddChild(mpCrystal->GetClockScattererList());
    mClockMaster.AddChild(mpCrystal->GetSpaceGroup().GetClockSpaceGroup());
    mClockGeomStructFact.Reset();
    mClockStructFactor.Reset();

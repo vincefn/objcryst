@@ -760,6 +760,7 @@ void WXPowderPattern::OnMenuRemoveComp(wxCommandEvent & WXUNUSED(event))
    }
    VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuRemoveComp()",10)
    this->GetPowderPattern().RemovePowderPatternComponent(*comp);
+   delete comp;
    VFN_DEBUG_MESSAGE("WXPowderPattern::OnMenuRemoveComp()",10)
    if(mpGraph!=0) mpPowderPattern->Prepare();//else this will be done when opening the graph
    wxTheApp->GetTopWindow()->Layout();
