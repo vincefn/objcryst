@@ -3,10 +3,22 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 53;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		99B133672C74794400B909C6 /* GridSlaveBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 99B1333A2C74791500B909C6 /* GridSlaveBase.cpp */; };
+		99B133682C74794400B909C6 /* GridMasterBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 99B1334A2C74791500B909C6 /* GridMasterBase.cpp */; };
+		99B133692C74794400B909C6 /* SocketThreadServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 99B133452C74791500B909C6 /* SocketThreadServer.cpp */; };
+		99B1336A2C74794400B909C6 /* FoxGridSlave.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 99B133472C74791500B909C6 /* FoxGridSlave.cpp */; };
+		99B1336B2C74794400B909C6 /* GridCommunication.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 99B1334B2C74791500B909C6 /* GridCommunication.cpp */; };
+		99B1336C2C74794400B909C6 /* wxFoxMaster.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 99B1333C2C74791500B909C6 /* wxFoxMaster.cpp */; };
+		99B1336D2C74794400B909C6 /* FoxGridMaster.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 99B133482C74791500B909C6 /* FoxGridMaster.cpp */; };
+		99B1336E2C74794400B909C6 /* wxGridWindow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 99B133362C74791500B909C6 /* wxGridWindow.cpp */; };
+		99B1336F2C74794400B909C6 /* GridClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 99B1333B2C74791500B909C6 /* GridClient.cpp */; };
+		99B133702C74794400B909C6 /* wxFoxSlave.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 99B1333F2C74791500B909C6 /* wxFoxSlave.cpp */; };
+		99B133712C74794400B909C6 /* GridServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 99B133432C74791500B909C6 /* GridServer.cpp */; };
+		99B133722C74794400B909C6 /* SocketThreadClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 99B133372C74791500B909C6 /* SocketThreadClient.cpp */; };
 		BF11E7BA2440AA42009C104D /* GlobalOptimObj.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E7B42440AA40009C104D /* GlobalOptimObj.h */; };
 		BF11E7BB2440AA42009C104D /* Simplex.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E7B52440AA40009C104D /* Simplex.h */; };
 		BF11E7BC2440AA42009C104D /* RefinableObj.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E7B62440AA41009C104D /* RefinableObj.h */; };
@@ -63,14 +75,6 @@
 		BF11E8212440C1EB009C104D /* wxMolecule.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E80D2440C1EA009C104D /* wxMolecule.h */; };
 		BF11E8222440C1EB009C104D /* wxCryst.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E80E2440C1EB009C104D /* wxCryst.h */; };
 		BF11E8232440C1EB009C104D /* trackball.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E80F2440C1EB009C104D /* trackball.h */; };
-		BF11E82D2440C200009C104D /* IOSocket.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E8242440C1FE009C104D /* IOSocket.h */; };
-		BF11E82E2440C200009C104D /* FoxJob.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E8252440C1FF009C104D /* FoxJob.h */; };
-		BF11E82F2440C200009C104D /* WXFoxServer.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E8262440C1FF009C104D /* WXFoxServer.h */; };
-		BF11E8312440C200009C104D /* WXFoxClient.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E8282440C1FF009C104D /* WXFoxClient.h */; };
-		BF11E8322440C200009C104D /* WXGridWindow.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E8292440C1FF009C104D /* WXGridWindow.h */; };
-		BF11E8332440C200009C104D /* GridResult.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E82A2440C1FF009C104D /* GridResult.h */; };
-		BF11E8342440C200009C104D /* FoxServer.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E82B2440C1FF009C104D /* FoxServer.h */; };
-		BF11E8352440C200009C104D /* FoxClient.h in Headers */ = {isa = PBXBuildFile; fileRef = BF11E82C2440C200009C104D /* FoxClient.h */; };
 		BF1DDDEE0D228E3700A3939D /* Fox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD88E0890422000044EBA /* Fox.cpp */; };
 		BF1DDDEF0D228E3700A3939D /* Atom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8900890426600044EBA /* Atom.cpp */; };
 		BF1DDDF00D228E3700A3939D /* Crystal.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFCD8910890426600044EBA /* Crystal.cpp */; };
@@ -143,14 +147,6 @@
 		BF3EB063089690D200E02367 /* spoil_optimization.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF3EB062089690D200E02367 /* spoil_optimization.cpp */; };
 		BF49CDF01B0BC56E0012BF3B /* covalent_radii.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF49CDEF1B0BC56E0012BF3B /* covalent_radii.cpp */; };
 		BF5EBF13283F8CB2000D09FE /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF5EBF12283F8CB2000D09FE /* QuartzCore.framework */; };
-		BF69C4D1124F8C310035CF57 /* FoxClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF69C4C8124F8C310035CF57 /* FoxClient.cpp */; };
-		BF69C4D2124F8C310035CF57 /* FoxJob.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF69C4C9124F8C310035CF57 /* FoxJob.cpp */; };
-		BF69C4D3124F8C310035CF57 /* FoxServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF69C4CA124F8C310035CF57 /* FoxServer.cpp */; };
-		BF69C4D5124F8C310035CF57 /* GridResult.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF69C4CC124F8C310035CF57 /* GridResult.cpp */; };
-		BF69C4D6124F8C310035CF57 /* IOSocket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF69C4CD124F8C310035CF57 /* IOSocket.cpp */; };
-		BF69C4D7124F8C310035CF57 /* WXFoxClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF69C4CE124F8C310035CF57 /* WXFoxClient.cpp */; };
-		BF69C4D8124F8C310035CF57 /* WXFoxServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF69C4CF124F8C310035CF57 /* WXFoxServer.cpp */; };
-		BF69C4D9124F8C310035CF57 /* WXGridWindow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF69C4D0124F8C310035CF57 /* WXGridWindow.cpp */; };
 		BF92D5CF259F2D50005FD5D7 /* Undo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF92D5CE259F2D4F005FD5D7 /* Undo.cpp */; };
 		BFCB29CD258F7484008A8CCB /* include.h in Headers */ = {isa = PBXBuildFile; fileRef = BFCB29CC258F7484008A8CCB /* include.h */; };
 		BFE729E4243A6A6D00BABE40 /* libwx_osx_cocoau_gl-3.2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BFF7D0BF1478047800799F7A /* libwx_osx_cocoau_gl-3.2.a */; };
@@ -265,6 +261,31 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		99B133352C74791500B909C6 /* GridCommunication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GridCommunication.h; path = src/foxgrid/GridCommunication.h; sourceTree = "<group>"; };
+		99B133362C74791500B909C6 /* wxGridWindow.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = wxGridWindow.cpp; path = src/foxgrid/wxGridWindow.cpp; sourceTree = "<group>"; };
+		99B133372C74791500B909C6 /* SocketThreadClient.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SocketThreadClient.cpp; path = src/foxgrid/SocketThreadClient.cpp; sourceTree = "<group>"; };
+		99B133382C74791500B909C6 /* FoxGridMaster.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FoxGridMaster.h; path = src/foxgrid/FoxGridMaster.h; sourceTree = "<group>"; };
+		99B133392C74791500B909C6 /* GridServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GridServer.h; path = src/foxgrid/GridServer.h; sourceTree = "<group>"; };
+		99B1333A2C74791500B909C6 /* GridSlaveBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GridSlaveBase.cpp; path = src/foxgrid/GridSlaveBase.cpp; sourceTree = "<group>"; };
+		99B1333B2C74791500B909C6 /* GridClient.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GridClient.cpp; path = src/foxgrid/GridClient.cpp; sourceTree = "<group>"; };
+		99B1333C2C74791500B909C6 /* wxFoxMaster.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = wxFoxMaster.cpp; path = src/foxgrid/wxFoxMaster.cpp; sourceTree = "<group>"; };
+		99B1333D2C74791500B909C6 /* wxFoxClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = wxFoxClient.h; path = src/foxgrid/wxFoxClient.h; sourceTree = "<group>"; };
+		99B1333E2C74791500B909C6 /* FoxGridSlave.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FoxGridSlave.h; path = src/foxgrid/FoxGridSlave.h; sourceTree = "<group>"; };
+		99B1333F2C74791500B909C6 /* wxFoxSlave.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = wxFoxSlave.cpp; path = src/foxgrid/wxFoxSlave.cpp; sourceTree = "<group>"; };
+		99B133402C74791500B909C6 /* wxFoxMaster.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = wxFoxMaster.h; path = src/foxgrid/wxFoxMaster.h; sourceTree = "<group>"; };
+		99B133412C74791500B909C6 /* wxGridWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = wxGridWindow.h; path = src/foxgrid/wxGridWindow.h; sourceTree = "<group>"; };
+		99B133422C74791500B909C6 /* SocketThreadClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SocketThreadClient.h; path = src/foxgrid/SocketThreadClient.h; sourceTree = "<group>"; };
+		99B133432C74791500B909C6 /* GridServer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GridServer.cpp; path = src/foxgrid/GridServer.cpp; sourceTree = "<group>"; };
+		99B133442C74791500B909C6 /* GridClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GridClient.h; path = src/foxgrid/GridClient.h; sourceTree = "<group>"; };
+		99B133452C74791500B909C6 /* SocketThreadServer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SocketThreadServer.cpp; path = src/foxgrid/SocketThreadServer.cpp; sourceTree = "<group>"; };
+		99B133462C74791500B909C6 /* SocketThreadServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SocketThreadServer.h; path = src/foxgrid/SocketThreadServer.h; sourceTree = "<group>"; };
+		99B133472C74791500B909C6 /* FoxGridSlave.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FoxGridSlave.cpp; path = src/foxgrid/FoxGridSlave.cpp; sourceTree = "<group>"; };
+		99B133482C74791500B909C6 /* FoxGridMaster.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FoxGridMaster.cpp; path = src/foxgrid/FoxGridMaster.cpp; sourceTree = "<group>"; };
+		99B133492C74791500B909C6 /* wxFoxSlave.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = wxFoxSlave.h; path = src/foxgrid/wxFoxSlave.h; sourceTree = "<group>"; };
+		99B1334A2C74791500B909C6 /* GridMasterBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GridMasterBase.cpp; path = src/foxgrid/GridMasterBase.cpp; sourceTree = "<group>"; };
+		99B1334B2C74791500B909C6 /* GridCommunication.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GridCommunication.cpp; path = src/foxgrid/GridCommunication.cpp; sourceTree = "<group>"; };
+		99B1334C2C74791500B909C6 /* GridMasterBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GridMasterBase.h; path = src/foxgrid/GridMasterBase.h; sourceTree = "<group>"; };
+		99B1334D2C74791500B909C6 /* GridSlaveBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GridSlaveBase.h; path = src/foxgrid/GridSlaveBase.h; sourceTree = "<group>"; };
 		BF08978A0B072DF600C0F576 /* CIF.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = CIF.cpp; path = ../ObjCryst/ObjCryst/CIF.cpp; sourceTree = "<group>"; };
 		BF08978D0B072E2F00C0F576 /* ci_string.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ci_string.cpp; path = ../ObjCryst/Quirks/ci_string.cpp; sourceTree = "<group>"; };
 		BF11E7B42440AA40009C104D /* GlobalOptimObj.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GlobalOptimObj.h; path = ../ObjCryst/RefinableObj/GlobalOptimObj.h; sourceTree = "<group>"; };
@@ -323,14 +344,6 @@
 		BF11E80D2440C1EA009C104D /* wxMolecule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = wxMolecule.h; path = ../ObjCryst/wxCryst/wxMolecule.h; sourceTree = "<group>"; };
 		BF11E80E2440C1EB009C104D /* wxCryst.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = wxCryst.h; path = ../ObjCryst/wxCryst/wxCryst.h; sourceTree = "<group>"; };
 		BF11E80F2440C1EB009C104D /* trackball.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = trackball.h; path = ../ObjCryst/wxCryst/trackball.h; sourceTree = "<group>"; };
-		BF11E8242440C1FE009C104D /* IOSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IOSocket.h; path = src/IOSocket.h; sourceTree = "<group>"; };
-		BF11E8252440C1FF009C104D /* FoxJob.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FoxJob.h; path = src/FoxJob.h; sourceTree = "<group>"; };
-		BF11E8262440C1FF009C104D /* WXFoxServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WXFoxServer.h; path = src/WXFoxServer.h; sourceTree = "<group>"; };
-		BF11E8282440C1FF009C104D /* WXFoxClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WXFoxClient.h; path = src/WXFoxClient.h; sourceTree = "<group>"; };
-		BF11E8292440C1FF009C104D /* WXGridWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WXGridWindow.h; path = src/WXGridWindow.h; sourceTree = "<group>"; };
-		BF11E82A2440C1FF009C104D /* GridResult.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GridResult.h; path = src/GridResult.h; sourceTree = "<group>"; };
-		BF11E82B2440C1FF009C104D /* FoxServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FoxServer.h; path = src/FoxServer.h; sourceTree = "<group>"; };
-		BF11E82C2440C200009C104D /* FoxClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FoxClient.h; path = src/FoxClient.h; sourceTree = "<group>"; };
 		BF1DDDE90D228DCF00A3939D /* Fox.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Fox.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BF1DDDEB0D228DCF00A3939D /* FoxCocoa-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "FoxCocoa-Info.plist"; sourceTree = "<group>"; };
 		BF1DE1230D228EA500A3939D /* libfftw3f.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfftw3f.a; path = "../static-libs/lib/libfftw3f.a"; sourceTree = SOURCE_ROOT; };
@@ -347,14 +360,6 @@
 		BF3EB062089690D200E02367 /* spoil_optimization.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = spoil_optimization.cpp; path = ../cctbx/cctbx/uctbx/spoil_optimization.cpp; sourceTree = "<group>"; };
 		BF49CDEF1B0BC56E0012BF3B /* covalent_radii.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = covalent_radii.cpp; path = ../cctbx/cctbx/eltbx/covalent_radii.cpp; sourceTree = "<group>"; };
 		BF5EBF12283F8CB2000D09FE /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
-		BF69C4C8124F8C310035CF57 /* FoxClient.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FoxClient.cpp; path = src/FoxClient.cpp; sourceTree = "<group>"; };
-		BF69C4C9124F8C310035CF57 /* FoxJob.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FoxJob.cpp; path = src/FoxJob.cpp; sourceTree = "<group>"; };
-		BF69C4CA124F8C310035CF57 /* FoxServer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FoxServer.cpp; path = src/FoxServer.cpp; sourceTree = "<group>"; };
-		BF69C4CC124F8C310035CF57 /* GridResult.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GridResult.cpp; path = src/GridResult.cpp; sourceTree = "<group>"; };
-		BF69C4CD124F8C310035CF57 /* IOSocket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IOSocket.cpp; path = src/IOSocket.cpp; sourceTree = "<group>"; };
-		BF69C4CE124F8C310035CF57 /* WXFoxClient.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WXFoxClient.cpp; path = src/WXFoxClient.cpp; sourceTree = "<group>"; };
-		BF69C4CF124F8C310035CF57 /* WXFoxServer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WXFoxServer.cpp; path = src/WXFoxServer.cpp; sourceTree = "<group>"; };
-		BF69C4D0124F8C310035CF57 /* WXGridWindow.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WXGridWindow.cpp; path = src/WXGridWindow.cpp; sourceTree = "<group>"; };
 		BF92D5CD259F2D4F005FD5D7 /* Undo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Undo.h; path = ../ObjCryst/ObjCryst/Undo.h; sourceTree = "<group>"; };
 		BF92D5CE259F2D4F005FD5D7 /* Undo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Undo.cpp; path = ../ObjCryst/ObjCryst/Undo.cpp; sourceTree = "<group>"; };
 		BFCB29CC258F7484008A8CCB /* include.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = include.h; path = ../newmat/include.h; sourceTree = "<group>"; };
@@ -1981,6 +1986,38 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		99B133342C74790200B909C6 /* FoxGrid */ = {
+			isa = PBXGroup;
+			children = (
+				99B133482C74791500B909C6 /* FoxGridMaster.cpp */,
+				99B133382C74791500B909C6 /* FoxGridMaster.h */,
+				99B133472C74791500B909C6 /* FoxGridSlave.cpp */,
+				99B1333E2C74791500B909C6 /* FoxGridSlave.h */,
+				99B1333B2C74791500B909C6 /* GridClient.cpp */,
+				99B133442C74791500B909C6 /* GridClient.h */,
+				99B1334B2C74791500B909C6 /* GridCommunication.cpp */,
+				99B133352C74791500B909C6 /* GridCommunication.h */,
+				99B1334A2C74791500B909C6 /* GridMasterBase.cpp */,
+				99B1334C2C74791500B909C6 /* GridMasterBase.h */,
+				99B133432C74791500B909C6 /* GridServer.cpp */,
+				99B133392C74791500B909C6 /* GridServer.h */,
+				99B1333A2C74791500B909C6 /* GridSlaveBase.cpp */,
+				99B1334D2C74791500B909C6 /* GridSlaveBase.h */,
+				99B133372C74791500B909C6 /* SocketThreadClient.cpp */,
+				99B133422C74791500B909C6 /* SocketThreadClient.h */,
+				99B133452C74791500B909C6 /* SocketThreadServer.cpp */,
+				99B133462C74791500B909C6 /* SocketThreadServer.h */,
+				99B1333D2C74791500B909C6 /* wxFoxClient.h */,
+				99B1333C2C74791500B909C6 /* wxFoxMaster.cpp */,
+				99B133402C74791500B909C6 /* wxFoxMaster.h */,
+				99B1333F2C74791500B909C6 /* wxFoxSlave.cpp */,
+				99B133492C74791500B909C6 /* wxFoxSlave.h */,
+				99B133362C74791500B909C6 /* wxGridWindow.cpp */,
+				99B133412C74791500B909C6 /* wxGridWindow.h */,
+			);
+			name = FoxGrid;
+			sourceTree = "<group>";
+		};
 		BF3479340915057C006E569C /* RefinableObj */ = {
 			isa = PBXGroup;
 			children = (
@@ -2179,24 +2216,9 @@
 		BF3EAF90089628D200E02367 /* Fox */ = {
 			isa = PBXGroup;
 			children = (
+				99B133342C74790200B909C6 /* FoxGrid */,
 				BFFCD88E0890422000044EBA /* Fox.cpp */,
 				BF26F598089306500008175B /* Fox.icns */,
-				BF69C4C8124F8C310035CF57 /* FoxClient.cpp */,
-				BF11E82C2440C200009C104D /* FoxClient.h */,
-				BF69C4C9124F8C310035CF57 /* FoxJob.cpp */,
-				BF11E8252440C1FF009C104D /* FoxJob.h */,
-				BF69C4CA124F8C310035CF57 /* FoxServer.cpp */,
-				BF11E82B2440C1FF009C104D /* FoxServer.h */,
-				BF69C4CC124F8C310035CF57 /* GridResult.cpp */,
-				BF11E82A2440C1FF009C104D /* GridResult.h */,
-				BF69C4CD124F8C310035CF57 /* IOSocket.cpp */,
-				BF11E8242440C1FE009C104D /* IOSocket.h */,
-				BF69C4CE124F8C310035CF57 /* WXFoxClient.cpp */,
-				BF11E8282440C1FF009C104D /* WXFoxClient.h */,
-				BF69C4CF124F8C310035CF57 /* WXFoxServer.cpp */,
-				BF11E8262440C1FF009C104D /* WXFoxServer.h */,
-				BF69C4D0124F8C310035CF57 /* WXGridWindow.cpp */,
-				BF11E8292440C1FF009C104D /* WXGridWindow.h */,
 			);
 			name = Fox;
 			sourceTree = SOURCE_ROOT;
@@ -4455,10 +4477,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				BF11E81D2440C1EB009C104D /* wxScatteringPowerSphere.h in Headers */,
-				BF11E8332440C200009C104D /* GridResult.h in Headers */,
-				BF11E82F2440C200009C104D /* WXFoxServer.h in Headers */,
 				BF11E7BD2440AA42009C104D /* LSQNumObj.h in Headers */,
-				BF11E8342440C200009C104D /* FoxServer.h in Headers */,
 				BF11E7FB2440C1D6009C104D /* VFNDebug.h in Headers */,
 				BF11E7DC2440C1BF009C104D /* ReflectionProfile.h in Headers */,
 				BF11E7EE2440C1BF009C104D /* Indexing.h in Headers */,
@@ -4468,7 +4487,6 @@
 				BF11E7F92440C1D6009C104D /* ci_string.h in Headers */,
 				BF11E8182440C1EB009C104D /* mpVector.h in Headers */,
 				BF11E8122440C1EB009C104D /* wxTrackerGraph.h in Headers */,
-				BF11E82D2440C200009C104D /* IOSocket.h in Headers */,
 				BF11E8172440C1EB009C104D /* wxLSQ.h in Headers */,
 				BF11E7E82440C1BF009C104D /* Scatterer.h in Headers */,
 				BF11E7F72440C1D6009C104D /* VFNStreamFormat.h in Headers */,
@@ -4479,12 +4497,10 @@
 				BF11E7BE2440AA42009C104D /* Tracker.h in Headers */,
 				BF11E8162440C1EB009C104D /* wxRefinableObj.h in Headers */,
 				BF11E8112440C1EB009C104D /* wxZScatterer.h in Headers */,
-				BF11E8312440C200009C104D /* WXFoxClient.h in Headers */,
 				BF11E7E72440C1BF009C104D /* Colours.h in Headers */,
 				BF11E7E32440C1BF009C104D /* DiffractionDataSingleCrystal.h in Headers */,
 				BF11E8132440C1EB009C104D /* wxMultiGraph.h in Headers */,
 				BF11E7F82440C1D6009C104D /* sse_mathfun.h in Headers */,
-				BF11E82E2440C200009C104D /* FoxJob.h in Headers */,
 				BF11E7F12440C1BF009C104D /* UnitCell.h in Headers */,
 				BF11E7E92440C1BF009C104D /* PDF.h in Headers */,
 				BF11E7DA2440C1BF009C104D /* ScatteringData.h in Headers */,
@@ -4505,8 +4521,6 @@
 				BF11E8232440C1EB009C104D /* trackball.h in Headers */,
 				BF11E8152440C1EB009C104D /* wxDiffractionSingleCrystal.h in Headers */,
 				BF11E7E22440C1BF009C104D /* test.h in Headers */,
-				BF11E8352440C200009C104D /* FoxClient.h in Headers */,
-				BF11E8322440C200009C104D /* WXGridWindow.h in Headers */,
 				BF11E7DF2440C1BF009C104D /* PowderPattern.h in Headers */,
 				BF11E7ED2440C1BF009C104D /* PowderPatternBackgroundBayesianMinimiser.h in Headers */,
 				BF11E7E42440C1BF009C104D /* ScatteringPowerSphere.h in Headers */,
@@ -4638,9 +4652,12 @@
 				BF1DDDF30D228E3700A3939D /* Exception.cpp in Sources */,
 				BF1DDDF40D228E3700A3939D /* geomStructFactor_001.cpp in Sources */,
 				BF1DDDF50D228E3700A3939D /* geomStructFactor_002.cpp in Sources */,
+				99B1336C2C74794400B909C6 /* wxFoxMaster.cpp in Sources */,
 				BF1DDDF60D228E3700A3939D /* geomStructFactor_067.cpp in Sources */,
+				99B133712C74794400B909C6 /* GridServer.cpp in Sources */,
 				BF1DDDF70D228E3700A3939D /* geomStructFactor_097.cpp in Sources */,
 				BF1DDDF80D228E3700A3939D /* geomStructFactor_230.cpp in Sources */,
+				99B1336D2C74794400B909C6 /* FoxGridMaster.cpp in Sources */,
 				BF1DDDF90D228E3700A3939D /* geomStructFactor_centro.cpp in Sources */,
 				BF1DDDFA0D228E3700A3939D /* geomStructFactor.cpp in Sources */,
 				BF1DDDFB0D228E3700A3939D /* GlobalOptimObj.cpp in Sources */,
@@ -4651,6 +4668,7 @@
 				BF1DDE000D228E3700A3939D /* Molecule.cpp in Sources */,
 				BF1DDE010D228E3700A3939D /* mpVector.cpp in Sources */,
 				BF1DDE020D228E3700A3939D /* Polyhedron.cpp in Sources */,
+				99B133672C74794400B909C6 /* GridSlaveBase.cpp in Sources */,
 				BF1DDE030D228E3700A3939D /* PowderPattern.cpp in Sources */,
 				BF1DDE040D228E3700A3939D /* PowderPatternBackgroundBayesianMinimiser.cpp in Sources */,
 				BF1DDE050D228E3700A3939D /* RefinableObj.cpp in Sources */,
@@ -4661,6 +4679,7 @@
 				BF1DDE0A0D228E3700A3939D /* ScatteringPower.cpp in Sources */,
 				BF1DDE0B0D228E3700A3939D /* ScatteringPowerSphere.cpp in Sources */,
 				BF1DDE0C0D228E3700A3939D /* Simplex.cpp in Sources */,
+				99B133702C74794400B909C6 /* wxFoxSlave.cpp in Sources */,
 				BF1DDE0D0D228E3700A3939D /* SpaceGroup.cpp in Sources */,
 				BF1DDE0E0D228E3700A3939D /* test.cpp in Sources */,
 				BF1DDE0F0D228E3700A3939D /* Tracker.cpp in Sources */,
@@ -4671,31 +4690,30 @@
 				BF1DDE140D228E3700A3939D /* wxCryst.cpp in Sources */,
 				BF1DDE150D228E3700A3939D /* wxCrystal.cpp in Sources */,
 				BF1DDE160D228E3700A3939D /* wxDiffractionSingleCrystal.cpp in Sources */,
+				99B1336E2C74794400B909C6 /* wxGridWindow.cpp in Sources */,
 				BF1DDE170D228E3700A3939D /* wxGlobalOptimObj.cpp in Sources */,
 				BF1DDE180D228E3700A3939D /* wxMolecule.cpp in Sources */,
 				BF1DDE190D228E3700A3939D /* wxMultiGraph.cpp in Sources */,
 				BF1DDE1A0D228E3700A3939D /* wxPowderPattern.cpp in Sources */,
+				99B133722C74794400B909C6 /* SocketThreadClient.cpp in Sources */,
 				BF1DDE1B0D228E3700A3939D /* wxRefinableObj.cpp in Sources */,
+				99B1336A2C74794400B909C6 /* FoxGridSlave.cpp in Sources */,
 				BF1DDE1C0D228E3700A3939D /* wxScatterer.cpp in Sources */,
+				99B133682C74794400B909C6 /* GridMasterBase.cpp in Sources */,
 				BF1DDE1D0D228E3700A3939D /* wxScatteringPower.cpp in Sources */,
 				BF1DDE1E0D228E3700A3939D /* wxScatteringPowerSphere.cpp in Sources */,
 				BF1DDE1F0D228E3700A3939D /* wxTrackerGraph.cpp in Sources */,
 				BF1DDE200D228E3700A3939D /* wxZScatterer.cpp in Sources */,
 				BF92D5CF259F2D50005FD5D7 /* Undo.cpp in Sources */,
+				99B1336F2C74794400B909C6 /* GridClient.cpp in Sources */,
 				BF1DDE210D228E3700A3939D /* ZScatterer.cpp in Sources */,
 				BF1DDE220D228E3700A3939D /* trackball.c in Sources */,
+				99B1336B2C74794400B909C6 /* GridCommunication.cpp in Sources */,
+				99B133692C74794400B909C6 /* SocketThreadServer.cpp in Sources */,
 				BF1DDE230D228E3700A3939D /* CIF.cpp in Sources */,
 				BF1DDE240D228E3700A3939D /* ci_string.cpp in Sources */,
 				BF1DDE250D228E3700A3939D /* Indexing.cpp in Sources */,
 				BFFB474E0E5E0E620027591E /* wxLSQ.cpp in Sources */,
-				BF69C4D1124F8C310035CF57 /* FoxClient.cpp in Sources */,
-				BF69C4D2124F8C310035CF57 /* FoxJob.cpp in Sources */,
-				BF69C4D3124F8C310035CF57 /* FoxServer.cpp in Sources */,
-				BF69C4D5124F8C310035CF57 /* GridResult.cpp in Sources */,
-				BF69C4D6124F8C310035CF57 /* IOSocket.cpp in Sources */,
-				BF69C4D7124F8C310035CF57 /* WXFoxClient.cpp in Sources */,
-				BF69C4D8124F8C310035CF57 /* WXFoxServer.cpp in Sources */,
-				BF69C4D9124F8C310035CF57 /* WXGridWindow.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4822,7 +4840,9 @@
 		BF1DDDEC0D228DD000A3939D /* Deployment */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_ASSIGN_ENUM = NO;
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
@@ -4850,7 +4870,7 @@
 					"$(inherited)",
 					"$(SRCROOT)/../static-libs/lib",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				OTHER_CFLAGS = (
 					"-DUSE_SSE2",
 					"-DHAVE_SSE_MATHFUN",
@@ -4989,6 +5009,7 @@
 		BF1DE1830D229D0800A3939D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
@@ -5029,7 +5050,9 @@
 		BF1DE1840D229D0800A3939D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_ASSIGN_ENUM = NO;
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
@@ -5055,7 +5078,7 @@
 					"$(inherited)",
 					"$(SRCROOT)/../static-libs/lib",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				OTHER_CFLAGS = (
 					"-DUSE_SSE2",
 					"-DHAVE_SSE_MATHFUN",
@@ -5165,6 +5188,7 @@
 		BF48AEF908924F3F0060B5BE /* Deployment */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;

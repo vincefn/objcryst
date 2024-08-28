@@ -204,32 +204,44 @@
     <ClCompile Include="src\Fox.cpp">
       <Filter>Source Files\Fox</Filter>
     </ClCompile>
-    <ClCompile Include="src\FoxClient.cpp">
-      <Filter>Source Files\Fox</Filter>
-    </ClCompile>
-    <ClCompile Include="src\FoxJob.cpp">
-      <Filter>Source Files\Fox</Filter>
-    </ClCompile>
-    <ClCompile Include="src\FoxServer.cpp">
-      <Filter>Source Files\Fox</Filter>
-    </ClCompile>
-    <ClCompile Include="src\GridResult.cpp">
-      <Filter>Source Files\Fox</Filter>
-    </ClCompile>
-    <ClCompile Include="src\IOSocket.cpp">
-      <Filter>Source Files\Fox</Filter>
-    </ClCompile>
-    <ClCompile Include="src\WXFoxClient.cpp">
-      <Filter>Source Files\Fox</Filter>
-    </ClCompile>
-    <ClCompile Include="src\WXFoxServer.cpp">
-      <Filter>Source Files\Fox</Filter>
-    </ClCompile>
-    <ClCompile Include="src\WXGridWindow.cpp">
-      <Filter>Source Files\Fox</Filter>
-    </ClCompile>
     <ClCompile Include="..\ObjCryst\ObjCryst\Undo.cpp">
       <Filter>Source Files\ObjCryst</Filter>
+    </ClCompile>
+    <ClCompile Include="src\foxgrid\FoxGridMaster.cpp">
+      <Filter>Source Files\Fox</Filter>
+    </ClCompile>
+    <ClCompile Include="src\foxgrid\FoxGridSlave.cpp">
+      <Filter>Source Files\Fox</Filter>
+    </ClCompile>
+    <ClCompile Include="src\foxgrid\GridClient.cpp">
+      <Filter>Source Files\Fox</Filter>
+    </ClCompile>
+    <ClCompile Include="src\foxgrid\GridCommunication.cpp">
+      <Filter>Source Files\Fox</Filter>
+    </ClCompile>
+    <ClCompile Include="src\foxgrid\GridMasterBase.cpp">
+      <Filter>Source Files\Fox</Filter>
+    </ClCompile>
+    <ClCompile Include="src\foxgrid\GridServer.cpp">
+      <Filter>Source Files\Fox</Filter>
+    </ClCompile>
+    <ClCompile Include="src\foxgrid\GridSlaveBase.cpp">
+      <Filter>Source Files\Fox</Filter>
+    </ClCompile>
+    <ClCompile Include="src\foxgrid\SocketThreadClient.cpp">
+      <Filter>Source Files\Fox</Filter>
+    </ClCompile>
+    <ClCompile Include="src\foxgrid\SocketThreadServer.cpp">
+      <Filter>Source Files\Fox</Filter>
+    </ClCompile>
+    <ClCompile Include="src\foxgrid\wxFoxMaster.cpp">
+      <Filter>Source Files\Fox</Filter>
+    </ClCompile>
+    <ClCompile Include="src\foxgrid\wxFoxSlave.cpp">
+      <Filter>Source Files\Fox</Filter>
+    </ClCompile>
+    <ClCompile Include="src\foxgrid\wxGridWindow.cpp">
+      <Filter>Source Files\Fox</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

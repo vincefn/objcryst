@@ -79,7 +79,7 @@
 #ifdef __WX__CRYST__
    #include "ObjCryst/wxCryst/wxCrystal.h"
 //FOXGrid
-   #include "WXGridWindow.h"
+   #include "foxgrid/wxGridWindow.h"
    #if defined(__WXGTK__) || defined(__WXMOTIF__) || defined(__WXMAC__) || defined(__WXMGL__) || defined(__WXX11__)
       #include "Fox.xpm"
    #endif
@@ -593,6 +593,7 @@ int main (int argc, char *argv[])
    string outfilename("Fox-out.xml");
    string working_dir("");
    long filenameInsertCost=-1;
+   long filenameInsertRwp=-1;
    bool randomize(false);
    bool only3D(false);
    bool loadFourierGRD(false);
@@ -610,6 +611,7 @@ int main (int argc, char *argv[])
    bool runclient(false);
    long nbCPUs = -1;
    string IP;
+   string port;
    bool testLSQ=false;
    bool testMC=false;
    bool testSPEED=false;
@@ -622,12 +624,23 @@ int main (int argc, char *argv[])
 
          if(!useGUI) {
             cout << "Client output: Run client with GUI only!"<<endl;
-            cout << "i.e. Fox --runclient 10.0.0.1 --CPUs 4 --working_dir c:\\FOXGrid"<<endl;
+            cout << "i.e. Fox --runclient 10.0.0.1:2854 --CPUs 4 --working_dir c:\\FOXGrid"<<endl;
             exit(0);
          }
          runclient = true;
          i++;
-         IP = string(wxString(argv[i]).ToAscii());
+  string tmpIP = string(wxString(argv[i]).ToAscii());
+
+         size_t colonPos = tmpIP.find(':');
+         if (colonPos != string::npos) {
+            IP = tmpIP.substr(0, colonPos);
+            port = tmpIP.substr(colonPos + 1);
+         } else {
+            cout << "ERROR: Can't read ip address and port: " << tmpIP << endl;
+            cout << "Use ip with port, e.g. 10.0.0.1:2853 "<< endl;
+            exit(0);
+         }
+
          //get nb of CPUs to use
          if(STRCMP(wxString("--CPUs"),argv[i+1])==0) {
              i=i+2;
@@ -762,6 +775,11 @@ int main (int argc, char *argv[])
          filenameInsertCost = outfilename.find("#cost",0);
          cout <<"Fox:#cost, pos="<<filenameInsertCost<<","<<string::npos<<endl;
          if((long)(string::npos)==filenameInsertCost) filenameInsertCost=-1;
+
+         filenameInsertRwp = outfilename.find("#Rwp",0);
+         cout <<"Fox:#Rwp, pos="<<filenameInsertRwp<<","<<string::npos<<endl;
+         if((long)(string::npos)==filenameInsertRwp) filenameInsertRwp=-1;
+
          continue;
       }
       if(STRCMP("--loadfouriergrd",argv[i])==0)
@@ -1458,6 +1476,20 @@ int main (int argc, char *argv[])
          string tmpstr2=costAsChar;
          tmpstr.replace(filenameInsertCost,5,tmpstr2,0,tmpstr2.length());
       }
+      if(filenameInsertRwp>=0) 
+      {            
+         //update actual position
+         filenameInsertRwp = tmpstr.find("#Rwp",0);
+         char RwpAsChar[50]; 
+         float Rwp = -1;
+         for(unsigned int i=0;i<gPowderPatternRegistry.GetNb();++i) {
+             //TODO: multiphase - now, it take Rwp of the last pattern in the registry...
+            Rwp =  gPowderPatternRegistry.GetObj(i).GetRw();           
+         }
+         sprintf(RwpAsChar,"-Rwp-%.4f", Rwp);
+         string tmpstr2=RwpAsChar;
+         tmpstr.replace(filenameInsertRwp,4,tmpstr2,0,tmpstr2.length());
+      }
       XMLCrystFileSaveGlobal(tmpstr);
       cout <<"End of Fox execution. Bye !"<<endl;
       //TAU_REPORT_STATISTICS();
@@ -1556,10 +1588,11 @@ int main (int argc, char *argv[])
       mpFrame->mpGridWindow->StartClientWindow();
 
       if(nbCPUs!=-1) {
-          mpFrame->mpGridWindow->m_WXFoxClient->setNbCPU(nbCPUs);
+          mpFrame->mpGridWindow->m_WXFoxSlave->setNbCPU(nbCPUs);
       }
-      mpFrame->mpGridWindow->m_WXFoxClient->m_IPWindow->SetValue(wxString::FromAscii(IP.c_str()));
-      mpFrame->mpGridWindow->m_WXFoxClient->OnConnectClient(com);
+      mpFrame->mpGridWindow->m_WXFoxSlave->m_IPWindow->SetValue(wxString::FromAscii(IP.c_str()));
+      mpFrame->mpGridWindow->m_WXFoxSlave->m_portWindow->SetValue(wxString::FromAscii(port.c_str()));
+      mpFrame->mpGridWindow->m_WXFoxSlave->OnConnectClient(com);
    }
 
    return TRUE;
@@ -1656,9 +1689,9 @@ WXCrystMainFrame::WXCrystMainFrame(const wxString& title, const wxPoint& pos, co
       #endif
       //FoxGrid////////////////////////////////////////////////////////////////////
       wxMenu *gridMenu = new wxMenu;
-         gridMenu->Append(MENU_GRID_SERVER_RUN, _T("&Run Server"), _T("Start Fox Grid Server"));
+         gridMenu->Append(MENU_GRID_SERVER_RUN, _T("&Run Master"), _T("Start Fox Grid Master"));
          gridMenu->AppendSeparator();
-         gridMenu->Append(MENU_GRID_CLIENT_START, _T("&Start Client"), _T("Start Fox Grid Client"));
+         gridMenu->Append(MENU_GRID_CLIENT_START, _T("&Start Slave"), _T("Start Fox Grid Slave"));
 
       wxMenu *prefsMenu = new wxMenu;
          prefsMenu->Append(MENU_PREFS_PREFERENCES, _T("&Preferences..."), _T("Fox Preferences..."));
@@ -2059,15 +2092,15 @@ void WXCrystMainFrame::OnClose(wxCloseEvent& event)
 }
 void WXCrystMainFrame::SafeQuit()
 {
-   if(mpGridWindow->m_WXFoxServer!=NULL)
+   if(mpGridWindow->m_WXFoxMaster!=NULL)
    {
       wxMessageDialog d(this,_T("You are trying to close the FOX GRID server. Are you sure?"), _T(""), wxYES | wxNO | wxCENTER | wxSTAY_ON_TOP);
       if(wxID_YES!=d.ShowModal()) return;
    }
-   if(mpGridWindow->m_WXFoxClient!=NULL){
+   if(mpGridWindow->m_WXFoxSlave!=NULL){
        wxMessageDialog d(this,_T("You are trying to close the FOX GRID client. Are you sure?"), _T(""), wxYES | wxNO | wxCENTER | wxSTAY_ON_TOP);
        if(wxID_YES!=d.ShowModal()) return;
-       mpGridWindow->m_WXFoxClient->CloseClient();
+       mpGridWindow->m_WXFoxSlave->CloseClient();
    }
    bool safe=true;
    wxConfigBase::Get()->Read(_T("Fox/BOOL/Ask confirmation before exiting Fox"),&safe);
@@ -2234,7 +2267,7 @@ void WXCrystMainFrame::OnRedo(wxCommandEvent &ev)
 //FOXGrid
 void WXCrystMainFrame::OnStartGridServer(wxCommandEvent &event)
 {
-   if((mpGridWindow->m_WXFoxServer!=NULL)||(mpGridWindow->m_WXFoxClient!=NULL))
+   if((mpGridWindow->m_WXFoxMaster!=NULL)||(mpGridWindow->m_WXFoxSlave!=NULL))
    {
       wxMessageDialog d(this,"You have already either a Grid client or server\n running in this instance of Fox !","Error",wxOK|wxICON_ERROR);
       d.ShowModal();
@@ -2257,7 +2290,7 @@ void WXCrystMainFrame::OnStartGridServer(wxCommandEvent &event)
 }
 void WXCrystMainFrame::OnStartGridClient(wxCommandEvent &event)
 {
-   if((mpGridWindow->m_WXFoxServer!=NULL)||(mpGridWindow->m_WXFoxClient!=NULL))
+   if((mpGridWindow->m_WXFoxMaster!=NULL)||(mpGridWindow->m_WXFoxSlave!=NULL))
    {
       wxMessageDialog d(this,"You have already either a Grid client or server\n running in this instance of Fox !","Error",wxOK|wxICON_ERROR);
       d.ShowModal();

@@ -20,8 +20,8 @@
 #endif
 
 
-#include "WXFoxServer.h"
-#include "WXFoxClient.h"
+#include "wxFoxMaster.h"
+#include "wxFoxSlave.h"
 
 
 class WXGrigWindow: public wxWindow
@@ -29,14 +29,14 @@ class WXGrigWindow: public wxWindow
 public:
    WXGrigWindow(wxWindow *parent);
    ~WXGrigWindow(void);
-   WXFoxServer *StartServer();
-   WXFoxClient *StartClientWindow();
-   //WXFoxClient *StartClientWindow(wxString IP, int nbCPU=-1);
+   WXFoxMaster *StartServer();
+   WXFoxSlave *StartClientWindow();
+   //WXFoxSlave *StartClientWindow(wxString IP, int nbCPU=-1);
    void DataLoaded();
    void Clear();
 
-   WXFoxServer *m_WXFoxServer;
-   WXFoxClient *m_WXFoxClient;
+   WXFoxMaster *m_WXFoxMaster;
+   WXFoxSlave *m_WXFoxSlave;
    bool dataLoaded;
    wxString m_working_dir;
 

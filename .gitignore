@@ -39,8 +39,8 @@ boost_1_68_0
 /cctbx*
 cctbx/gnu.mak
 
+/Fox/.vs
+/Fox/Debug
+/Fox/Release
 cctbx/gnu.mak
-Fox/cctbx_vc12.vcxproj.user
-Fox/Fox_vc12.vcxproj
-Fox/Fox_vc12.vcxproj.user
-Fox/newmat_vc12.vcxproj.user
+*.vcxproj.user
