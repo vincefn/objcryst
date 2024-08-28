@@ -1,0 +1,23 @@
+# RevisionOfFix RevisionOfBug Severity (0=minor feature, 1=major feature, 2= new official release, 10=minor bugfix,11=major bugfix, 12=critical), reason
+2024001 0 2 Fox release 2024.1 (29 August 2024): added inter-molecular restraints (for ssNMR), improved FoxGrid + a few minor improvements and bug fixes
+2022001 0 2 Fox release 2022.1 (26 May 2022): simpler COD access (http), cylindrical absorption correction, better indexing, + a few minor improvements and bug fixes
+2017002 0 2 Fox release 2017.2 (28 June 2017):  better 3D display options, some minor improvements
+2017001 0 2 Fox release 2017.1 (20 June 2017): improved profile fitting, indexing, 3D view
+2016002 0 2 Fox release 2016.2 (14 November 2016): improved CIF import and display
+2016001 0 2 Fox release 2016.1 (6 November 2016): COD import, auto recognition of molecules in CIF files,...
+1350 0 2 Fox release 1.9.8 (end 2011): new single crystal diffraction import, some optimisations
+1313 0 2 Fox release 1.9.7 (September 2011): more efficient spacegroup explorer, cif and xml file browsing, proper handling of c-axis monoclinic spacegroups
+1295 0 2 Fox release 1.9.6 (June 2011): includes Fox.Grid distributed computing, better profile fitting, indexing, background evaluation,...
+1204 0 2 Fox release 1.9.0.1 (November 17th, 2009): adds automatic least squares refinement with rigid body support, triclinic indexing,...
+1180 1122 1 Fox Beta version (October 2nd, 2009): fixes crash during auto-indexing, improves cif import, and other minor features and bug fixes
+1117 0 0 Fox release 1.8.1.2 (April 4th, 2009): fixes a wxwidgets scrolling bug, enhances the display of some fields
+1113 0 2 Fox release 1.8.1 (March 2009): adds molecular dynamics moves, fixes slow optimisation of powder patterns, unicode probems under Linux and slow reading of xml files under windows,...
+1080 0 2 Fox release 1.8.0 (January 2009): adds a spacegroup explorer, Fullprof export, manual selection of parameters for profile fitting, etc...
+1013 0 2 Fox release 1.7.7 (June 2008): faster profile fitting, better indexing, etc...
+995 0 2 Fox release 1.7.6.2 (April 2008): improves Fourier maps rendering, more efficient search for organic moleculs, etc..
+956 0 2 Fox release 1.7.5 (February 2008): adds Fourier maps display, better profile fitting, etc...
+927 0 1  Add Fourier maps calculations. Auto-check for Fox updates.
+905 0 12 Correct calculation of interatomic distances and dynamical occupancy correction
+887 0 1  More efficient display update during optimization
+879 0 1  Improved profile fitting
+864 0 0  Initial revision
