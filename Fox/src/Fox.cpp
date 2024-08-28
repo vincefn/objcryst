@@ -96,7 +96,7 @@ using namespace std;
 // Rough version number - must be updated at least for every major version or critical update
 // This is used to check for updates...
 // Now using YYYY### (4-digit year + 3 number for the version)
-#define __FOXREVISION__ 2022001
+#define __FOXREVISION__ 2024001
 
 static std::string foxVersion;
 
@@ -421,7 +421,7 @@ bool CheckUpdates(std::map<unsigned int,std::pair<int,wxString> > &vUpdates)
 {
    vUpdates.clear();
    std::list<wxString> vurl;
-   vurl.push_back(wxString("http://vincefn.net/FoxUpdates.txt"));
+   vurl.push_back(wxString("https://raw.githubusercontent.com/vincefn/objcryst/master/Fox/FoxUpdates.txt"));
    vurl.push_back(wxString("http://objcryst.sourceforge.net/FoxUpdates.txt"));
    wxInputStream *fstream=NULL;
    wxFileSystem fs;
