@@ -11,7 +11,7 @@ DOWNLOAD_COMMAND=wget
 endif
 
 ../cctbx.tar.bz2:
-	cd .. && $(DOWNLOAD_COMMAND)  https://github.com/vincefn/objcryst/releases/download/v2021-3rdPartyLibs/cctbx.tar.bz2
+	cd .. && $(DOWNLOAD_COMMAND)  https://github.com/vincefn/objcryst/releases/download/v2024.1/cctbx.tar.bz2
 
 ../cctbx: ../cctbx.tar.bz2
 	cd .. && tar -xjf cctbx.tar.bz2

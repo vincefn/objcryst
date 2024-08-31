@@ -229,7 +229,7 @@ endif
 
 #cctbx
 $(BUILD_DIR)/cctbx.tar.bz2:
-	cd $(BUILD_DIR) && $(DOWNLOAD_COMMAND) https://github.com/vincefn/objcryst/releases/download/v2021-3rdPartyLibs/cctbx.tar.bz2
+	cd $(BUILD_DIR) && $(DOWNLOAD_COMMAND) https://github.com/vincefn/objcryst/releases/download/v2024.1/cctbx.tar.bz2
 
 $(DIR_STATIC_LIBS)/lib/libcctbx.a: $(BUILD_DIR)/cctbx.tar.bz2
 	mkdir -p $(DIR_STATIC_LIBS)/lib/ $(DIR_STATIC_LIBS)/include/
