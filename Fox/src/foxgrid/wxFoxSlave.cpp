@@ -67,13 +67,13 @@ void WXFoxSlave::InitClient()
    wxStaticText *labelIP = new wxStaticText(this, NULL, _T("Server IP:"), wxDefaultPosition, wxDefaultSize, 0 , _T("label"));
    //IPSizer->Add(labelIP, 0, wxALL|wxALIGN_LEFT|wxALIGN_TOP ,3);
    connect_sizer->Add(labelIP, 0, wxALL|wxALIGN_RIGHT|wxALIGN_TOP ,3);
-   
+
 
    m_IPWindow = new wxComboBox(this, NULL, _T("localhost"), wxDefaultPosition,
                        wxDefaultSize, 0,0,
                        wxCB_DROPDOWN, wxDefaultValidator, _T("TextBox"));
    connect_sizer->Add(m_IPWindow, 0, wxALL|wxALIGN_LEFT|wxALIGN_TOP ,3);
-   
+
    wxStaticText *labelPort = new wxStaticText(this, NULL, _T("Port:"), wxDefaultPosition, wxDefaultSize, 0 , _T("label"));
    connect_sizer->Add(labelPort, 0, wxALL|wxALIGN_RIGHT|wxALIGN_TOP ,3);
 
@@ -107,7 +107,7 @@ void WXFoxSlave::InitClient()
    //ConnectSizer->Add(IPSizer, 0, wxALL|wxALIGN_TOP);
    ConnectSizer->Add(connect_sizer, 0, wxALL|wxALIGN_TOP);
    ConnectSizer->Add(IPButtonSizer, 0, wxALL|wxALIGN_RIGHT);
-   
+
    topSizer->Add(ConnectSizer, 0, wxALL|wxALIGN_TOP);
    topSizer->Add(new wxStaticText(this, NULL, "List of Processes", wxDefaultPosition, wxDefaultSize, 0 , _T("label")), 0, wxALL|wxALIGN_TOP, 3);
    m_process_table = new wxGrid(this, NULL, wxDefaultPosition, wxSize(xsize,200), wxWANTS_CHARS, _T("List of Processes"));
@@ -164,9 +164,9 @@ void WXFoxSlave::OnConnectClient(wxCommandEvent& event)
       m_nbCPUs->GetValue().ToLong(&nbCPUs);
       m_portWindow->GetValue().ToLong(&port);
       this->setNbCPU((int) nbCPUs);
-      m_connecting = true;      
+      m_connecting = true;
       ConnectClient(m_IPWindow->GetValue(), port);
-   }   
+   }
 }
 void WXFoxSlave::setNbCPU(int nb)
 {
@@ -190,7 +190,7 @@ void WXFoxSlave::CloseClient()
     */
 }
 void WXFoxSlave::OnUpdateProcessTimer(wxTimerEvent& event)
-{    
+{
     if(m_grid_slave==0) {
         m_ConnectButton->Show(true);
         m_ConnectButton->SetLabel(_T("Connect"));
@@ -205,9 +205,9 @@ void WXFoxSlave::OnUpdateProcessTimer(wxTimerEvent& event)
         Layout();
     }
 
-    vector<FOX_PROCESS> p = m_grid_slave->getProcesses();            
+    vector<FOX_PROCESS> p = m_grid_slave->getProcesses();
     vector<MasterJob> jobs = m_grid_slave->getJobs();
-    
+
     int nbRow = m_process_table->GetNumberRows();
     //delete it just in the case of different nb of processes then before
     if(nbRow != p.size()) {
@@ -215,7 +215,7 @@ void WXFoxSlave::OnUpdateProcessTimer(wxTimerEvent& event)
             m_process_table->DeleteRows(0, nbRow, true);
         }
         for(int i=0;i<p.size();i++) {
-            m_process_table->InsertRows(i, 1, false);   
+            m_process_table->InsertRows(i, 1, false);
         }
     }
     m_process_table->ClearGrid();
@@ -227,20 +227,20 @@ void WXFoxSlave::OnUpdateProcessTimer(wxTimerEvent& event)
             m_process_table->SetCellBackgroundColour(i, 0, wxColour(255, 200, 200));
 
             m_process_table->SetCellValue(i,1,wxString::Format("%d",p[i].jobID));
-            m_process_table->SetReadOnly(i,1);           
+            m_process_table->SetReadOnly(i,1);
             m_process_table->SetCellBackgroundColour(i, 1, wxColour(255, 200, 200));
 
             m_process_table->SetCellValue(i,2,wxString::Format("%s",p[i].startingtime.FormatTime()));
-            m_process_table->SetReadOnly(i,2);           
+            m_process_table->SetReadOnly(i,2);
             m_process_table->SetCellBackgroundColour(i, 2, wxColour(255, 200, 200));
 
-            int cprogress = -1;            
+            int cprogress = -1;
             for(int j=0;j<jobs.size();j++) {
                 if(p[i].jobID==jobs[j].ID) {
                     cprogress = p[i].getProgressInPercents(jobs[j].average_calc_time);
                 }
             }
-            
+
             if(cprogress==-1) {
                 m_process_table->SetCellValue(i,3,"not available yet");
             } else {
@@ -259,7 +259,7 @@ void WXFoxSlave::OnUpdateProcessTimer(wxTimerEvent& event)
             m_process_table->SetCellBackgroundColour(i, 0, wxColour(200, 255, 200));
 
             m_process_table->SetCellValue(i,1,"");
-            m_process_table->SetReadOnly(i,1);           
+            m_process_table->SetReadOnly(i,1);
             m_process_table->SetCellBackgroundColour(i, 1, wxColour(200, 255, 200));
 
             m_process_table->SetCellValue(i,2,"");
@@ -284,7 +284,7 @@ void WXFoxSlave::OnUpdateProcessTimer(wxTimerEvent& event)
             m_job_table->DeleteRows(0, nbRow, true);
         }
         for(int i=0;i<jobs.size();i++) {
-            m_job_table->InsertRows(i, 1, false);   
+            m_job_table->InsertRows(i, 1, false);
         }
     }
     m_job_table->ClearGrid();
@@ -293,17 +293,17 @@ void WXFoxSlave::OnUpdateProcessTimer(wxTimerEvent& event)
         m_job_table->SetReadOnly(i,0);
 
         m_job_table->SetCellValue(i,1,wxString::Format("%d",jobs[i].ID));
-        m_job_table->SetReadOnly(i,1);  
+        m_job_table->SetReadOnly(i,1);
 
          m_job_table->SetCellValue(i,2,wxString::Format("%d", jobs[i].nb_runs));
         m_job_table->SetReadOnly(i,2);
 
         m_job_table->SetCellValue(i,3,wxString::Format("%d", jobs[i].results.size()));
-        m_job_table->SetReadOnly(i,3);           
+        m_job_table->SetReadOnly(i,3);
 
         m_job_table->SetCellValue(i,4,jobs[i].average_calc_time.Format());
         m_job_table->SetReadOnly(i,4);
-    }      
+    }
 
     m_UpdateProcessTimer->Start(3*1000, true);
 }
@@ -318,16 +318,16 @@ void WXFoxSlave::OnConnectTimer(wxTimerEvent& event)
    }
 }
 void WXFoxSlave::ConnectClient(wxString IP, int port)
-{   
-   if(!m_grid_slave->isConnectedToMaster()) {       
-       m_ConnectButton->SetLabel(_T("Cancel Connecting"));   
-       if(m_grid_slave->ConnectToMaster(1, IP, port)) {           
+{
+   if(!m_grid_slave->isConnectedToMaster()) {
+       m_ConnectButton->SetLabel(_T("Cancel Connecting"));
+       if(m_grid_slave->ConnectToMaster(1, IP, port)) {
           m_ConnectButton->Hide();
           Layout();
           wxString CPUs;
           m_connecting=false;
        }else{
-          m_ConnectTimer->Start(10000, true);       
+          m_ConnectTimer->Start(10000, true);
        }
-   }   
+   }
 }

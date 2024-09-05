@@ -1,16 +1,16 @@
 /*  ObjCryst++ Object-Oriented Crystallographic Library
  (c) 2000- Vincent Favre-Nicolin vincefn@gmail.com
- 
+
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation; either version 2 of the License, or
  (at your option) any later version.
- 
+
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details.
- 
+
  You should have received a copy of the GNU General Public License
  along with this program; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -34,7 +34,7 @@ XMLConfig::XMLConfig()
 {
    mClock.Click();
    mTime = boost::posix_time::second_clock::local_time();
-   
+
    for(std::vector<Crystal*>::const_iterator pos=gCrystalRegistry.begin();pos!=gCrystalRegistry.end();++pos)
    {
       VFN_DEBUG_MESSAGE("XMLConfig::XMLConfig(): storing "<< (*pos)->GetClassName() << ":" << (*pos)->GetName(), 10)
@@ -42,7 +42,7 @@ XMLConfig::XMLConfig()
       (*pos)->XMLOutput(ss,0);
       mvpCrystalXML[*pos] = boost::shared_ptr<std::string>(new std::string(ss.str()));
    }
-   
+
    for(std::vector<DiffractionDataSingleCrystal*>::const_iterator pos=gDiffractionDataSingleCrystalRegistry.begin();pos!=gDiffractionDataSingleCrystalRegistry.end();++pos)
    {
       VFN_DEBUG_MESSAGE("XMLConfig::XMLConfig(): storing "<< (*pos)->GetClassName() << ":" << (*pos)->GetName(), 10)
@@ -50,7 +50,7 @@ XMLConfig::XMLConfig()
       (*pos)->XMLOutput(ss,0);
       mvpDiffractionDataSingleCrystalXML[*pos] = boost::shared_ptr<std::string>(new std::string(ss.str()));
    }
-   
+
    for(std::vector<PowderPattern*>::const_iterator pos=gPowderPatternRegistry.begin();pos!=gPowderPatternRegistry.end();++pos)
    {
       VFN_DEBUG_MESSAGE("XMLConfig::XMLConfig(): storing "<< (*pos)->GetClassName() << ":" << (*pos)->GetName(), 10)
@@ -58,7 +58,7 @@ XMLConfig::XMLConfig()
       (*pos)->XMLOutput(ss,0);
       mvpPowderPatternXML[*pos] = boost::shared_ptr<std::string>(new std::string(ss.str()));
    }
-   
+
    for(std::vector<OptimizationObj*>::const_iterator pos=gOptimizationObjRegistry.begin();pos!=gOptimizationObjRegistry.end();++pos)
    {
       VFN_DEBUG_MESSAGE("XMLConfig::XMLConfig(): storing "<< (*pos)->GetClassName() << ":" << (*pos)->GetName(), 10)
@@ -72,7 +72,7 @@ XMLConfig::XMLConfig()
 XMLConfig::XMLConfig(const XMLConfig &old)
 {
    mTime = boost::posix_time::second_clock::local_time();
-   
+
    for(std::vector<Crystal*>::const_iterator pos=gCrystalRegistry.begin();pos!=gCrystalRegistry.end();++pos)
    {
       VFN_DEBUG_MESSAGE("XMLConfig::XMLConfig(&old): storing "<< (*pos)->GetClassName() << ":" << (*pos)->GetName(), 10)
@@ -98,7 +98,7 @@ XMLConfig::XMLConfig(const XMLConfig &old)
          mvpCrystalXML[*pos] = boost::shared_ptr<std::string>(new std::string(ss.str()));
       }
    }
-   
+
    for(std::vector<DiffractionDataSingleCrystal*>::const_iterator pos=gDiffractionDataSingleCrystalRegistry.begin();pos!=gDiffractionDataSingleCrystalRegistry.end();++pos)
    {
       VFN_DEBUG_MESSAGE("XMLConfig::XMLConfig(&old): storing "<< (*pos)->GetClassName() << ":" << (*pos)->GetName(), 10)
@@ -173,7 +173,7 @@ XMLConfig::XMLConfig(const XMLConfig &old)
    }
    mClock.Click();
 }
-   
+
 void XMLConfig::Restore()
 {
    VFN_DEBUG_ENTRY("XMLConfig::Restore()", 10)
@@ -228,7 +228,7 @@ void XMLConfig::Restore()
       VFN_DEBUG_EXIT("XMLConfig::Restore()"<<p->GetClassName()<<":"<<p->GetName(), 10)
       vpRefObjUpdated.push_back(p);
    }
-   
+
    for(std::map<PowderPattern*, boost::shared_ptr<std::string> >::const_iterator pos= mvpPowderPatternXML.begin(); pos!=mvpPowderPatternXML.end();++pos)
    {
       VFN_DEBUG_MESSAGE("XMLConfig::Restore(): found "<< pos->first->GetClassName() << ":" << pos->first->GetName(), 10)
@@ -250,7 +250,7 @@ void XMLConfig::Restore()
       VFN_DEBUG_EXIT("XMLConfig::Restore()"<<p->GetClassName()<<":"<<p->GetName(), 10)
       vpRefObjUpdated.push_back(p);
    }
-   
+
    for(std::map<OptimizationObj*, boost::shared_ptr<std::string> >::const_iterator pos= mvpOptimizationObjXML.begin(); pos!=mvpOptimizationObjXML.end();++pos)
    {
       VFN_DEBUG_MESSAGE("XMLConfig::Restore(): found "<< pos->first->GetClassName() << ":" << pos->first->GetName(), 10)
@@ -311,7 +311,7 @@ bool XMLConfig::operator==(const ObjCryst::XMLConfig &rhs) const
    if(mvpDiffractionDataSingleCrystalXML.size() != rhs.mvpDiffractionDataSingleCrystalXML.size()) return false;
    if(mvpPowderPatternXML.size() != rhs.mvpPowderPatternXML.size()) return false;
    if(mvpOptimizationObjXML.size() != rhs.mvpOptimizationObjXML.size()) return false;
-   
+
    for(std::map<Crystal*, boost::shared_ptr<std::string> >::const_iterator pos = mvpCrystalXML.begin(); pos!=mvpCrystalXML.end(); pos++)
    {
       std::map<Crystal*, boost::shared_ptr<std::string> >::const_iterator pos2 = rhs.mvpCrystalXML.find(pos->first);
@@ -382,12 +382,12 @@ bool XMLConfigHistory::Store()
    mpCurrentConfig = boost::shared_ptr<XMLConfig>();
    if(mvpConfig.size()>mMaxNb) mvpConfig.pop_back();
    (*fpObjCrystInformUser)("XMLConfigHistory::Store()");
-   
+
    VFN_DEBUG_EXIT("XMLConfigHistory::Store(): new config", 10)
    mLock=false;
    return true;
 }
-   
+
 void XMLConfigHistory::Restore(boost::shared_ptr<XMLConfig> &p)
 {
    mLock=true;

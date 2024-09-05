@@ -1,7 +1,7 @@
 #include "SocketThreadClient.h"
 
-SocketThreadClient::SocketThreadClient(  wxSocketBase         *pSocket, 
-                             wxString              workingDir, 
+SocketThreadClient::SocketThreadClient(  wxSocketBase         *pSocket,
+                             wxString              workingDir,
                              wxEvtHandler         *parent,
                              wxIPV4address         address,
                              vector<MSGINFO_SENT>       *messages_out,
@@ -30,12 +30,12 @@ wxIPV4address SocketThreadClient::GetAddress()
 }
 wxThread::ExitCode SocketThreadClient::Entry()
 {
-    WriteLogMessage("Thread Entry");    
+    WriteLogMessage("Thread Entry");
     while (!TestDestroy()) { //Connection lost event is handled by owner!
         if(!m_socket->IsConnected()) {
             break;
         }
-     
+
         wxThread::Yield(); // this is important to call it before WaitForRead()
         wxThread::Sleep(100);
         if(isMessageToBeSent()) {
@@ -67,11 +67,11 @@ void SocketThreadClient::WriteLogMessage(wxString msg)
       wxDateTime datetime = wxDateTime::Now();
       logfile.Write(datetime.Format(_T("%X ")) + msg + _T("\n"));
       logfile.Close();
-   } 
+   }
 #endif
 }
 bool SocketThreadClient::SndMsg()
-{//send data may take some time, so lock mutex only for finding the msg and changing the msg status. 
+{//send data may take some time, so lock mutex only for finding the msg and changing the msg status.
  //it does not lock the mutex during sending the data
 
     MSGINFO_SENT ms;
@@ -85,7 +85,7 @@ bool SocketThreadClient::SndMsg()
             return false;
         }
         for(int i=0;i<m_messages_out->size();i++) {
-            if((*m_messages_out)[i].sent==0) { 
+            if((*m_messages_out)[i].sent==0) {
                 ms = (*m_messages_out)[i];
                 found = true;
                 break;
@@ -97,7 +97,7 @@ bool SocketThreadClient::SndMsg()
     if(found) {
         //if found send it
         er = SendData2(m_socket, ms.ID, ms.msg.c_str(), ms.msg.length(), true);
-   
+
         //change the state of the msg based on the resulting er
         wxMutexLocker locker(*m_messages_out_mutex);
         if (!locker.IsOk()) {
@@ -105,7 +105,7 @@ bool SocketThreadClient::SndMsg()
             return false;
         }
         for(int i=0;i<m_messages_out->size();i++) {
-            if((*m_messages_out)[i].ID==ms.ID) { 
+            if((*m_messages_out)[i].ID==ms.ID) {
                 if(er==0) {
                     (*m_messages_out)[i].sent = getTimeStampMinutes();
                     (*m_messages_out)[i].delivery_confirmation_obtained = (*m_messages_out)[i].sent;
@@ -118,11 +118,11 @@ bool SocketThreadClient::SndMsg()
                     m_socket_error = true;
                     return false;
                 }
-                break; 
+                break;
             }
         }
     }
-                        
+
 
     WriteLogMessage("SndMsg() - end");
     return true;
@@ -143,5 +143,3 @@ bool SocketThreadClient::isMessageToBeSent()
     }
     return false;
 }
-
-

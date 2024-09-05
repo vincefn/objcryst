@@ -66,7 +66,7 @@ struct SentMsgInfo {
         SlaveIP = IP;
     }
 };
-struct MasterResult {    
+struct MasterResult {
     wxString data;
     wxString filename;
     float Cost;
@@ -106,7 +106,7 @@ struct SlaveJob {
         nb_trial = 0;
         nb_running = 0;
         nb_done = 0;
-        randomize = true;        
+        randomize = true;
         average_calc_time = wxTimeSpan();
     }
     int getNbFreeJobs() {
@@ -116,10 +116,10 @@ struct SlaveJob {
 */
 struct MasterJob {
     bool       deleted;
-    long       ID; 
+    long       ID;
     wxString   data;
     int        nb_runs;
-    vector<SentMsgInfo> sentToClientsMsgInfo; //msgIDs that were sent to clients with this job and receiving was not confirmed yet and nb of running expected    
+    vector<SentMsgInfo> sentToClientsMsgInfo; //msgIDs that were sent to clients with this job and receiving was not confirmed yet and nb of running expected
     vector<MasterResult> results;
     int        nb_trial;
     vector<wxString> runningIPs;
@@ -139,9 +139,9 @@ struct MasterJob {
         randomize = true;
         average_calc_time = wxTimeSpan();
         msgID = 0;
-    }   
+    }
     int getNbSentToClients() {
-        int sum = 0;        
+        int sum = 0;
         for (const auto& p : sentToClientsMsgInfo) {
             sum += p.nb_runs;
         }
@@ -153,8 +153,8 @@ struct MasterJob {
 
     //removes just one ore several of them from runningIPs or from sentToClientsMsgInfo
     //use nb=-1 to delete all from runningIPs and also from sentToClientsMsgInfo
-    bool removeIPFromRunningIPs(wxString IP, int nb=1) {         
-        for(int i=0;i<runningIPs.size();i++) {            
+    bool removeIPFromRunningIPs(wxString IP, int nb=1) {
+        for(int i=0;i<runningIPs.size();i++) {
             if(runningIPs[i].compare(IP)==0) {
                 runningIPs.erase(runningIPs.begin()+i);
                 i--;
@@ -189,9 +189,9 @@ struct ResultInfo {
     bool          sent;
 	bool          pending;
     long long     msgID;
-            
+
     ResultInfo() {
-        resultID = -1; 
+        resultID = -1;
         jobID = -1;
         duration_seconds = -1;
         sent = false;
@@ -247,16 +247,16 @@ class GridCommunication
             long long ID;// Message ID
             //long socketID;
 
-            //IP of the sender 
+            //IP of the sender
             wxString IP;
-            wxString msg;            
+            wxString msg;
             unsigned int recieved; //time stamp in minutes, when it was delivered
             unsigned int delivery_confirmation_sent; //time stamp in minutes, when the delivery confirmation was sent.
             unsigned int processed; //time stamp in minutes, when the message was proccessed or copied somewhere else.
             wxSocketBase* m_socket;
 
             MSGINFO_REC() {
-                ID = 0;                
+                ID = 0;
                 recieved = 0;
                 delivery_confirmation_sent = 0;
                 processed = 0;
@@ -267,17 +267,16 @@ class GridCommunication
         struct MSGINFO_SENT {
             long long ID; // Message ID
             wxString msg;
-            unsigned int sent; //time stamp in minutes, when the msg was sent            
-            unsigned int delivery_confirmation_obtained; //time stamp in minutes, when delivery confirmation was received                        
+            unsigned int sent; //time stamp in minutes, when the msg was sent
+            unsigned int delivery_confirmation_obtained; //time stamp in minutes, when delivery confirmation was received
 
             MSGINFO_SENT() {
                 ID = 0;
                 sent = 0;
-                delivery_confirmation_obtained = 0;                
+                delivery_confirmation_obtained = 0;
             }
         };
-        
-        
+
+
 };
 #endif
-

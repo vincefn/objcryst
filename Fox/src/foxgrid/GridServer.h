@@ -25,15 +25,15 @@ class GridServer: public wxEvtHandler, GridCommunication
         void SetWorkingDir(wxString path);
         bool isConnected();
         bool isListening();
-        
+
         //void OnWorkerEvent(WorkerEvent& pEvent);
 
         vector<GridCommunication::MSGINFO_REC> getReceivedMsgs();
 
         void setExpectPortSendingAfterConnection(bool exp);
-        
-    
-    protected: 
+
+
+    protected:
         void getReceivedMsgsFromAllThreads();
         void refreshServerThreadList();
         int readPortToConnectClient(wxSocketBase* sock);
@@ -53,4 +53,3 @@ class GridServer: public wxEvtHandler, GridCommunication
 
 };
 #endif
-

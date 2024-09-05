@@ -44,12 +44,12 @@ libcctbx.a : ${OBJ}
 	${AR} crs $@ ${filter-out %.a %.so, $^}
 
 -include $(OBJ:.o=.dep)
-   
+
 lib: libcctbx.a
 
 install:lib
 	cp -f libcctbx.a ../static-libs/lib/
-	rm -Rf ../static-libs/include/boost ../static-libs/include/cctbx  ../static-libs/include/scitbx 
+	rm -Rf ../static-libs/include/boost ../static-libs/include/cctbx  ../static-libs/include/scitbx
 	cp -Rf include/* ../static-libs/include/
 
 # target for removing all object files

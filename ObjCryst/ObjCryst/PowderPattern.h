@@ -1097,7 +1097,7 @@ class PowderPattern : public RefinableObj
          /// This is mutable because generally we use the 'best' scale factor, but
          /// it should not be...
          mutable CrystVector_REAL mScaleFactor;
-   
+
       /// Mu*R parameter for cylinder absorption correction
       REAL mMuR;
 
@@ -1189,7 +1189,7 @@ struct SPGScore
    string hm;
    /// Rw factor, from PowderPattern::GetRw()
    REAL rw;
-   /// Goodness-of-fit, from PowderPattern::GetChi2() normalised by 
+   /// Goodness-of-fit, from PowderPattern::GetChi2() normalised by
    REAL gof;
    /// Normalised & integrated goodness-of-fit =  iGoF * (nb_refl) / (nb_refl in P1),
    /// where iGoF is the integrated goodness-of-fit, computed using the integration
@@ -1289,7 +1289,7 @@ private:
    /// Map extinction fingerprint
    std::map<std::vector<bool>,SPGScore> mvSPGExtinctionFingerprint;
 };
-   
+
 
 }//namespace ObjCryst
 #endif // _OBJCRYST_POWDERPATTERN_H_

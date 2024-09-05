@@ -7962,7 +7962,7 @@ Molecule *ZScatterer2Molecule(ZScatterer *scatt)
       z0+=z;
       mol->AddAtom(x,y,z,scatt->GetZAtomRegistry().GetObj(i).GetScatteringPower(),
                    scatt->GetZAtomRegistry().GetObj(i).GetName());
-      
+
       #if 0
       if(i>0)
       {
@@ -8014,7 +8014,7 @@ Molecule *ZScatterer2Molecule(ZScatterer *scatt)
       #endif
       mol->GetAtom(i).SetOccupancy(scatt->GetZAtomRegistry().GetObj(i).GetOccupancy());
    }
-   
+
    CrystVector_REAL x(nb),y(nb),z(nb),radius(nb);
    vector<pair<const ScatteringPowerAtom *,long> > scattpow(nb);
    for(unsigned int i=0;i<nb;++i)

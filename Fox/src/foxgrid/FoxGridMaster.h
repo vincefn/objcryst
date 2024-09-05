@@ -14,15 +14,15 @@ class FoxGridMaster: public GridMasterBase, wxEvtHandler
 {
     public:
         struct SLAVE_FOX_INFO {
-                
-                GridMasterBase::SLAVE_INFO_PUBLIC sinfo;                
+
+                GridMasterBase::SLAVE_INFO_PUBLIC sinfo;
                 unsigned short nb_CPU_all;
                 unsigned short nb_CPU_idle;
                 bool connected;
                 long long LastProcessedJobMsgID;
                 long long LasSentJobMsgID;
                 int port;
-            
+
                 SLAVE_FOX_INFO() {
                     nb_CPU_all = 0;
                     nb_CPU_idle = 0;
@@ -72,4 +72,3 @@ class FoxGridMaster: public GridMasterBase, wxEvtHandler
         DECLARE_EVENT_TABLE()
 };
 #endif
-

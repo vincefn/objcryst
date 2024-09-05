@@ -885,7 +885,7 @@ void Crystal::XMLOutput(ostream &os,int indent)const
 
            string tmpAt1 = mInterMolDistList[i].get_list_At1();
            tagIMD.AddAttribute("At1",tmpAt1);
-           
+
            string tmpAt2 = mInterMolDistList[i].get_list_At2();
            /*
            for(int j=0;j<mInterMolDistList[i].mAt2.size();j++) {
@@ -898,7 +898,7 @@ void Crystal::XMLOutput(ostream &os,int indent)const
            tagIMD.AddAttribute("At2",tmpAt2);
            tagIMD.AddAttribute("Dist",std::to_string(sqrt(mInterMolDistList[i].mDist2)));
            tagIMD.AddAttribute("Delta",std::to_string(mInterMolDistList[i].mDelta));
-           tagIMD.AddAttribute("Sigma",std::to_string(mInterMolDistList[i].mSig));           
+           tagIMD.AddAttribute("Sigma",std::to_string(mInterMolDistList[i].mSig));
            os<<tagIMD;
            os<<endl;
        }
@@ -907,7 +907,7 @@ void Crystal::XMLOutput(ostream &os,int indent)const
        os << tag2<< mInterMolDistCostScale;
        tag2.SetIsEndTag(true);
        os << tag2<<endl;
-       
+
        for(int k=0;k<=indent;k++) os << "  " ;
        XMLCrystTag tag3("mCostCalcMethod");
        os << tag3<< mCostCalcMethod;
@@ -918,7 +918,7 @@ void Crystal::XMLOutput(ostream &os,int indent)const
        XMLCrystTag tag4("mDistMaxMultiplier");
        os << tag4<< mDistMaxMultiplier;
        tag4.SetIsEndTag(true);
-       os << tag4<<endl;       
+       os << tag4<<endl;
    }
    indent--;
    tag.SetIsEndTag(true);
@@ -1071,15 +1071,15 @@ void Crystal::XMLInput(istream &is,const XMLCrystTag &tagg)
          bool er=false;
          for(unsigned int i=0;i<tag.GetNbAttribute();i++)
          {
-            if("At1"==tag.GetAttributeName(i)) {                
+            if("At1"==tag.GetAttributeName(i)) {
                 string tmpAt1=tag.GetAttributeValue(i);
                 if(tmpAt1.length()==0) {
                     er = true;
                     break;
-                }                
-                stringstream ss(tmpAt1);  
+                }
+                stringstream ss(tmpAt1);
                 string word;
-                while (ss >> word) { 
+                while (ss >> word) {
                     At1.push_back(word);
                 }
                 if(At1.size()==0) {
@@ -1092,10 +1092,10 @@ void Crystal::XMLInput(istream &is,const XMLCrystTag &tagg)
                 if(tmpAt2.length()==0) {
                     er = true;
                     break;
-                }                
-                stringstream ss(tmpAt2);  
+                }
+                stringstream ss(tmpAt2);
                 string word;
-                while (ss >> word) { 
+                while (ss >> word) {
                     At2.push_back(word);
                 }
                 if(At2.size()==0) {
@@ -1124,7 +1124,7 @@ void Crystal::XMLInput(istream &is,const XMLCrystTag &tagg)
                     break;
                 }
             }
-         }                  
+         }
          if(!er) {
             this->SetNewInterMolDist(At1, At2, stof(Dist), stof(Sigma), stof(Delta));
          }
@@ -1139,7 +1139,7 @@ void Crystal::XMLInput(istream &is,const XMLCrystTag &tagg)
       {
          is>>mCostCalcMethod;
          XMLCrystTag junk(is);
-      } 
+      }
       if("mDistMaxMultiplier"==tag.GetName())
       {
          is>>mDistMaxMultiplier;

@@ -2118,7 +2118,7 @@ void PowderPatternDiffraction::CalcIntensityCorr()const
    }
    mpCorr[4]=&(mCorrTextureEllipsoid.GetCorr());
    if(mClockIntensityCorr<mCorrTextureEllipsoid.GetClockCorr()) needRecalc=true;
-   
+
    if(needRecalc==false) return;
 
    TAU_PROFILE("PowderPatternDiffraction::CalcIntensityCorr()","void ()",TAU_DEFAULT);
@@ -2615,13 +2615,13 @@ void PowderPattern::RemovePowderPatternComponent(PowderPatternComponent &comp)
       this->RemovePar(&this->GetPar(mScaleFactor.data()+mPowderPatternComponentRegistry.GetNb()-1));
       this->Print();
    }
-   
+
    this->RemoveSubRefObj(comp);
    comp.DeRegisterClient(*this);
    mClockPowderPatternCalc.Reset();
    mClockIntegratedFactorsPrep.Reset();
    mPowderPatternComponentRegistry.DeRegister(comp);
-   
+
    // Shift scale factors
    unsigned int i=0;
    for(unsigned int i=0;i<this->GetNbPowderPatternComponent();i++)
@@ -6968,7 +6968,7 @@ SPGScore SpaceGroupExplorer::Run(const cctbx::sgtbx::space_group &spg, const boo
    lsq.PrepareRefParList(true);
    const unsigned int saved_par = lsq.GetCompiledRefinedObj().CreateParamSet("SpaceGroupExplorer saved parameters");
    lsq.GetCompiledRefinedObj().SaveParamSet(saved_par);
-   
+
    Chronometer chrono;
    for(unsigned int j=0;j<nbcycle;j++)
    {
@@ -7039,7 +7039,7 @@ SPGScore SpaceGroupExplorer::Run(const cctbx::sgtbx::space_group &spg, const boo
    for(unsigned int i=6;i<fgp.size();++i) nbextinct446+=(unsigned int)(fgp[i]);
    const unsigned int nbrefl = mpDiff->GetNbReflBelowMaxSinThetaOvLambda();
    if(verbose>0) cout << boost::format(" Rwp= %5.2f%%  GoF=%9.2f  nGoF =%9.2f (%3u reflections, %3u extinct)") % rw % gof % ngof % nbrefl % nbextinct446<<endl;
-   
+
    if(restore_orig)
    {
       mpDiff->GetCrystal().Init(a,b,c,d,e,f,spghm,name);
@@ -7059,7 +7059,7 @@ void SpaceGroupExplorer::RunAll(const bool fitprofile_all, const bool verbose, c
                                 const REAL relative_length_tolerance, const REAL absolute_angle_tolerance_degree)
 {
    Crystal *pCrystal=&(mpDiff->GetCrystal());
-   
+
    // Initial lattice parameters & spg
    const REAL a=pCrystal->GetLatticePar(0),
    b=pCrystal->GetLatticePar(1),
@@ -7086,7 +7086,7 @@ void SpaceGroupExplorer::RunAll(const bool fitprofile_all, const bool verbose, c
 
    mvSPG.clear();
    mvSPGExtinctionFingerprint.clear();
-   
+
    // Nb refl below max sin(theta/lambda) for p1, to compute nGoF
    unsigned int nb_refl_p1=1;
 
@@ -7170,7 +7170,7 @@ REAL SpaceGroupExplorer::GetP1IntegratedGoF()
       //     <<FormatVertVectorHKLFloats<REAL>(mP1IntegratedProfileMin, mP1IntegratedProfileMax,mP1IntegratedProfileMax)<<endl;
    }
    else if (mP1IntegratedProfileMin.size()==0) return 0;
-   
+
    //cout<<FormatVertVectorHKLFloats<REAL>(mpDiff->GetH(), mpDiff->GetK(), mpDiff->GetL(), mpDiff->GetFhklCalcSq());
    REAL integratedChi2=0.;
    REAL integratedChi2LikeNorm=0.;
@@ -7199,5 +7199,5 @@ REAL SpaceGroupExplorer::GetP1IntegratedGoF()
    }
    return chi2 / nbpoint;
 }
-   
+
 }//namespace ObjCryst

@@ -57,7 +57,7 @@ private:
    void OnEditJob(wxCommandEvent& event);
    void EditJob();
    void OnDeleteJob(wxCommandEvent& event);
-   void OnLoadJob(wxCommandEvent& event);   
+   void OnLoadJob(wxCommandEvent& event);
    void UpdateJobList();
    void UpdateResultList();
    void UpdateClientList(vector<FoxGridMaster::SLAVE_FOX_INFO> SI);

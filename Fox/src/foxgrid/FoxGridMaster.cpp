@@ -16,19 +16,19 @@ FoxGridMaster::~FoxGridMaster()
 }
 int FoxGridMaster::generateJobID()
 {
-    return generateUniqueID();    
+    return generateUniqueID();
 }
 bool FoxGridMaster::addJob(wxString filename, wxString name, wxString data, int id, long nbOfTrial, long nbRun, bool rand)
 {
     wxMutexLocker l(m_jobs_mutex);
     MasterJob mj;
     mj.filename = filename;
-    mj.name = name;    
+    mj.name = name;
     mj.data = data;
     mj.ID = id;
     mj.nb_trial = nbOfTrial;
     mj.nb_runs = nbRun;
-    mj.randomize = rand;    
+    mj.randomize = rand;
     m_jobs.push_back(mj);
     WriteLogMessage("new job added");
 
@@ -39,27 +39,27 @@ void FoxGridMaster::CheckIfJobsReceived()
     wxMutexLocker l(m_jobs_mutex);
     for(int i=0;i<m_jobs.size();i++) {
         for(int j=0;j<m_jobs[i].sentToClientsMsgInfo.size();j++) {
-            if(isMsgReceived(m_jobs[i].sentToClientsMsgInfo[j].msgID)) {                
+            if(isMsgReceived(m_jobs[i].sentToClientsMsgInfo[j].msgID)) {
                 //m_jobs[i].nb_running += m_jobs[i].sentToClientsMsgInfo[j].nb_runs;
                 m_jobs[i].runningIPs.insert(m_jobs[i].runningIPs.end(), m_jobs[i].sentToClientsMsgInfo[j].nb_runs, m_jobs[i].sentToClientsMsgInfo[j].SlaveIP);
                 m_jobs[i].sentToClientsMsgInfo.erase(m_jobs[i].sentToClientsMsgInfo.begin()+j);
                 j--;
-            }                
+            }
         }
     }
 
 }
 void FoxGridMaster::OnCheckSlavesTimerEvent(wxTimerEvent& event)
 {
-    WriteLogMessage("OnCheckSlavesTimerEvent");        
-    
+    WriteLogMessage("OnCheckSlavesTimerEvent");
+
     CheckIfJobsReceived();
     ProcessMessagesFromSlaves();
 
     if((m_timer_iter % 10)==0) {
         AskSlavesState();
-    }       
-                   
+    }
+
     m_checkSlaveStateTimer->Start(1000, true);
     m_timer_iter++;
 }
@@ -69,15 +69,15 @@ void FoxGridMaster::SlaveDisconnected(wxString SlaveIP)
     wxMutexLocker l1(m_jobs_mutex);
     for(int j=0;j<m_jobs.size();j++) {
         for(int k=0;k<m_jobs[j].runningIPs.size();k++) {
-            m_jobs[j].removeIPFromRunningIPs(SlaveIP, -1);            
+            m_jobs[j].removeIPFromRunningIPs(SlaveIP, -1);
         }
     }
 }
 vector<FoxGridMaster::SLAVE_FOX_INFO> FoxGridMaster::getFoxSlaveInfo()
-{   
+{
     vector<SLAVE_INFO_PUBLIC> pi = getSlavesPublicInfo();
-    
-    wxMutexLocker l(m_fox_slaves_info_mutex); 
+
+    wxMutexLocker l(m_fox_slaves_info_mutex);
     //refresh the old m_fox_slaves_info
     for(int i=0;i<m_fox_slaves_info.size();i++) {
         bool found = false;
@@ -87,20 +87,20 @@ vector<FoxGridMaster::SLAVE_FOX_INFO> FoxGridMaster::getFoxSlaveInfo()
                 found = true;
                 break;
             }
-        }    
+        }
         if(found) {
             m_fox_slaves_info[i].sinfo = pi[j];
             m_fox_slaves_info[i].connected = true;
-        } else if(m_fox_slaves_info[i].connected) {  
+        } else if(m_fox_slaves_info[i].connected) {
             m_fox_slaves_info[i].connected = false;
             m_fox_slaves_info[i].nb_CPU_all = 0;
             m_fox_slaves_info[i].nb_CPU_idle = 0;
             m_fox_slaves_info[i].LasSentJobMsgID = 0;
             m_fox_slaves_info[i].LastProcessedJobMsgID = 0;
 
-            SlaveDisconnected(m_fox_slaves_info[i].sinfo.ip);            
+            SlaveDisconnected(m_fox_slaves_info[i].sinfo.ip);
         }
-    }   
+    }
     //finding new
     for(int j=0;j<pi.size();j++) {
         bool found = false;
@@ -135,7 +135,7 @@ wxString FoxGridMaster::getResult(wxString message, long pos)
     return result;
 }
 bool FoxGridMaster::SaveResult(wxString filename, wxString data)
-{   
+{
    #ifdef WIN32
       filename = m_working_dir + "\\GridRslt\\" + filename;
    #else
@@ -154,11 +154,11 @@ bool FoxGridMaster::SaveResult(wxString filename, wxString data)
 void FoxGridMaster::ProcessMessagesFromSlaves()
 {
     vector<GridMasterBase::REC_MSG> msgs = getReceivedMsgs();
-    
+
     for(int i=0;i<msgs.size();i++) {
         stringstream in_string;
         in_string<<msgs[i].msg;
-        
+
         bool newResult = false;
 
         while(true) {
@@ -188,13 +188,13 @@ void FoxGridMaster::ProcessMessagesFromSlaves()
                 }
                 long long LasSentJobMsgID = 0;
                 updateSlaveCPUsInfo(msgs[i].IP, freeCPUs, AllCPUs, LastProcessedJobMsgID, LasSentJobMsgID);
-                
+
                 if((freeCPUs!=0) && (LasSentJobMsgID==LastProcessedJobMsgID)) {
                     SendSomeJob(msgs[i].IP, freeCPUs);
                 }
                 break;
             }
-            
+
             //<result ID=\"%d\" Cost=\"%s\" Rwp=\"%s\">
             if( ("result"==tag.GetName()) && (!tag.IsEndTag()) ) {
                 newResult = true;
@@ -214,7 +214,7 @@ void FoxGridMaster::ProcessMessagesFromSlaves()
                         count++;
                         Rwp = atof(tag.GetAttributeValue(j).c_str());
                     }
-                }                
+                }
                 long pos = in_string.tellg();
                 if(cost<0) {
                     //error occured during the calculation and empty result was obtained from the slave, just delete from the job list one run
@@ -234,7 +234,7 @@ void FoxGridMaster::ProcessMessagesFromSlaves()
                         for(int j=0;j<m_jobs.size();j++) {
                             if(m_jobs[j].ID == id) {
                                 //just decrease nb_running...
-                                m_jobs[j].removeIPFromRunningIPs(msgs[i].IP);                                
+                                m_jobs[j].removeIPFromRunningIPs(msgs[i].IP);
                                 break;
                             }
                         }
@@ -245,12 +245,12 @@ void FoxGridMaster::ProcessMessagesFromSlaves()
                     MasterResult mr;
                     wxMutexLocker l(m_jobs_mutex);
                     for(int j=0;j<m_jobs.size();j++) {
-                        if(m_jobs[j].ID == id) {                            
+                        if(m_jobs[j].ID == id) {
                             //just decrease nb_running...
-                            m_jobs[j].removeIPFromRunningIPs(msgs[i].IP);                          
+                            m_jobs[j].removeIPFromRunningIPs(msgs[i].IP);
                             mr.Cost = cost;
                             mr.data = "";
-                            mr.Rwp = Rwp; 
+                            mr.Rwp = Rwp;
                             mr.JobID = m_jobs[j].ID;
                             mr.filename = mr.generateFileName(m_jobs[j].ID, cost, Rwp);
                             m_jobs[j].results.push_back(mr);
@@ -264,16 +264,16 @@ void FoxGridMaster::ProcessMessagesFromSlaves()
                             //TODO: save it later!
                             mr.data = "";
                         }
-                    }                                        
+                    }
                 }
                 break;
-            }                        
-        }        
+            }
+        }
     }
 }
 void FoxGridMaster::updateSlaveLastJobMsgsInfo(wxString SlaveIP, long long lastSentJobMsgID)
 {
-    wxMutexLocker l(m_fox_slaves_info_mutex);     
+    wxMutexLocker l(m_fox_slaves_info_mutex);
     for(int i=0;i<m_fox_slaves_info.size();i++) {
         if(m_fox_slaves_info[i].sinfo.ip==SlaveIP) {
             m_fox_slaves_info[i].LasSentJobMsgID = lastSentJobMsgID;
@@ -283,13 +283,13 @@ void FoxGridMaster::updateSlaveLastJobMsgsInfo(wxString SlaveIP, long long lastS
 void FoxGridMaster::updateSlaveCPUsInfo(wxString SlaveIP, int CPUfree, int CPUall, long long lastProcessedJobMsgID, long long &lastSentJobMsgID)
 {
     lastSentJobMsgID = 0;
-    wxMutexLocker l(m_fox_slaves_info_mutex);     
+    wxMutexLocker l(m_fox_slaves_info_mutex);
     for(int i=0;i<m_fox_slaves_info.size();i++) {
         if(m_fox_slaves_info[i].sinfo.ip==SlaveIP) {
             m_fox_slaves_info[i].nb_CPU_all = CPUall;
             m_fox_slaves_info[i].nb_CPU_idle = CPUfree;
             m_fox_slaves_info[i].LastProcessedJobMsgID = lastProcessedJobMsgID;
-            lastSentJobMsgID=m_fox_slaves_info[i].LasSentJobMsgID; 
+            lastSentJobMsgID=m_fox_slaves_info[i].LasSentJobMsgID;
         }
     }
 }
@@ -340,18 +340,18 @@ wxString FoxGridMaster::createJobHeader(wxString name, int ID, int nb_trial, int
 }
 bool FoxGridMaster::SendSomeJob(wxString SlaveIP, int freeCPUs)
 { //cannot use GetSlaveIndex here, because we have to be under mutex
-       
+
     MasterJob mj;
     bool found = false;
 
-    wxMutexLocker l(m_jobs_mutex);    
+    wxMutexLocker l(m_jobs_mutex);
     for(int i=0;i<m_jobs.size();i++) {
         if(m_jobs[i].getNbFreeJobs() > 0) {
             mj = m_jobs[i];
             found = true;
 
             int min = m_jobs[i].getNbFreeJobs() < freeCPUs ? m_jobs[i].getNbFreeJobs() : freeCPUs;
-            wxString header = createJobHeader(mj.name, mj.ID, mj.nb_trial, min, mj.randomize);            
+            wxString header = createJobHeader(mj.name, mj.ID, mj.nb_trial, min, mj.randomize);
             long long msgID = SendMsgToSlave(header + mj.data + "\n</ClientJob>\n", SlaveIP);
             if (msgID==-1) {
                 return false;
@@ -363,8 +363,8 @@ bool FoxGridMaster::SendSomeJob(wxString SlaveIP, int freeCPUs)
             if(freeCPUs<=0) break;
         }
     }
-    
-    if(!found) {                     
+
+    if(!found) {
         WriteLogMessage("No job found");
         return false;
     }
@@ -374,4 +374,3 @@ void FoxGridMaster::AskSlavesState()
 {
     SendMsgtoAll("state");
 }
-

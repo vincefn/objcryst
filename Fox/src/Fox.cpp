@@ -1476,15 +1476,15 @@ int main (int argc, char *argv[])
          string tmpstr2=costAsChar;
          tmpstr.replace(filenameInsertCost,5,tmpstr2,0,tmpstr2.length());
       }
-      if(filenameInsertRwp>=0) 
-      {            
+      if(filenameInsertRwp>=0)
+      {
          //update actual position
          filenameInsertRwp = tmpstr.find("#Rwp",0);
-         char RwpAsChar[50]; 
+         char RwpAsChar[50];
          float Rwp = -1;
          for(unsigned int i=0;i<gPowderPatternRegistry.GetNb();++i) {
              //TODO: multiphase - now, it take Rwp of the last pattern in the registry...
-            Rwp =  gPowderPatternRegistry.GetObj(i).GetRw();           
+            Rwp =  gPowderPatternRegistry.GetObj(i).GetRw();
          }
          sprintf(RwpAsChar,"-Rwp-%.4f", Rwp);
          string tmpstr2=RwpAsChar;
@@ -2784,7 +2784,7 @@ void WXCrystMainFrame::OnCOD(wxCommandEvent &event)
    tmpsizer->Add(mvpCOD_Text1,1, wxEXPAND);
    mvpCOD_Text2 = new wxTextCtrl(pWinCOD,-1);
    tmpsizer->Add(mvpCOD_Text2,1, wxEXPAND);
-   
+
    tmpsizer=new wxBoxSizer(wxHORIZONTAL);
    topsizer->Add(tmpsizer, 0, wxEXPAND);
    wxStaticText *pFormula=new wxStaticText(pWinCOD,-1,"Formula (Hill notation):");
@@ -2805,8 +2805,8 @@ void WXCrystMainFrame::OnCOD(wxCommandEvent &event)
    pSMARTS->SetToolTip(_T("SMARTS pattern, e.g. [OH]c1ccccc1 for phenol\n"
                           "See https://www.daylight.com/dayhtml/doc/theory/theory.smarts.html\n"
                           "Characters not allowed (untested): at least &"));
-   
-   
+
+
    tmpsizer=new wxBoxSizer(wxHORIZONTAL);
    topsizer->Add(tmpsizer, 0, wxEXPAND);
    wxStaticText *pCODId=new wxStaticText(pWinCOD,-1,"COD id:");
@@ -2826,7 +2826,7 @@ void WXCrystMainFrame::OnCOD(wxCommandEvent &event)
       mvpCOD_Elements.push_back(new wxTextCtrl(pWinCOD,-1, wxEmptyString, wxDefaultPosition, wxSize(50,-1)));
       tmpsizer->Add(mvpCOD_Elements.back(),1, wxEXPAND);
    }
-   
+
    tmpsizer=new wxBoxSizer(wxHORIZONTAL);
    topsizer->Add(tmpsizer, 0, wxEXPAND);
    pElements=new wxStaticText(pWinCOD,-1,"Excluded Elements:");
@@ -3054,14 +3054,14 @@ void WXCrystMainFrame::OnButton(wxCommandEvent &event)
       query<<"&text1="<<v;
       empty_query = false;
    }
-   
+
    v=mvpCOD_Text2->GetValue();
    if(v.IsEmpty()==false)
    {
       query<<"&text2="<<v;
       empty_query = false;
    }
-   
+
    // Formula
    v=mvpCOD_Formula->GetValue();
    if(v.IsEmpty()==false)
@@ -3069,7 +3069,7 @@ void WXCrystMainFrame::OnButton(wxCommandEvent &event)
       query<<"&formula="<<v;
       empty_query = false;
    }
-   
+
    // SMARTS
    v=mvpCOD_SMARTS->GetValue();
    if(v.IsEmpty()==false)
@@ -3085,7 +3085,7 @@ void WXCrystMainFrame::OnButton(wxCommandEvent &event)
       query<<"&id="<<v;
       empty_query = false;
    }
-   
+
    //Elements
    int idxel=1;
    for(std::list<wxTextCtrl*>::iterator pos=mvpCOD_Elements.begin();pos!=mvpCOD_Elements.end();++pos)
@@ -3097,7 +3097,7 @@ void WXCrystMainFrame::OnButton(wxCommandEvent &event)
          empty_query = false;
       }
    }
-   
+
    // Excluded elements
    idxel=1;
    for(std::list<wxTextCtrl*>::iterator pos=mvpCOD_NElements.begin();pos!=mvpCOD_NElements.end();++pos)
@@ -3147,7 +3147,7 @@ void WXCrystMainFrame::OnButton(wxCommandEvent &event)
 
    VFN_DEBUG_MESSAGE("WXCrystMainFrame::OnButton():Query="<<query.str()<<" (dt="<<chrono.seconds()<<")", 10)
    if( (mpCODFrame!=0)  && (wxWindow::FindWindowById(ID_FOX_COD_LIST)!=NULL)) mpCODFrame->Close();
-   
+
    // Query using REST API
    if(false == wxFileSystem::HasHandlerForPath(_T("http://objcryst.sourceforge.net/FoxUpdates.txt")))
       wxFileSystem::AddHandler(new wxInternetFSHandler);
@@ -3183,7 +3183,7 @@ void WXCrystMainFrame::OnButton(wxCommandEvent &event)
          wxInputStream *fstream = fp->GetStream();
          wxStringOutputStream wxresult;
          fstream->Read(wxresult);
-         
+
          // Parse results
          boost::property_tree::ptree root;
          stringstream ss;

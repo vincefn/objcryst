@@ -9,10 +9,10 @@ using namespace std;
 
 class GridSlaveBase
 {
-    public:        
+    public:
         GridSlaveBase(wxString working_dir);
         ~GridSlaveBase();
-        bool ConnectToMaster(int nbOfTrial, wxString hostname, int port=2854);                
+        bool ConnectToMaster(int nbOfTrial, wxString hostname, int port=2854);
         bool isConnectedToMaster();
         bool isOutcommingConnectionRunning();
         bool isReceivingConnectionRunning();
@@ -23,8 +23,8 @@ class GridSlaveBase
         vector<GridCommunication::MSGINFO_REC> getReceivedMessages();
 
     protected:
-        void WriteLogMessage(wxString msg); 
-        
+        void WriteLogMessage(wxString msg);
+
         wxMutex   m_log_msg_mutex;
 
     private:
@@ -35,8 +35,7 @@ class GridSlaveBase
         GridClient  *m_client;//for outcomming msgs
         GridServer  *m_server;//for incomming msgs
         int          m_port_server;
-        
-        
+
+
 };
 #endif
-

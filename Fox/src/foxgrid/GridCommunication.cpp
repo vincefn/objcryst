@@ -5,7 +5,7 @@ int generateUniqueID() {
 
     static bool initialized = false;
     static int currentID;
-    
+
     if (!initialized) {
         std::srand(std::time(nullptr));
         currentID = std::rand() % 1000;
@@ -36,20 +36,20 @@ char GridCommunication::CalculateXORChecksum(const string& data) {
 
     //runs netstat
     try {
-        string command = "netstat -an";        
-        array<char, 1024> buffer; 
+        string command = "netstat -an";
+        array<char, 1024> buffer;
         unique_ptr<FILE, decltype(&PCLOSE)> pipe(POPEN(command.c_str(), "r"), PCLOSE);
         if (!pipe) {
             return localPorts;
         }
         while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
             result.push_back(buffer.data());
-        }        
+        }
     } catch (const exception& e) {
         cerr << "Exception: " << e.what() << std::endl;
         return localPorts;
     }
-    
+
     /*
     Proto  Local Address          Foreign Address        State
     TCP    0.0.0.0:135            0.0.0.0:0              LISTENING
@@ -78,7 +78,7 @@ char GridCommunication::CalculateXORChecksum(const string& data) {
 
     return localPorts;
 }
-long long GridCommunication::getTimeStampNanoSeconds() 
+long long GridCommunication::getTimeStampNanoSeconds()
 {
     auto now = std::chrono::high_resolution_clock::now();
     auto now_ms = std::chrono::time_point_cast<std::chrono::nanoseconds>(now).time_since_epoch().count();
@@ -97,19 +97,19 @@ long long GridCommunication::getTimeStampSeconds()
     return now_m;
 }
 string GridCommunication::GenerateUniqueIdentifier(const string& userSpecificString) {
-    
+
     auto now = std::chrono::high_resolution_clock::now();
     auto now_ms = std::chrono::time_point_cast<std::chrono::milliseconds>(now).time_since_epoch().count();
     std::string dateTimeStr = std::to_string(now_ms);
     std::string combinedStr = dateTimeStr + userSpecificString;
-        
+
     std::hash<std::string> hash_fn;
-    size_t hash = hash_fn(combinedStr);  
-    
+    size_t hash = hash_fn(combinedStr);
+
     std::ostringstream oss;
-    oss << std::setw(32) << std::setfill('0') << std::hex << hash; 
+    oss << std::setw(32) << std::setfill('0') << std::hex << hash;
     std::string uniqueIdentifier = oss.str();
-    
+
     if (uniqueIdentifier.length() > 32) {
         uniqueIdentifier = uniqueIdentifier.substr(0, 32);
     }
@@ -143,7 +143,7 @@ bool GridCommunication::lastWriteOK(wxSocketBase *socket, wxUint32 len)
 short GridCommunication::SendData(wxSocketBase *socket, long long msgID, const char* data, const wxUint32 dataLen)
 {
     const wxUint32 maxChunkSize = 10*1024;
-    
+
     //sending the header
     MessageHeader msgH;
 
@@ -165,7 +165,7 @@ short GridCommunication::SendData(wxSocketBase *socket, long long msgID, const c
     }
     //socket->SetFlags(wxSOCKET_WAITALL|wxSOCKET_BLOCK);
     socket->SetFlags(wxSOCKET_WAITALL);
-    
+
     socket->Write(&msgH, sizeof(MessageHeader));
     if(!lastWriteOK(socket, sizeof(MessageHeader))) {
         return 1;
@@ -173,7 +173,7 @@ short GridCommunication::SendData(wxSocketBase *socket, long long msgID, const c
 
     wxUint32 remaining = dataLen;
     while (remaining > 0) {
-        char message[maxChunkSize];   
+        char message[maxChunkSize];
         wxUint32 restChunkSize = std::min(remaining, static_cast<wxUint32>(maxChunkSize - sizeof(MessageHeader)));
         msgH.chunkLength = restChunkSize;
 
@@ -206,7 +206,7 @@ short GridCommunication::ReadData(wxSocketBase *socket, long long &msgID, vector
     if (!lastReadOK(socket, sizeof(MessageHeader))) {
         return 1;
     }
-    if(msgH.chunkLength!=0) return 2; //in this stage we are expecting only the header!   
+    if(msgH.chunkLength!=0) return 2; //in this stage we are expecting only the header!
     msgID = msgH.msgID;
 
     data.clear();
@@ -226,11 +226,11 @@ short GridCommunication::ReadData(wxSocketBase *socket, long long &msgID, vector
 
 
         data.insert(data.end(), message + sizeof(MessageHeader), message + sizeof(MessageHeader) + msgH.chunkLength);
-        
+
         //std::memcpy(data + received, message + sizeof(MessageHeader), msgH.chunkLength);
-        
+
         received += msgH.chunkLength;
-    }   
+    }
     data.push_back('\0');
     return 0;
 }
@@ -310,7 +310,7 @@ short GridCommunication::SendData2(wxSocketBase *socket, long long msgID, const 
 
     wxUint32 remaining = dataLen;
     while (remaining > 0) {
-        char message[maxChunkSize] = {};   
+        char message[maxChunkSize] = {};
         wxUint32 restChunkSize = std::min(remaining, static_cast<wxUint32>(maxChunkSize - sizeof(MessageHeader)));
         msgH.chunkLength = restChunkSize;
 
@@ -327,10 +327,10 @@ short GridCommunication::SendData2(wxSocketBase *socket, long long msgID, const 
         }
         data += restChunkSize;
         remaining -= restChunkSize;
-        
+
         MessageHeader confirm;
         socket->Read(&confirm, sizeof(MessageHeader));
-        
+
         if(!lastReadOK(socket, sizeof(MessageHeader))) {
             return 3;
         }
@@ -342,7 +342,7 @@ short GridCommunication::SendData2(wxSocketBase *socket, long long msgID, const 
 
     WriteLogMessage("SendData end");
     return 0;
-    
+
 }
 short GridCommunication::ReceiveData2(wxSocketBase *socket, long long &msgID, vector<char> &data, bool thread)
 {
@@ -362,7 +362,7 @@ short GridCommunication::ReceiveData2(wxSocketBase *socket, long long &msgID, ve
     if (!lastReadOK(socket, sizeof(MessageHeader))) {
         return 1;
     }
-    if(msgH.chunkLength!=0) return 2; //in this stage we are expecting only the header!   
+    if(msgH.chunkLength!=0) return 2; //in this stage we are expecting only the header!
     msgID = msgH.msgID;
 
     data.clear();
@@ -370,7 +370,7 @@ short GridCommunication::ReceiveData2(wxSocketBase *socket, long long &msgID, ve
 
     wxUint32 received = 0;
     while (received < msgH.msgLen) {
-        char message[maxChunkSize] = {}; 
+        char message[maxChunkSize] = {};
         wxUint32 toReceive = std::min(static_cast<wxUint32>((msgH.msgLen - received) + sizeof(MessageHeader)), maxChunkSize);
         socket->Read(message, toReceive);
         if (!lastReadOK(socket, toReceive)) {
@@ -385,7 +385,7 @@ short GridCommunication::ReceiveData2(wxSocketBase *socket, long long &msgID, ve
         if(!lastWriteOK(socket, sizeof(MessageHeader))) {
             return 5;
         }
-    }   
+    }
     data.push_back('\0');
     return 0;
 }
