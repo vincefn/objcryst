@@ -189,7 +189,7 @@ class Crystal:public UnitCell
       /// \todo one function to print on one line and a PrintLong() function
       /// \param os the stream to which the information is outputed (default=cout)
       void Print(ostream &os=cout) const;
-   
+
       /// Formula with atoms in alphabetic order
       std::string GetFormula() const;
       /// Weight for the crystal formula, in atomic units (g/mol). This should be
@@ -338,7 +338,7 @@ class Crystal:public UnitCell
       const VBumpMergePar& GetBumpMergeParList()const;
       VBumpMergePar& GetBumpMergeParList();
 
-      
+
       struct DistTableInternalPosition
       {
             DistTableInternalPosition(const long atomIndex, const int sym,
@@ -380,28 +380,28 @@ class Crystal:public UnitCell
       struct InterMolDistPar
       {
           InterMolDistPar();
-          
+
           InterMolDistPar(const vector<string> At1, const vector<string> At2, const REAL actualDist, const REAL dist, const REAL sigma, const REAL delta);
 
           //set mAt2 from the string of atom names separated by spaces
           string get_list_At1();
           string get_list_At2();
           void set_At2(string atom_names);
-          
+
           //the first is the atom in the asymmetric part of the unit cell
-          vector<string> mAt1;           
+          vector<string> mAt1;
           vector<int> mAt1Indexes;
           vector<DistTableInternalPosition> vUniqueIndexAt1;
 
           //the second one is the neighbour
-          vector<string> mAt2;  
+          vector<string> mAt2;
           vector<int> mAt2Indexes;
           vector<DistTableInternalPosition> vPosAt2;
 
           //table of neighbours based on At1 and list of At2
           //there could be two atoms with the same name in crystal, thats why it is a vector
           vector<NeighbourHood> mNbh;
-          
+
           //dummy, just actual distance
           REAL mActDist;
           //defined distance (to be found) as d*d
@@ -411,13 +411,13 @@ class Crystal:public UnitCell
           REAL mDelta;
       };
 
-      struct NamedScatteringComponent: public ScatteringComponent  {          
+      struct NamedScatteringComponent: public ScatteringComponent  {
           string mName;
       };
       mutable vector<NamedScatteringComponent> mNamedScattCompList;
 
       const vector<NamedScatteringComponent>& GetNamedScatteringComponentList() const;
-      
+
       void SetNewInterMolDist(const vector<string> At1, const vector<string> At2, const REAL dist, const REAL sigma, const REAL delta) const;
 
       void RemoveIntermolDistPar(int Index) const;
@@ -547,7 +547,7 @@ class Crystal:public UnitCell
       //void CalcMyDistTable()const;
       void CalcDistTableForInterMolDistCost()const;
 
-      
+
       void printInterMolDistList() const;
 
       /** Calculate all Bond Valences.
@@ -561,7 +561,7 @@ class Crystal:public UnitCell
       /// Anti-bump parameters map
       VBumpMergePar mvBumpMergePar;
 
-      
+
 
       /// Last Time Anti-bump parameters were changed
       RefinableObjClock mBumpMergeParClock;
@@ -573,7 +573,7 @@ class Crystal:public UnitCell
       REAL mBumpMergeScale;
 
       //list of intermolecular distances
-      mutable std::vector<InterMolDistPar> mInterMolDistList; 
+      mutable std::vector<InterMolDistPar> mInterMolDistList;
 
       //intermolecular distances in the meaning of the indexes of mScattCompList
       //[i][j]: i=mAt1, j=mAt2
@@ -589,8 +589,8 @@ class Crystal:public UnitCell
       /// The time when the distance table was last calculated
       mutable RefinableObjClock mDistTableForInterMolDistClock;
 
-      //mutable std::vector<NeighbourHood> mImdTable;      
-      
+      //mutable std::vector<NeighbourHood> mImdTable;
+
       //list of atoms referenced to mImdTable
       //mutable vector<int> mlistOfAt1InterMolDistScatterers;
 

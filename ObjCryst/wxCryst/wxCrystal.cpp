@@ -478,7 +478,7 @@ mpCrystalGL(0)
                                 "Show Intermolecular Distance Restraints");
          mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_SCATT,ID_CRYSTAL_MENU_REMOVE_INTERMOLDIST_WIN,
                                 "Remove Intermolecular Distance Restraints");
-         
+
 
       mpMenuBar->AddMenu("Display",ID_CRYSTAL_MENU_DISPLAY);
          mpMenuBar->AddMenuItem(ID_CRYSTAL_MENU_DISPLAY,ID_CRYSTAL_MENU_DISPLAY_3DVIEW,
@@ -1093,7 +1093,7 @@ void WXCrystal::OnMenuRemoveIntermolecularDistRestr(wxCommandEvent & event)
     wxArrayString choices;
     choices.resize(mpCrystal->GetIntermolDistNb());
     for(int i=0;i<choices.size();i++) {
-        Crystal::InterMolDistPar imdp = mpCrystal->GetIntermolDistPar(i);        
+        Crystal::InterMolDistPar imdp = mpCrystal->GetIntermolDistPar(i);
         string myline;
         for(int j=0;j<imdp.mAt1.size();j++) {
             myline += imdp.mAt1[j] + " ";
@@ -1108,7 +1108,7 @@ void WXCrystal::OnMenuRemoveIntermolecularDistRestr(wxCommandEvent & event)
 
     wxSingleChoiceDialog dialog(this,_T("Choose restraints you want to delete"),_T("Select line"),choices);
     if(wxID_OK!=dialog.ShowModal()) return;
-    int pos = dialog.GetSelection();    
+    int pos = dialog.GetSelection();
 
     mpCrystal->RemoveIntermolDistPar(pos);
     wxMessageDialog dialog5(this, _T("The restriction was removed"));
@@ -1119,17 +1119,17 @@ void WXCrystal::OnMenuRemoveIntermolecularDistRestr(wxCommandEvent & event)
 }
 void WXCrystal::OnMenuAddIntermolecularDistRestr(wxCommandEvent & event)
 {
-    
+
    VFN_DEBUG_ENTRY("WXMolecule::OnMenuAddBond()",6)
    WXCrystValidateAllUserInput();
    int choice;
    const vector<Crystal::NamedScatteringComponent> pList=mpCrystal->GetNamedScatteringComponentList();
-   
+
    wxArrayString choices;
    choices.resize(pList.size());
    for(unsigned int i=0;i<pList.size();i++)
       choices[i]= wxString::FromAscii(pList[i].mName.c_str());
-   
+
    wxMultiChoiceDialog dialog(this,_T("Choose name(s) of the first atom(s)"),_T("Select Atom(s)"),choices);
    if(wxID_OK!=dialog.ShowModal()) return;
    wxArrayInt At1=dialog.GetSelections();
@@ -1179,7 +1179,7 @@ void WXCrystal::OnMenuAddIntermolecularDistRestr(wxCommandEvent & event)
    dialog4.SetTextValidator(wxTextValidator(wxFILTER_NUMERIC));
    if(wxID_OK!=dialog4.ShowModal()) return;
    double delta;
-   dialog4.GetValue().ToDouble(&delta);   
+   dialog4.GetValue().ToDouble(&delta);
 
    mpCrystal->SetNewInterMolDist(vectAt1, vectAt2, d, sigma, delta);
 
@@ -1188,7 +1188,7 @@ void WXCrystal::OnMenuAddIntermolecularDistRestr(wxCommandEvent & event)
 
    wxTheApp->GetTopWindow()->Layout();
    wxTheApp->GetTopWindow()->SendSizeEvent();
-   
+
 }
 void WXCrystal::OnMenuAddScatterer(wxCommandEvent &event)
 {
@@ -1892,13 +1892,13 @@ void WXCrystal::OnMenuShowIntermoDistWindow(wxCommandEvent &event)
     mpIntermolDistWin->SetColLabelValue(3,_T("Sigma"));
     mpIntermolDistWin->SetColFormatFloat(4,5,3);
     mpIntermolDistWin->SetColLabelValue(4,_T("Delta"));
-    
+
     mpIntermolDistWin->AutoSizeRows();
     mpIntermolDistWin->AutoSizeColumns();
 
     mpIntermolDistWin->AppendRows(mpCrystal->GetIntermolDistNb());
     for(int i=0;i<mpCrystal->GetIntermolDistNb();i++) {
-        Crystal::InterMolDistPar imdp = mpCrystal->GetIntermolDistPar(i);        
+        Crystal::InterMolDistPar imdp = mpCrystal->GetIntermolDistPar(i);
         string tmpAt1;
         for(int j=0;j<imdp.mAt1.size();j++) {
             tmpAt1 += imdp.mAt1[j] + " ";
@@ -1911,12 +1911,12 @@ void WXCrystal::OnMenuShowIntermoDistWindow(wxCommandEvent &event)
         }
         mpIntermolDistWin->SetCellValue(i, 1, tmpAt2);
         float d = imdp.mDist2;
-        if(d>0.0) d=sqrt(d);              
+        if(d>0.0) d=sqrt(d);
         mpIntermolDistWin->SetCellValue(i, 2, wxString::Format(wxT("%f"), d));
         mpIntermolDistWin->SetCellValue(i, 3, wxString::Format(wxT("%f"), imdp.mSig));
         mpIntermolDistWin->SetCellValue(i, 4, wxString::Format(wxT("%f"), imdp.mDelta));
     }
-    
+
     this->CrystUpdate(true);
     frame->Show(true);
     frame->Layout();
@@ -1993,24 +1993,24 @@ void WXCrystal::OnEditGridIntermolDistWindow(wxGridEvent &e)
    Crystal::InterMolDistPar *imdp = mpCrystal->GetIntermolDistPar_ptr(r);
    if(imdp==0) return;
 
-   wxString s=mpIntermolDistWin->GetCellValue(r,c);      
-   
+   wxString s=mpIntermolDistWin->GetCellValue(r,c);
+
    switch(c)
    {
       case 0:
-      {//At1 
+      {//At1
          if(s!=_T(""))
          {
-            stringstream ss(s.ToStdString());  
+            stringstream ss(s.ToStdString());
             string word;
             vector<string> At1;
-            while (ss >> word) { 
+            while (ss >> word) {
                 At1.push_back(word);
             }
             bool bad=false;
             for(int i=0;i<At1.size();i++) {
                 if(mpCrystal->FindScatterersInComponentList(At1[i]).size()==0) {
-                    bad=true;                    
+                    bad=true;
                     wxMessageBox(wxString::Format("Atom with %s name does not exist !", At1[i].c_str()), _T("Unknown atom"), wxOK | wxICON_INFORMATION, this);
                     break;
                 }
@@ -2027,16 +2027,16 @@ void WXCrystal::OnEditGridIntermolDistWindow(wxGridEvent &e)
       {//At2
          if(s!=_T(""))
          {
-            stringstream ss(s.ToStdString());  
+            stringstream ss(s.ToStdString());
             string word;
             vector<string> At2;
-            while (ss >> word) { 
+            while (ss >> word) {
                 At2.push_back(word);
             }
             bool bad=false;
             for(int i=0;i<At2.size();i++) {
                 if(mpCrystal->FindScatterersInComponentList(At2[i]).size()==0) {
-                    bad=true;                    
+                    bad=true;
                     wxMessageBox(wxString::Format("Atom with %s name does not exist !", At2[i].c_str()), _T("Unknown atom"), wxOK | wxICON_INFORMATION, this);
                     break;
                 }
@@ -2065,7 +2065,7 @@ void WXCrystal::OnEditGridIntermolDistWindow(wxGridEvent &e)
          {
             double d;
             s.ToDouble(&d);
-            imdp->mSig = d;            
+            imdp->mSig = d;
          }
          break;
       }
@@ -2075,14 +2075,14 @@ void WXCrystal::OnEditGridIntermolDistWindow(wxGridEvent &e)
          {
             double d;
             s.ToDouble(&d);
-            imdp->mDelta = d;                 
+            imdp->mDelta = d;
          }
          break;
-      } 
+      }
    }
    mpCrystal->mInterMolDistListNeedsInit=true;
    this->CrystUpdate();
-   
+
 }
 void WXCrystal::OnEditGridScattPow(wxGridEvent &e)
 {
@@ -3353,15 +3353,15 @@ mIsGLFontBuilt(false),mGLFontDisplayListBase(0),mpFourierMapListWin(0),mFadeDist
    // Fade distance for showing transparent atoms beyond display limit
    if(!wxConfigBase::Get()->HasEntry(_T("Crystal/REAL/3D fade distance")))
       wxConfigBase::Get()->Write(_T("Crystal/REAL/3D fade distance"), 4);
-   
+
    wxConfigBase::Get()->Read(_T("Crystal/REAL/3D fade distance"), &mFadeDistance);
-   
+
    // Show full molecules for those centered inside the display limits ?
    if(!wxConfigBase::Get()->HasEntry(_T("Crystal/BOOL/Show full molecules in 3D view")))
       wxConfigBase::Get()->Write(_T("Crystal/BOOL/Show full molecules in 3D view"), mShowFullMolecule);
-   
+
    wxConfigBase::Get()->Read(_T("Crystal/BOOL/Show full molecules in 3D view"), &mShowFullMolecule);
-   
+
    if(mShowAtomName) mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWATOMLABEL, _T("Hide Atom Labels"));
    else mpPopUpMenu->SetLabel(ID_GLCRYSTAL_MENU_SHOWATOMLABEL, _T("Show Atom Labels"));
 }

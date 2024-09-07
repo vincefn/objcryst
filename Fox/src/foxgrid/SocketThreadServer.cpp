@@ -1,7 +1,7 @@
 #include "SocketThreadServer.h"
 
-SocketThreadServer::SocketThreadServer(  wxSocketBase         *pSocket, 
-                                         wxString              workingDir, 
+SocketThreadServer::SocketThreadServer(  wxSocketBase         *pSocket,
+                                         wxString              workingDir,
                                          wxEvtHandler         *parent,
                                          wxIPV4address         address,
                                          int                   port_to_connect_client=-1)
@@ -32,11 +32,11 @@ int SocketThreadServer::getPortToConnectClient()
 }
 wxThread::ExitCode SocketThreadServer::Entry()
 {
-    WriteLogMessage("Thread Entry");    
-    while (!TestDestroy()) { 
+    WriteLogMessage("Thread Entry");
+    while (!TestDestroy()) {
         if(!m_socket->IsConnected()) {
             break;
-        }     
+        }
         wxThread::Yield(); // this is important to call it before WaitForRead()
         if(m_socket->WaitForRead(1, 0)) {
 
@@ -47,7 +47,7 @@ wxThread::ExitCode SocketThreadServer::Entry()
             break;
         }
     }
-   
+
     m_socket->Destroy();
     m_socket = 0;
     WriteLogMessage("Leaving thread");
@@ -68,7 +68,7 @@ void SocketThreadServer::WriteLogMessage(wxString msg)
       wxDateTime datetime = wxDateTime::Now();
       logfile.Write(datetime.Format(_T("%X ")) + msg + _T("\n"));
       logfile.Close();
-   }  
+   }
 #endif
 }
 bool SocketThreadServer::ReadSocket()
@@ -87,7 +87,7 @@ bool SocketThreadServer::ReadSocket()
     WriteLogMessage("msg.ID="+to_string(mi_rec.ID)+" saving new message (len="+to_string(mi_rec.msg.length())+")");
     mi_rec.recieved = getTimeStampMinutes();
     mi_rec.IP = GetAddress().IPAddress();
-    
+
     wxMutexLocker locker(m_messages_in_mutex);
     if (!locker.IsOk()) {
         WriteLogMessage("ERROR: getReceivedMessages() - !locker.IsOk()");
@@ -120,7 +120,6 @@ vector<GridCommunication::MSGINFO_REC> SocketThreadServer::getReceivedMessages()
     m_messages_in.erase(std::remove_if(m_messages_in.begin(), m_messages_in.end(),
                         [](const MSGINFO_REC& msg) { return msg.processed != 0; }),
                         m_messages_in.end());
-    
-    return res;    
-}
 
+    return res;
+}

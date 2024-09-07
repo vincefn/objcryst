@@ -17,54 +17,54 @@ class GridMasterBase
             wxString    IP;
             long long msgID;
             //long slaveID;
-            wxString msg;                        
+            wxString msg;
 
             REC_MSG() {
-                msgID = 0;                
-                //slaveID = 0;                
+                msgID = 0;
+                //slaveID = 0;
             }
         };
 
          struct SLAVE_INFO_PUBLIC {
                 //long          ID;
-                wxString      ip; 
+                wxString      ip;
                 int port;
-            
+
                 SLAVE_INFO_PUBLIC() {
                     port = -1;
                 }
             };
 
-        
+
         GridMasterBase(wxString working_dir);
         ~GridMasterBase();
-        
+
         bool isServerListening();
-        bool InitializeCommunication(); 
+        bool InitializeCommunication();
         int getServersPort();
         //call think about calling refreshSlaveList();
         long long SendMsgtoAll(wxString msg, long long msgID=-1);
-        long long SendMsgToSlave(wxString msg, wxString slaveIP, long long msgID=-1, bool refresh_slave_list=false);               
+        long long SendMsgToSlave(wxString msg, wxString slaveIP, long long msgID=-1, bool refresh_slave_list=false);
         vector<GridMasterBase::REC_MSG> getReceivedMsgs();
-        vector<wxString> getSlavesIPs();      
-        vector<SLAVE_INFO_PUBLIC> getSlavesPublicInfo(); 
-        bool isMsgReceived(long long msgID);         
-       
+        vector<wxString> getSlavesIPs();
+        vector<SLAVE_INFO_PUBLIC> getSlavesPublicInfo();
+        bool isMsgReceived(long long msgID);
+
     protected:
         void refreshSlaveList();
-        void WriteLogMessage(wxString msg);    
+        void WriteLogMessage(wxString msg);
         int GetSlaveIndex(wxString IP);
 
-        wxString                 m_working_dir; 
+        wxString                 m_working_dir;
         int                      m_port;
-                                                
-    private:   
+
+    private:
         struct SLAVE_INFO_BASE {
                 //long          ID;
                 wxString      ip;
                 int           port;
                 GridClient    *grid_client;
-            
+
                 SLAVE_INFO_BASE() {
                     //ID = 0;
                     grid_client = 0;
@@ -76,9 +76,8 @@ class GridMasterBase
         long                     m_slaves_refresh_time;
         wxMutex                  m_slaves_mutex;
 
-        GridServer              *m_server; //for incomming msgs        
-                       
+        GridServer              *m_server; //for incomming msgs
+
 
 };
 #endif
-

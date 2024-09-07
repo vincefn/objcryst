@@ -53,4 +53,3 @@ This exploration can take a few minutes for a monoclinic unit cell, usually 15' 
 At the end the log window will list the best results with increasing GoF, starting from the minimal GoF, up to twice that value.
 
 **Important:** the true spaceroup will not necessarily be the one with the lowest Rwp/GoF ! Ususally there will be group of spacegroup settings which have systematic extinctions compatible with the observed pattern, and will all have an Rwp or GoF close to the best. In the case of Cimetidine (above graph), the "P 1 21/a 1" correct result is the #1 solution, but this won't always be the case. For the potassium tartrate sample, the "P 21 21 21" correct result is listed as the 11th solution, with Rwp=5.06% (the best having an Rwp=4.92%).
-

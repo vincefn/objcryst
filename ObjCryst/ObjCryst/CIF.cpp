@@ -1008,10 +1008,10 @@ Crystal* CreateCrystalFromCIF(CIF &cif,const bool verbose,const bool checkSymAsX
    (*fpObjCrystInformUser)("CIF: Opening CIF");
    Chronometer chrono;
    chrono.start();
-   
+
    // If oneScatteringPowerPerElement==true, we hold this to compute the average Biso per element
    std::map<ScatteringPower*,std::pair<REAL,unsigned int> > vElementBiso;
-   
+
    bool import_multiple = true;
    if(pCryst!=NULL) import_multiple = false;
    bool crystal_found = false;
@@ -1184,7 +1184,7 @@ Crystal* CreateCrystalFromCIF(CIF &cif,const bool verbose,const bool checkSymAsX
          // Try to set name from CIF. If that fails, the computed formula will be used at the end
          if(pos->second.mName!="") pCryst->SetName(pos->second.mName);
          else if(pos->second.mFormula!="") pCryst->SetName(pos->second.mFormula);
-         
+
          const float t1=chrono.seconds();
          (*fpObjCrystInformUser)((boost::format("CIF: Create Crystal:%s(%s)(dt=%6.3fs)")%pCryst->GetName() % pCryst->GetSpaceGroup().GetName() % t1).str());
 

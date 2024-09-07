@@ -1,4 +1,4 @@
-#ifndef _FOXGRIDSLAVE_H 
+#ifndef _FOXGRIDSLAVE_H
 #define _FOXGRIDSLAVE_H
 #include "GridSlaveBase.h"
 
@@ -70,32 +70,32 @@ class FoxGridSlave: public GridSlaveBase, public wxEvtHandler
         ~FoxGridSlave();
 
         void OnCheckSlaveTimerEvent(wxTimerEvent& event);
-        void OnProcessEvent(ProcessMyEvent& pEvent);               
+        void OnProcessEvent(ProcessMyEvent& pEvent);
 
-        vector<MasterJob> getJobs();        
-        
+        vector<MasterJob> getJobs();
+
         //Sets nb of available CPUs
         //Use it carefully, it kills all current processes and allocate them again!
-        void ResetNbCPUsAll(int CPUs);      
+        void ResetNbCPUsAll(int CPUs);
 
         //void SendResult(wxString result, long duration, long jobID, long resultID);
-        
+
         int getCPUsAll();
         int getCPUsFree();
         wxString getMyStateMsg();
         wxString getMyHostname();
 
         vector<FOX_PROCESS> getProcesses();
-        
+
     protected:
 
         void addJob(MasterJob job);
         void CheckJobsAndStartCalculation();
-        void CheckResultsAndSendOne();       
+        void CheckResultsAndSendOne();
         FOX_PROCESS *getUnusedProcess();
         bool SaveDataAsFile(wxString out, wxString filename);
         void setProcessUnused(int pid);
-        bool SaveResult(wxString fileName, wxString Cost, wxString Rwp, int ID, wxDateTime startingtime, bool error);                
+        bool SaveResult(wxString fileName, wxString Cost, wxString Rwp, int ID, wxDateTime startingtime, bool error);
         bool findResultedFile(wxString dir, wxString &Rwp, wxString &Cost, wxString &filename);
         bool LoadFile(wxString filename, wxString &in);
         bool DeleteXMLFilesInDirectory(const wxString& directoryPath);
@@ -107,14 +107,14 @@ class FoxGridSlave: public GridSlaveBase, public wxEvtHandler
         wxString getJobData(wxString inmsg, long pos);
 
         wxTimer     *m_checkSlaveTimer;
-        
-        //vector<ResultInfo> m_results;  
+
+        //vector<ResultInfo> m_results;
         //wxMutex            m_results_mutex;
-        
+
         vector<MasterJob>  m_jobs;
         wxMutex            m_job_mutex;
         long long          m_last_job_msg_processed;
-        
+
 
 
         vector<FOX_PROCESS> m_processes;

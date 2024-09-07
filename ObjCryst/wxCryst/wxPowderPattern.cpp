@@ -108,7 +108,7 @@ WXCrystObjBasic(parent),mpRadiation(rad)
 
    mpSizer->Add(pSizer1,0);
    mpSizer->Add(pSizer2,0);
-   
+
    this->CrystUpdate(true);
    this->SetSizer(mpSizer);
    mpSizer->SetSizeHints(this);
@@ -3188,13 +3188,13 @@ void WXCellExplorer::OnExportIndexingResults(wxCommandEvent &event)
       dumbUser.ShowModal();
       return;
    }
-   
+
    wxFileDialog save(this,_T("Choose a file"),_T(""),_T(""),_T("*.csv"),wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
    if(save.ShowModal() != wxID_OK) return;
-   
+
    ofstream out(save.GetPath().ToAscii());
    if(!out) return;//:TODO:
-   
+
    wxArrayString sols;
    float bestvol=0;
    out <<"Score, Volume, Volume/V_best, a, b, c, alpha, beta, gamma, Lattice, Centering, NbSpurious"<<endl;
@@ -3228,13 +3228,13 @@ void WXCellExplorer::OnExportIndexingResults(wxCommandEvent &event)
       stringstream spurious;
       if(pos->first.mNbSpurious>0)
          spurious<<"(nbspurious = "<<pos->first.mNbSpurious<<")";
-      
+
       out<<pos->second<<","<<uc[6]<<","<<relvol<<","<<uc[0]<<","<<uc[1]<<","<<uc[2]<<","
          <<uc[3]*RAD2DEG<<","<<uc[4]*RAD2DEG<<","<<uc[5]*RAD2DEG<<","
          <<sys.c_str()<<","<<centc<<","<<pos->first.mNbSpurious<<endl;
    }
 
-   
+
    out.close();
 
 }
@@ -4927,9 +4927,9 @@ void WXProfileFitting::OnExploreSpacegroups(wxCommandEvent &event)
                                  nbspg*nbcycle,this,wxPD_AUTO_HIDE|wxPD_ELAPSED_TIME|wxPD_CAN_ABORT|wxPD_APP_MODAL);
 
    list<SPGScore> vSPG;
-   
+
    SpaceGroupExplorer ex(pDiff);
-   
+
    // we don't have the extinction symbols, so do it the stupid way
    // create a fingerprint of systematically extinct reflections
    // for 0<H<5 0<K<5 0<L<7
@@ -4980,7 +4980,7 @@ void WXProfileFitting::OnExploreSpacegroups(wxCommandEvent &event)
 
             if(dlgProgress.Update(i*nbcycle,wxString::FromAscii(hm.c_str())+wxString::Format(_T("  (%u cycles)\n   Rwp=%5.2f%%\n   GoF=%9.2f"),
                                   nbcycle,score.rw,score.gof))==false) user_stop=true;
-            
+
             if(user_stop) break;
             vSPG.push_back(score);
             mpLog->AppendText(wxString::Format(_T(" Rwp= %5.2f%%  GoF=%8.3f  nGoF=%9.5f (%3u reflections, %3u extinct)\n"),score.rw,score.gof,score.ngof, score.nbreflused,score.nbextinct446));

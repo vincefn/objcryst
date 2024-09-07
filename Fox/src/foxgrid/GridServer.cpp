@@ -17,7 +17,7 @@ GridServer::~GridServer()
     delete(m_checkingTimer);
     m_checkingTimer = NULL;
 
-    { 
+    {
         //releasing all these threads may take some time...
         wxMutexLocker l(m_server_threads_mutex);
         for(int i=0;i<m_server_threads.size();i++) {
@@ -46,7 +46,7 @@ bool GridServer::RunGridServer(unsigned short port)
 
    WriteLogMessage(_T("Starting server..."));
    m_server = new wxSocketServer(ip, wxSOCKET_REUSEADDR);
-   m_server->SetEventHandler(*this, GRID_SERVER_ID);   
+   m_server->SetEventHandler(*this, GRID_SERVER_ID);
    m_server->SetNotify(wxSOCKET_CONNECTION_FLAG);
    m_server->Notify(true);
    m_server->SetTimeout(60);
@@ -90,7 +90,7 @@ int GridServer::readPortToConnectClient(wxSocketBase* sock)
 {//reading 10 bytes with port number
     int port = -1;
 
-    if(sock->WaitForRead(3, 0)) {       
+    if(sock->WaitForRead(3, 0)) {
         WriteLogMessage("Reading the port number to connect client");
         sock->SetFlags(wxSOCKET_WAITALL);
         char msg[10];
@@ -107,13 +107,13 @@ int GridServer::readPortToConnectClient(wxSocketBase* sock)
         wxString tmpport(msg);
         tmpport.Trim();
         if(!tmpport.ToInt(&port)) return -1;
-    }    
+    }
     return port;
 }
 void GridServer::HandleConnection(wxSocketBase* sock)
 {
     wxIPV4address addr;
-    
+
     if (!sock->GetPeer(addr))
     {
         WriteLogMessage("ERROR: Server cannot get peer info of a new connection!");
@@ -145,12 +145,12 @@ void GridServer::HandleConnection(wxSocketBase* sock)
             WriteLogMessage("ERROR: Server cannot accept this connection. Port number for connection of the client was not sent or error occured!");
             return;
         }
-    }   
+    }
 
     {
         WriteLogMessage("Server: Creating Thread");
         SocketThreadServer *st = new SocketThreadServer(sock,
-                                            m_working_dir, 
+                                            m_working_dir,
                                             this,
                                             addr,
                                             port);
@@ -166,10 +166,10 @@ void GridServer::HandleConnection(wxSocketBase* sock)
             sock->Close();
             st->Delete();
         };
-    }    
+    }
 }
 vector<SocketThreadInfo> GridServer::getSocketThreadsInfo()
-{       
+{
     vector<SocketThreadInfo> res;
 
     //refreshServerThreadList();
@@ -192,7 +192,7 @@ vector<GridCommunication::MSGINFO_REC> GridServer::getReceivedMsgs()
     if (!l.IsOk()) {
         return msgs;
     }
-    
+
     for(int i=0;i<m_messages_received.size();i++) {
         if(m_messages_received[i].processed==0) {
             msgs.push_back(m_messages_received[i]);
@@ -208,13 +208,13 @@ vector<GridCommunication::MSGINFO_REC> GridServer::getReceivedMsgs()
     return msgs;
 }
 bool GridServer::isConnected()
-{//returns true if at least one connection (running thread) detected 
+{//returns true if at least one connection (running thread) detected
 
     if(m_server==NULL) return false;
     if(!m_server->IsConnected()) return false;
-    
+
     wxMutexLocker l(m_server_threads_mutex);
-    for(int i=0;i<m_server_threads.size();i++) {        
+    for(int i=0;i<m_server_threads.size();i++) {
         if(m_server_threads[i]->IsRunning()) {
             return true;
         }
@@ -234,10 +234,10 @@ void GridServer::refreshServerThreadList()
     WriteLogMessage("refreshServerThreadList() - start");
     vector<MSGINFO_REC> msgs;
     {
-        wxMutexLocker l(m_server_threads_mutex); 
+        wxMutexLocker l(m_server_threads_mutex);
         //if(m_server_threads.size()==0) return;
         for (auto it = m_server_threads.begin(); it != m_server_threads.end(); ) {
-            if (!(*it)->IsRunning()) { 
+            if (!(*it)->IsRunning()) {
                 WriteLogMessage("Thread " + to_string((*it)->GetId()) + "is not running -> Save messages and delete it");
                 //first save messages
                 vector<MSGINFO_REC> ms;
@@ -250,7 +250,7 @@ void GridServer::refreshServerThreadList()
                 ++it;
             }
         }
-    }   
+    }
 
     {//save it to received
         wxMutexLocker l(m_messages_received_mutex);
@@ -281,7 +281,7 @@ void GridServer::getReceivedMsgsFromAllThreads()
 void GridServer::OnTimerEvent(wxTimerEvent& event)
 {
     WriteLogMessage("OnTimerEvent - start");
-    
+
     refreshServerThreadList();
     getReceivedMsgsFromAllThreads();
 

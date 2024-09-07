@@ -16,7 +16,7 @@ GridClient::GridClient(wxString working_dir, wxString IP)
     m_IP = IP;
     m_keep_at_least_last_m_messages_to_be_send = 50;
     m_keep_minutes_m_messages_to_be_send = 10;
-    m_delete = false; 
+    m_delete = false;
 }
 GridClient::~GridClient()
 {
@@ -52,8 +52,8 @@ bool GridClient::sendPortNumber(wxSocketBase *sock, int port)
     sock->SetFlags(wxSOCKET_WAITALL);
     char msg[10];
     stringstream ss;
-    ss << std::left << std::setw(10) << std::setfill(' ') << port; 
-    string formattedString = ss.str();    
+    ss << std::left << std::setw(10) << std::setfill(' ') << port;
+    string formattedString = ss.str();
     formattedString.copy(msg, 10);
     sock->Write(msg, 10);
     if(sock->LastWriteCount()!=10) {
@@ -71,22 +71,22 @@ bool GridClient::ConnectClient(int nbOfTrial, wxString hostname, int hostport, i
 {
    WriteLogMessage(_T("Client try to connect"));
    wxIPV4address ip;
-   
+
    m_port = hostport;
    m_hostname = hostname;
    if(!ip.Service(m_port)) return false;
    if(!ip.Hostname(m_hostname)) return false;
 
    wxMutexLocker l(m_socket_thread_client_mutex);
-   if(m_socket_thread_client!=NULL) { 
-        WriteLogMessage("ERROR: The thread is still working, m_socket_thread!=0, cannot start client again"); 
-        return false;                        
+   if(m_socket_thread_client!=NULL) {
+        WriteLogMessage("ERROR: The thread is still working, m_socket_thread!=0, cannot start client again");
+        return false;
    }
 
    wxSocketClient *client = new wxSocketClient();
-   client->SetEventHandler(*this, GRID_CLIENT_SOCKET_ID);   
+   client->SetEventHandler(*this, GRID_CLIENT_SOCKET_ID);
    client->SetNotify(wxSOCKET_LOST_FLAG);
-      
+
    client->Notify(true);
    client->SetTimeout(60);
 
@@ -98,7 +98,7 @@ bool GridClient::ConnectClient(int nbOfTrial, wxString hostname, int hostport, i
       client->WaitOnConnect(3,0);
       if(i==nbOfTrial) break;
    } while(!client->IsConnected());
-   
+
     if (client->IsConnected()) {
 
         if(my_server_port>0) {
@@ -111,26 +111,26 @@ bool GridClient::ConnectClient(int nbOfTrial, wxString hostname, int hostport, i
         client->SaveState();
         //better to run it just once and then start it again after all precedures are done
         m_sendingTimer->Start(3*1000, true);
-        WriteLogMessage(_T("Client is connected to the server"));                
+        WriteLogMessage(_T("Client is connected to the server"));
 
         wxIPV4address tmp;
         WriteLogMessage("Creating Thread");
-        
+
         m_socket_thread_client = new SocketThreadClient(client,
-                                           m_working_dir, 
+                                           m_working_dir,
                                            this,
                                            tmp,
                                            &m_messages_to_be_send,
                                            &m_messages_to_be_send_mutex);
 
-        if (m_socket_thread_client->Create() == wxTHREAD_NO_ERROR) {           
+        if (m_socket_thread_client->Create() == wxTHREAD_NO_ERROR) {
             WriteLogMessage("Thread is running");
             m_socket_thread_client->Run();
         } else {
             WriteLogMessage("ERROR: Cannot create next thread");
             m_socket_thread_client->Delete();
             m_socket_thread_client=NULL;
-        }        
+        }
       return true;
    }
    else {
@@ -164,7 +164,7 @@ void GridClient::OnSocketEvent(wxSocketEvent &event)
      default:
        break;
    }
-   
+
    WriteLogMessage("OnSocketEvent end");
 }
 
@@ -177,11 +177,11 @@ bool GridClient::isConnected()
     return false;
 }
 void GridClient::refreshClientThreadState()
-{    
+{
     {
         wxMutexLocker l(m_socket_thread_client_mutex);
         if(m_socket_thread_client==NULL) return;
-    
+
         //when thread is not running, delete it and reconnect
         if(!m_socket_thread_client->IsRunning()) {
             m_socket_thread_client->Delete();
@@ -203,13 +203,13 @@ void GridClient::CleanMessagesToBeSent()
 }
 void GridClient::OnTimerEvent(wxTimerEvent& event)
 {
-    WriteLogMessage("OnTimerEvent");        
-    
+    WriteLogMessage("OnTimerEvent");
+
     if(m_reconnect_when_connection_lost && m_need_socket_connect) {
-        WriteLogMessage("Socket reconnection detected");    
+        WriteLogMessage("Socket reconnection detected");
         if(ConnectClient(1, m_hostname, m_port)) {
             m_need_socket_connect = false;
-        }        
+        }
     } else {
         refreshClientThreadState();
     }
@@ -219,15 +219,15 @@ void GridClient::OnTimerEvent(wxTimerEvent& event)
     if(m_delete) {
         DeleteMyself();
         return;
-    } 
+    }
 
     m_sendingTimer->Start(1*1000, true);
-    
+
 }
 long long GridClient::addMessageToSend(wxString msg, long long msgID)
 {
     wxMutexLocker locker(m_messages_to_be_send_mutex);
-    
+
     MSGINFO_SENT mi;
     mi.ID = msgID;
     mi.msg = msg;
@@ -243,15 +243,15 @@ void GridClient::printMsgs()
         outmsg+= "["+to_string(i)+"]:\n";
         outmsg+= "ID: "+to_string(m_messages_to_be_send[i].ID)+"\n";
         outmsg+= "sent: "+to_string(m_messages_to_be_send[i].sent)+"\n";
-        outmsg+= "receiving confirmed: "+to_string(m_messages_to_be_send[i].delivery_confirmation_obtained)+"\n";        
+        outmsg+= "receiving confirmed: "+to_string(m_messages_to_be_send[i].delivery_confirmation_obtained)+"\n";
         outmsg+= "msg len: "+to_string(m_messages_to_be_send[i].msg.length())+"\n";
-    }    
+    }
     outmsg+="------------\n";
     WriteLogMessage(outmsg);
 }
 vector<GridCommunication::MSGINFO_SENT> GridClient::getCopyMsgsToBeSent()
 {
-    wxMutexLocker locker(m_messages_to_be_send_mutex);    
+    wxMutexLocker locker(m_messages_to_be_send_mutex);
     return m_messages_to_be_send;
 }
 bool GridClient::getCopyMsgToBeSent(long long msgID, GridCommunication::MSGINFO_SENT &msg)

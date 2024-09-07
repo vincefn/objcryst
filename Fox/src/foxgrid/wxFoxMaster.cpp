@@ -70,10 +70,10 @@ void WXFoxMaster::Clear()
 }
 void WXFoxMaster::InitServer()
 {
-   
-   //starting server   
+
+   //starting server
    m_grid_master = new FoxGridMaster(m_working_dir);
-   m_grid_master->InitializeCommunication();   
+   m_grid_master->InitializeCommunication();
 
    //Start update timer
    m_UpdateTimer = new wxTimer(this, ID_UPDATE_TIMER);
@@ -108,7 +108,7 @@ void WXFoxMaster::InitServer()
    m_JobListTable->SetColSize(3, (xsize-10)/5-10);
    m_JobListTable->SetColSize(4, (xsize-10)/5+10);
    m_JobListTable->DeleteRows(0, 1, false);
-   
+
    JobSizer->Add(m_JobListTable,0, wxALL|wxALIGN_LEFT|wxALIGN_TOP ,3);
 
    wxBoxSizer *JobButtonSizer = new wxBoxSizer( wxHORIZONTAL );
@@ -147,13 +147,13 @@ void WXFoxMaster::InitServer()
    //client list table
    m_ClientTable = new wxGrid(this, NULL, wxDefaultPosition, wxSize(xsize,150), wxWANTS_CHARS, _T("m_ClientTable"));
    m_ClientTable->CreateGrid(1,2,wxGrid::wxGridSelectRows);
-   m_ClientTable->SetColLabelValue(0, _T("Client IP"));   
+   m_ClientTable->SetColLabelValue(0, _T("Client IP"));
    m_ClientTable->SetColLabelValue(1, _T("CPUs/using"));
    //m_ClientTable->SetColLabelValue(3, _T("Status"));
    m_ClientTable->SetColLabelSize(20);
    m_ClientTable->SetRowLabelSize(0);
    m_ClientTable->SetColSize(0, xsize/2);
-   m_ClientTable->SetColSize(1, xsize/2);     
+   m_ClientTable->SetColSize(1, xsize/2);
    m_ClientTable->DeleteRows(0, 1, false);
    listClientSizer->Add(m_ClientTable,0, wxALL|wxALIGN_LEFT|wxALIGN_TOP ,3);
 
@@ -200,28 +200,28 @@ void WXFoxMaster::InitServer()
    listsSizer->Add(listClientSizer, 0, wxALL|wxALIGN_TOP);
    listsSizer->Add(listResultSizer, 0, wxALL|wxALIGN_TOP);
 
-   
+
    topSizer->Add(JobSizer, 0, wxALL|wxALIGN_TOP);
    topSizer->Add(listsSizer, 0, wxALL|wxALIGN_TOP);
-   
-   
+
+
 
    this->SetSizer( topSizer );
    wxTheApp->GetTopWindow()->Layout();
-   wxTheApp->GetTopWindow()->SendSizeEvent();   
+   wxTheApp->GetTopWindow()->SendSizeEvent();
 }
-void WXFoxMaster::saveJobHeader(wxString filename, long ID, wxString name, int nbOfTrial, int nbRun, bool rand, wxString &data) {    
+void WXFoxMaster::saveJobHeader(wxString filename, long ID, wxString name, int nbOfTrial, int nbRun, bool rand, wxString &data) {
     wxString file;
     if(this->LoadFile(filename, data)) {
         int r = (int) rand;
         file.Printf(_T("<FoxJob Name=\"%s\" ID=\"%d\" nbOfTrial=\"%ld\" nbRun=\"%d\" rand=\"%d\"></FoxJob>\n"), name.c_str(), ID, nbOfTrial, nbRun, r);
         file +=data;
         SaveDataAsFile(file, filename);
-    }   
+    }
 }
-void WXFoxMaster::ChangeJobHeader(wxString filename, long ID, wxString name, int nbOfTrial, int nbRun, bool rand, wxString &data) 
+void WXFoxMaster::ChangeJobHeader(wxString filename, long ID, wxString name, int nbOfTrial, int nbRun, bool rand, wxString &data)
 {
-    wxString file;    
+    wxString file;
     if(LoadFile(filename, data)) {
         int r = (int) rand;
         int pos = data.First(_T("</FoxJob>"));
@@ -277,7 +277,7 @@ void WXFoxMaster::OnNewJob(wxCommandEvent& event)
     do {//show setup window
         if(!ShowEditJobWindow(newID, Name, nbOfTrial, nbRun, randomize, false)) return;
     } while((nbRun<=0)||(nbOfTrial<=0)||(Name==_T("")));
-   
+
     string tmp;
     stringstream str;
     #ifdef WIN32
@@ -332,13 +332,13 @@ bool WXFoxMaster::isFileFoxJob(wxString path, wxString &name, long &id, int &nbO
     is.close();
     return true;
 }
-bool WXFoxMaster::isJobLoaded(long ID) 
+bool WXFoxMaster::isJobLoaded(long ID)
 {
-    return m_grid_master->existsJob(ID);    
+    return m_grid_master->existsJob(ID);
 }
-void WXFoxMaster::AddServerJob(wxString filename, wxString name, wxString data, long id, int nbOfTrial, int nbRun, bool rand) 
+void WXFoxMaster::AddServerJob(wxString filename, wxString name, wxString data, long id, int nbOfTrial, int nbRun, bool rand)
 {
-    m_grid_master->addJob(filename, name, data, id, nbOfTrial, nbRun, rand);   
+    m_grid_master->addJob(filename, name, data, id, nbOfTrial, nbRun, rand);
 }
 void WXFoxMaster::loadMultipleJobs(wxArrayString jobfiles)
 {
@@ -351,7 +351,7 @@ void WXFoxMaster::loadMultipleJobs(wxArrayString jobfiles)
         bool randomize=true;
         wxString jobdata;
         if(jobfiles[i].Mid(jobfiles[i].size()-4)==wxString(_T(".xml")) && isFileFoxJob(jobfiles[i], Name, newID, nbOfTrial, nbRun, randomize)) {
-            if(!isJobLoaded(newID)) {                
+            if(!isJobLoaded(newID)) {
                 filename.Printf(_T("JOB_%d.xml"), newID);
                 #ifdef WIN32
                 filename = m_working_dir + _T("\\") + filename;
@@ -359,7 +359,7 @@ void WXFoxMaster::loadMultipleJobs(wxArrayString jobfiles)
                 #else
                  filename = m_working_dir + _T("/") + filename;
                 if(!wxFileExists(filename)) wxCopyFile(jobfiles[i], filename);
-                #endif          
+                #endif
                 ChangeJobHeader(filename, newID, Name, nbOfTrial, nbRun, randomize, jobdata);
                 AddServerJob(filename, Name, jobdata, newID, nbOfTrial, nbRun, randomize);
             } else {
@@ -386,7 +386,7 @@ void WXFoxMaster::OnLoadJob(wxCommandEvent& event)
         UpdateJobList();
         return;
     }
-    
+
     long newID;
     wxString Name=wxFileName::FileName(path).GetName();
     int nbOfTrial;
@@ -585,7 +585,7 @@ void WXFoxMaster::OnEditJob(wxCommandEvent& event)
 }
 void WXFoxMaster::OnDeleteJob(wxCommandEvent& event)
 {
-   
+
    int nb = m_JobListTable->GetSelectedRows().Count();
    if(nb!=1) return;
    int r = m_JobListTable->GetSelectedRows().Item(0);
@@ -595,7 +595,7 @@ void WXFoxMaster::OnDeleteJob(wxCommandEvent& event)
    if(r>=jobs.size()) return;
 
    wxMessageDialog d(this,_T("Do you really want to delete selected job?"), _T("Alert"), wxYES | wxNO);
-   if(wxID_YES!=d.ShowModal()) {       
+   if(wxID_YES!=d.ShowModal()) {
        return;
    }
 
@@ -654,7 +654,7 @@ void WXFoxMaster::RunLocalClient(wxCommandEvent& event)
    m_UpdateTimer->Start(1000, true);
 }
 void WXFoxMaster::UpdateJobList()
-{    
+{
     vector<MasterJob> jobs = m_grid_master->getJobs();
 
     int nbRow = m_JobListTable->GetNumberRows();
@@ -690,23 +690,23 @@ void WXFoxMaster::UpdateJobList()
         tmp.Printf(_T("%d/%d/%d"), jobs[i].nb_runs, jobs[i].results.size(), jobs[i].runningIPs.size());
         m_JobListTable->SetCellValue(i,4,tmp);//runs
         m_JobListTable->SetReadOnly(i,2);
-        wxColor ccolor(255, 255, 255);    
-        
+        wxColor ccolor(255, 255, 255);
+
         if(jobs[i].results.size() >= jobs[i].nb_runs) {
             ccolor.Set(200, 255, 200);
         } else if(jobs[i].runningIPs.size()>0) {
             ccolor.Set(255, 200, 200);
         } else if(jobs[i].results.size()>0) {
             ccolor.Set(255, 255, 200);
-        } 
-        
+        }
+
         m_JobListTable->SetCellBackgroundColour(i, 0, ccolor);
         m_JobListTable->SetCellBackgroundColour(i, 1, ccolor);
         m_JobListTable->SetCellBackgroundColour(i, 2, ccolor);
         m_JobListTable->SetCellBackgroundColour(i, 3, ccolor);
         m_JobListTable->SetCellBackgroundColour(i, 4, ccolor);
 
-    }   
+    }
 }
 void WXFoxMaster::UpdateResultList()
 {
@@ -717,7 +717,7 @@ void WXFoxMaster::UpdateResultList()
         q+=jobs[i].results.size();
     }
     if(nb == q) return;
-    
+
     m_Results.clear();
     for(int i=0;i<jobs.size();i++) {
         m_Results.insert(m_Results.begin(), jobs[i].results.begin(), jobs[i].results.end());
@@ -726,7 +726,7 @@ void WXFoxMaster::UpdateResultList()
     std::sort(m_Results.begin(), m_Results.end());
     wxString tmp;
     //rewrite already present rows (because we sorted/changed results before) and insert new ones.
-    for(int i=0;i<m_Results.size();i++) {        
+    for(int i=0;i<m_Results.size();i++) {
         if(i>=nb) {
             m_ResultTable->InsertRows(i, 1, false);
         }
@@ -740,7 +740,7 @@ void WXFoxMaster::UpdateResultList()
 }
 void WXFoxMaster::UpdateClientList(vector<FoxGridMaster::SLAVE_FOX_INFO> SI)
 {
-    
+
    //update client list
    int nbRow = m_ClientTable->GetNumberRows();
    if(nbRow>0) m_ClientTable->DeleteRows(0, nbRow, true);
@@ -751,30 +751,30 @@ void WXFoxMaster::UpdateClientList(vector<FoxGridMaster::SLAVE_FOX_INFO> SI)
         //Name
         m_ClientTable->SetCellValue(i,0,SI[i].sinfo.ip+":"+to_string(SI[i].sinfo.port));
         m_ClientTable->SetReadOnly(i,0);
-        
+
 
         //CPUs
         tmp.Printf(_T("%d/%d"), (int) SI[i].nb_CPU_all, (int) (SI[i].nb_CPU_all-SI[i].nb_CPU_idle));
         m_ClientTable->SetCellValue(i,1,tmp);
-        m_ClientTable->SetReadOnly(i,1);        
+        m_ClientTable->SetReadOnly(i,1);
 
         //set colors
         wxColour bg = wxColour(255, 255, 255);
         if(SI[i].connected) {
             if((SI[i].nb_CPU_idle == 0) && (SI[i].nb_CPU_all == 0)) {
-                bg = wxColour(255, 255, 200);                
+                bg = wxColour(255, 255, 200);
             } else if(SI[i].nb_CPU_idle == 0) {
-                bg = wxColour(255, 200, 200);                
+                bg = wxColour(255, 200, 200);
             } else {
-                bg = wxColour(200, 255, 200);                
+                bg = wxColour(200, 255, 200);
             }
         } else {
-            bg = wxColour(200, 200, 200);            
+            bg = wxColour(200, 200, 200);
         }
         m_ClientTable->SetCellBackgroundColour(i, 0, bg);
         m_ClientTable->SetCellBackgroundColour(i, 1, bg);
-        
-   }   
+
+   }
 }
 void WXFoxMaster::UpdateLists(wxTimerEvent& event)
 {
@@ -785,22 +785,22 @@ void WXFoxMaster::UpdateLists(wxTimerEvent& event)
    if(m_grid_master->isServerListening()) {
        if(m_ServerStatus!=NULL) {
             m_ServerStatus->SetForegroundColour(wxColour(0, 128, 0));
-            m_ServerStatus->SetLabelText("Master status: Server is listening on port "+to_string(port));  
+            m_ServerStatus->SetLabelText("Master status: Server is listening on port "+to_string(port));
 
        }
    } else {
        if(m_ServerStatus!=NULL) {
             m_ServerStatus->SetForegroundColour(wxColour(128, 0, 0));
-            m_ServerStatus->SetLabelText("Master status: ERROR - server is not listenning");            
+            m_ServerStatus->SetLabelText("Master status: ERROR - server is not listenning");
        }
    }
-   
+
    vector<FoxGridMaster::SLAVE_FOX_INFO> SI = m_grid_master->getFoxSlaveInfo();
    UpdateClientList(SI);
 
    UpdateJobList();
    UpdateResultList();
-   
+
    m_UpdateTimer->Start(5*1000, true);
 }
 
@@ -833,17 +833,17 @@ void WXFoxMaster::OnShowResultsServer(wxCommandEvent& event)
     {
         wxMessageBox(_T("Select one result!"), _T("Error"), wxOK, this);
         return;
-    }    
+    }
 
     int r = m_ResultTable->GetSelectedRows().Item(0);
     long JobID;
     double Cost, Rwp;
-    
+
     if(r<0 || r>=m_Results.size()) {
         wxMessageBox(_T("The selection os out of range!"), _T("Error"), wxOK, this);
         return;
-    }   
-    
+    }
+
     (*fpObjCrystInformUser)(wxString::Format("Show Results: opening file: "+m_Results[r].filename).ToStdString());
 
     if(m_dataLoaded) {
@@ -857,7 +857,7 @@ void WXFoxMaster::OnShowResultsServer(wxCommandEvent& event)
         m_dataLoaded = false;
     }
 
-    if(m_Results[r].filename.size()>4 && m_Results[r].filename.Mid(m_Results[r].filename.size()-4)==wxString(_T(".xml"))) {    
+    if(m_Results[r].filename.size()>4 && m_Results[r].filename.Mid(m_Results[r].filename.size()-4)==wxString(_T(".xml"))) {
         wxFileInputStream is(this->m_working_dir + "\\GridRslt\\" + m_Results[r].filename);
         stringstream in;
         if(is.GetSize()>0)
@@ -879,19 +879,19 @@ void WXFoxMaster::OnShowResultsServer(wxCommandEvent& event)
     }
 }
 void WXFoxMaster::OnShowResults(wxCommandEvent& event)
-{    
+{
     int nb = m_ResultTable->GetSelectedRows().Count();
     if(nb!=1)
     {
         wxMessageBox(_T("Select one result!"), _T("Error"), wxOK, this);
         return;
-    }    
+    }
 
     int r = m_ResultTable->GetSelectedRows().Item(0);
     if(r<0 || r>=m_Results.size()) {
         wxMessageBox(_T("The selection os out of range!"), _T("Error"), wxOK, this);
         return;
-    }                       
+    }
 
     wxString cmd;
     #ifdef WIN32
@@ -905,6 +905,6 @@ void WXFoxMaster::OnShowResults(wxCommandEvent& event)
     wxString com=appname+_T(" ")+ this->m_working_dir + "/GridRslt/" +m_Results[r].filename;
    VFN_DEBUG_MESSAGE("WXFoxMaster::OnShowResults() command: "<<com, 10)
     long result= wxExecute(com);
-    (*fpObjCrystInformUser)(com.ToStdString());    
+    (*fpObjCrystInformUser)(com.ToStdString());
     #endif
 }

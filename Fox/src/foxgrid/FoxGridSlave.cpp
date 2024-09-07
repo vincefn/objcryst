@@ -36,13 +36,13 @@ FoxGridSlave::FoxGridSlave(wxString m_working_dir): GridSlaveBase(m_working_dir)
     wxString dir =  dirname.GetPath();
     if(!wxDirExists(dir)) wxMkdir(dir);
 
-    m_checkSlaveTimer = new wxTimer(this, ID_GRID_CHECK_SLAVE);       
+    m_checkSlaveTimer = new wxTimer(this, ID_GRID_CHECK_SLAVE);
     m_checkSlaveTimer->Start(3000, true);
     m_last_job_msg_processed = 0;
 }
 FoxGridSlave::~FoxGridSlave()
 {
-    wxMutexLocker locker(m_processes_mutex);    
+    wxMutexLocker locker(m_processes_mutex);
     //if there are running processes, kill them all
     for(int i=0;i<m_processes.size();i++) {
         if(m_processes[i].running) {
@@ -52,10 +52,10 @@ FoxGridSlave::~FoxGridSlave()
 }
 void FoxGridSlave::resetProcesses(int nbProcesses)
 {
-    wxMutexLocker locker(m_processes_mutex); 
+    wxMutexLocker locker(m_processes_mutex);
 
-    if(nbProcesses == m_processes.size()) return;    
-    
+    if(nbProcesses == m_processes.size()) return;
+
     //todo: make it smart
     // - if nbProcesses > m_processes.size(), then just add and do not kill all previous.
     // - else try to delete not running processes. if not possible kill only necessary number of them and not all of them
@@ -79,7 +79,7 @@ void FoxGridSlave::resetProcesses(int nbProcesses)
 
         if(!wxDirExists(dir.c_str())) {
             wxMkdir(dir);
-        } 
+        }
         FOX_PROCESS proc;
         proc.dir = dir;
         m_processes.push_back(proc);
@@ -87,7 +87,7 @@ void FoxGridSlave::resetProcesses(int nbProcesses)
 }
 FOX_PROCESS *FoxGridSlave::getUnusedProcess()
 {//this function itself can't lock m_ProcessMutex, because it returns pointer
- //the mutex has to be used by the caller   
+ //the mutex has to be used by the caller
 
     for(int i=0;i<m_processes.size();i++) {
         if(!m_processes[i].running) {
@@ -102,19 +102,19 @@ void FoxGridSlave::setProcessUnused(int pid)
     for(int i=0;i<m_processes.size();i++) {
        if(m_processes[i].pid == pid) {
            m_processes[i].running = false;
-           m_processes[i].pid = -1;           
+           m_processes[i].pid = -1;
            break;
        }
    }
 }
 vector<FOX_PROCESS> FoxGridSlave::getProcesses()
-{    
-    wxMutexLocker locker(m_processes_mutex);    
+{
+    wxMutexLocker locker(m_processes_mutex);
     return m_processes;
 }
 bool FoxGridSlave::findResultedFile(wxString dir, wxString &Rwp, wxString &Cost, wxString &filename)
 {
-    wxDir tmpDir(dir);    
+    wxDir tmpDir(dir);
 
     if(!tmpDir.IsOpened()) return false;
     //there should be only one file out-Cost-*.xml
@@ -122,12 +122,12 @@ bool FoxGridSlave::findResultedFile(wxString dir, wxString &Rwp, wxString &Cost,
     if(!tmpDir.GetFirst(&filename, _T("out-Cost*.xml"), wxDIR_FILES)) return false;
 
     //filename = tmpfile;
-   
+
     int pos = filename.find("Cost");
     if(pos==-1) return false;
     int pos2 = filename.find("Rwp");
     if(pos2==-1) return false;
-    
+
     Cost = filename.substr(pos+5,pos2-1-(pos+5));
     Cost.Replace(",", ".", true);
 
@@ -135,26 +135,26 @@ bool FoxGridSlave::findResultedFile(wxString dir, wxString &Rwp, wxString &Cost,
     if(pos==-1) return false;
     pos2 = filename.find(".xml");
     if(pos2==-1) return false;
-  
+
     Rwp = filename.substr(pos+4,pos2-(pos+4));
     Rwp.Replace(",", ".", true);
-     
+
     return true;
 }
 void FoxGridSlave::OnProcessEvent(ProcessMyEvent& pEvent)
-{   
+{
    wxString st = _T("");
-   wxString filename, Cost, Rwp; 
+   wxString filename, Cost, Rwp;
    st.Printf(_T("pid=%d, status=%d, dir="), pEvent.m_pid, pEvent.m_status);
-   WriteLogMessage(_T("Process terminated: ") + st + pEvent.m_dir);  
-   
+   WriteLogMessage(_T("Process terminated: ") + st + pEvent.m_dir);
+
    int jobID=-1;
    wxDateTime startingtime = wxDateTime();
-   //identify process ID   
+   //identify process ID
    {
        wxMutexLocker locker(m_processes_mutex);
        for(int i=0;i<m_processes.size();i++) {
-           if(m_processes[i].pid == pEvent.m_pid) {           
+           if(m_processes[i].pid == pEvent.m_pid) {
                jobID = m_processes[i].jobID;
                startingtime = m_processes[i].startingtime;
                break;
@@ -166,38 +166,38 @@ void FoxGridSlave::OnProcessEvent(ProcessMyEvent& pEvent)
 
        WriteLogMessage(_T("ERROR: Process JobID not found!"));
        setProcessUnused(pEvent.m_pid);
-   
+
    } else if(pEvent.m_status!=0) {
-       
+
        WriteLogMessage(_T("ERROR: process terminated with an error => empty result will be sent to the server"));
        SaveResult("", "-1", "-1", jobID, startingtime, true);
-   
+
    } else if(!findResultedFile(pEvent.m_dir, Rwp, Cost, filename)) {
-       
+
        WriteLogMessage("ERROR: parsing filename error: filename=" + filename + ", cost=" + Cost + ", Rwp=" + Rwp);
        SaveResult("", "-1", "-1", jobID, startingtime, true);
 
    } else {
-   
+
        #ifdef WIN32
        SaveResult(pEvent.m_dir + _T("\\") + filename, Cost, Rwp, jobID, startingtime, false);
        #else
        SaveResult(pEvent.m_dir + _T("/") + filename, Cost, Rwp, jobID, startingtime, false);
        #endif
-   }      
-  
+   }
+
     #ifdef WIN32
     if(filename.length()!=0) {
         if(wxFileExists(pEvent.m_dir + _T("\\") + filename)) wxRemoveFile(pEvent.m_dir + _T("\\") + filename);
     }
     if(wxFileExists(pEvent.m_dir + _T("\\input.xml"))) wxRemoveFile(pEvent.m_dir + _T("\\input.xml"));
-    #else  
+    #else
     if(filename.length()!=0) {
         wxRemoveFile(pEvent.m_dir + _T("/") + filename);
     }
     wxRemoveFile(pEvent.m_dir + _T("/input.xml"));
     wxRemoveFile(pEvent.m_dir + _T("/out.txt"));
-    #endif      
+    #endif
 
     setProcessUnused(pEvent.m_pid);
 
@@ -229,22 +229,22 @@ bool FoxGridSlave::SaveResult(wxString fileName, wxString Cost, wxString Rwp, in
             WriteLogMessage("ERROR: can't load the file with result: " + fileName);
             return false;
         }
-        
+
         out.Printf(_T("<result ID=\"%d\" Cost=\"%s\" Rwp=\"%s\">\n"), ID, Cost.c_str(), Rwp.c_str());
         out += in;
         out += _T("</result>\n");
-    } else {    
+    } else {
         wxString out;
         out.Printf(_T("<result ID=\"%d\" Cost=\"-1\" Rwp=\"-1\" >\n"), ID);
         out += in;
         out += _T("</result>\n");
     }
-        
+
     MasterResult mr;
     mr.Cost = atof(Cost);
     mr.Rwp = atof(Rwp);
     mr.data = out;
-                
+
     bool found = false;
     wxMutexLocker l(m_job_mutex);
     for(int i=0;i<m_jobs.size();i++) {
@@ -258,7 +258,7 @@ bool FoxGridSlave::SaveResult(wxString fileName, wxString Cost, wxString Rwp, in
             found = true;
             break;
         }
-    }        
+    }
     return found;
 }
 /*
@@ -266,14 +266,14 @@ void FoxGridSlave::SendResult(wxString result, long duration, long jobID, long r
 {
     wxString outmsg = "duration="+to_string(duration)+" jobID="+to_string(jobID)+" resultID="+to_string(resultID)+"\n"+result;
     WriteLogMessage("GridSlave::SendResult");
-    
+
     if(!sendMessage(outmsg)) {
-        WriteLogMessage("ERROR: sendMessage returns false!");     
+        WriteLogMessage("ERROR: sendMessage returns false!");
 
         //TODO process result later
         return;
     }
-    
+
     ResultInfo ri;
     ri.data = " ";
     ri.duration_seconds = duration;
@@ -312,7 +312,7 @@ bool FoxGridSlave::DeleteXMLFilesInDirectory(const wxString& directoryPath) {
 
     return true;
 }
-void FoxGridSlave::CheckResultsAndSendOne() 
+void FoxGridSlave::CheckResultsAndSendOne()
 {
     wxMutexLocker l(m_job_mutex);
     for(int i=0;i<m_jobs.size();i++) {
@@ -323,7 +323,7 @@ void FoxGridSlave::CheckResultsAndSendOne()
                 }
                 return;
             }
-        }        
+        }
     }
 }
 void FoxGridSlave::CheckJobsAndStartCalculation()
@@ -432,15 +432,15 @@ void FoxGridSlave::OnCheckSlaveTimerEvent(wxTimerEvent& event)
 
     CheckJobsAndStartCalculation();
     CheckResultsAndSendOne();
-    
+
     m_checkSlaveTimer->Start(1000, true);
 }
 void FoxGridSlave::addJob(MasterJob job)
-{    
-    wxMutexLocker l(m_job_mutex); 
+{
+    wxMutexLocker l(m_job_mutex);
     for(int i=0;i<m_jobs.size();i++) {
         if(m_jobs[i].ID == job.ID) {
-            m_jobs[i].nb_runs += job.nb_runs; 
+            m_jobs[i].nb_runs += job.nb_runs;
             return;
         }
     }
@@ -480,17 +480,17 @@ wxString FoxGridSlave::getJobData(wxString inmsg, long pos)
 }
 
 void FoxGridSlave::ProcessMsgs(vector<GridCommunication::MSGINFO_REC> &msgs)
-{    
+{
     //just for testing...
     for(int i=0;i<msgs.size();i++) {
         if(msgs[i].msg.compare("state")==0) {
-            WriteLogMessage("ProcessMsgs: asking for my state, sending answer");                
-            sendMessage(getMyStateMsg());        
-        } else {            
+            WriteLogMessage("ProcessMsgs: asking for my state, sending answer");
+            sendMessage(getMyStateMsg());
+        } else {
             WriteLogMessage("Job received");
             //WriteLogMessage(msgs[i].msg);
             stringstream in_string;
-            in_string<<msgs[i].msg;            
+            in_string<<msgs[i].msg;
             int id=0, trial=0, runs=0, rand=0;
             wxString name;
 
@@ -527,31 +527,31 @@ void FoxGridSlave::ProcessMsgs(vector<GridCommunication::MSGINFO_REC> &msgs)
                             if(!Rand.ToInt(&rand)) WriteLogMessage(_T("Can't convert rand attribute to int"));
                         }
                     }
-                
+
                     long pos = in_string.tellg();
                     wxString tmp = getJobData(msgs[i].msg, pos);
                     tmp.Trim();
                     if(tmp.length()!=0) {
-                                               
+
                         MasterJob mj;
                         mj.data = tmp;
                         mj.ID = id;
                         mj.name = name;
                         mj.nb_runs = runs;
                         mj.nb_trial = trial;
-                        mj.randomize = rand; 
-                        mj.msgID=msgs[i].ID; 
+                        mj.randomize = rand;
+                        mj.msgID=msgs[i].ID;
                         addJob(mj);
-                        
+
                         WriteLogMessage("New Job Saved");
                     } else {
                         WriteLogMessage(_T("ERROR: job was not load"));
                     }
                     m_last_job_msg_processed = msgs[i].ID;
                     break;
-                }                
-            }            
-        }        
+                }
+            }
+        }
     }
 }
 vector<MasterJob> FoxGridSlave::getJobs()
@@ -560,7 +560,7 @@ vector<MasterJob> FoxGridSlave::getJobs()
     return m_jobs;
 }
 void FoxGridSlave::ResetNbCPUsAll(int CPUs)
-{    
+{
     resetProcesses(CPUs);
 }
 int FoxGridSlave::getCPUsAll()

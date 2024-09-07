@@ -931,10 +931,10 @@ template<class T> void ObjRegistry<T>::DeRegister(T &obj)
    if(0!=mpWXRegistry) mpWXRegistry->Remove(obj.WXGet());
    #endif
    mvpRegistry.erase(pos);
-   
+
    typename list<T*>::iterator pos2=find(mvpRegistryList.begin(),mvpRegistryList.end(),&obj);
    mvpRegistryList.erase(pos2);
-   
+
    mListClock.Click();
    VFN_DEBUG_EXIT("ObjRegistry("<<mName<<")::Deregister(&obj)",2)
 }

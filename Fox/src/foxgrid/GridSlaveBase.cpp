@@ -32,11 +32,11 @@ bool GridSlaveBase::ConnectToMaster(int nbOfTrial, wxString hostname, int port)
         m_port_server = 2853;
         //search for the free port
         vector<int> used_ports = GridCommunication::getUsedPorts();
-    
+
         while (find(used_ports.begin(), used_ports.end(), m_port_server) != used_ports.end()) {
             m_port_server++;
         }
-        
+
         m_server = new GridServer(m_working_dir);
         m_server->setExpectPortSendingAfterConnection(false);
         if(!m_server->RunGridServer(m_port_server)) {
@@ -46,7 +46,7 @@ bool GridSlaveBase::ConnectToMaster(int nbOfTrial, wxString hostname, int port)
         }
     }
     if(m_client==NULL) {
-        m_client = new GridClient(m_working_dir, "");        
+        m_client = new GridClient(m_working_dir, "");
         m_client->setAutoReconnectWhenConnectionLost(true);
 
         if(!m_client->ConnectClient(nbOfTrial, hostname, m_port_host, m_port_server)) {
@@ -56,7 +56,7 @@ bool GridSlaveBase::ConnectToMaster(int nbOfTrial, wxString hostname, int port)
         }
         //todo
         //sendMessage("newConnection port="+to_string(m_port_server));
-    }    
+    }
     return true;
 }
 long long GridSlaveBase::sendMessage(wxString msg, long long msgID)
@@ -77,7 +77,7 @@ bool GridSlaveBase::isMsgDelivered(long long msgID)
         for (auto it = msgs.rbegin(); it != msgs.rend(); ++it) {
             if (it->ID == msgID) {
                 if(it->delivery_confirmation_obtained>0) return true;
-                else return false;                
+                else return false;
             }
         }
     }
@@ -85,7 +85,7 @@ bool GridSlaveBase::isMsgDelivered(long long msgID)
     return false;
 }
 vector<GridCommunication::MSGINFO_REC> GridSlaveBase::getReceivedMessages()
-{    
+{
     if(m_server!=NULL) {
          return m_server->getReceivedMsgs();
     }
@@ -103,7 +103,7 @@ bool GridSlaveBase::isReceivingConnectionRunning()
     return m_server->isConnected();
 }
 bool GridSlaveBase::isConnectedToMaster()
-{    
+{
     if(isOutcommingConnectionRunning() && isReceivingConnectionRunning()) {
         return true;
     }
@@ -127,6 +127,6 @@ void GridSlaveBase::WriteLogMessage(wxString msg)
       wxDateTime datetime = wxDateTime::Now();
       logfile.Write(datetime.Format(_T("%X ")) + msg + _T("\n"));
       logfile.Close();
-   }  
+   }
 #endif
 }

@@ -262,7 +262,7 @@ else
 libfftw=
 endif
 
-# Boost library - used for cctbx and Fox. 
+# Boost library - used for cctbx and Fox.
 # TODO: clarify install to see if we use boost from cctbx or independently installed...
 $(BUILD_DIR)/boost_1_68_0.tar.bz2:
 	cd $(BUILD_DIR) && $(DOWNLOAD_COMMAND) https://dl.bintray.com/boostorg/release/1.68.0/source/boost_1_68_0.tar.bz2

@@ -19,7 +19,7 @@ GridMasterBase::~GridMasterBase()
     }
 }
 int GridMasterBase::GetSlaveIndex(wxString IP)
-{  
+{
     wxMutexLocker l(m_slaves_mutex);
     for(int i=0;i<m_slaves.size();i++) {
         if(m_slaves[i].ip.compare(IP)==0) return i;
@@ -34,7 +34,7 @@ bool GridMasterBase::InitializeCommunication() //connections for sending
 {
     //search for the free port
     vector<int> used_ports = GridCommunication::getUsedPorts();
-    
+
     while (find(used_ports.begin(), used_ports.end(), m_port) != used_ports.end()) {
         m_port++;
     }
@@ -50,7 +50,7 @@ bool GridMasterBase::InitializeCommunication() //connections for sending
             return false;
         }
     }
-    
+
     return true;
 }
 bool GridMasterBase::isServerListening()
@@ -61,7 +61,7 @@ bool GridMasterBase::isServerListening()
     return false;
 }
 long long GridMasterBase::SendMsgtoAll(wxString msg, long long msgID)
-{   
+{
     refreshSlaveList();
     if(msgID==-1) {
         msgID = GridCommunication::getTimeStampNanoSeconds();
@@ -73,7 +73,7 @@ long long GridMasterBase::SendMsgtoAll(wxString msg, long long msgID)
     return msgID;
 }
 long long GridMasterBase::SendMsgToSlave(wxString msg, wxString slaveIP, long long msgID, bool refresh_slave_list)
-{    
+{
     if(refresh_slave_list) {
         refreshSlaveList();
     }
@@ -89,7 +89,7 @@ long long GridMasterBase::SendMsgToSlave(wxString msg, wxString slaveIP, long lo
         WriteLogMessage("ERROR: Unknown slave (ID="+slaveIP+"). Job will not be sent...");
         return -1;
     }
-                            
+
     if(msgID==-1) {
         msgID = GridCommunication::getTimeStampNanoSeconds();
     }
@@ -100,7 +100,7 @@ long long GridMasterBase::SendMsgToSlave(wxString msg, wxString slaveIP, long lo
         return -1;
     }
     WriteLogMessage("Job sent");
-    
+
     return msgID;
 }
 vector<GridMasterBase::REC_MSG> GridMasterBase::getReceivedMsgs()
@@ -151,10 +151,10 @@ vector<GridMasterBase::SLAVE_INFO_PUBLIC> GridMasterBase::getSlavesPublicInfo()
 void GridMasterBase::refreshSlaveList()
 {
     //to avoid refreshing every time
-    long long now = GridCommunication::getTimeStampNanoSeconds();    
+    long long now = GridCommunication::getTimeStampNanoSeconds();
     if((now - m_slaves_refresh_time) < 3) return;
 
-    if(m_server!=NULL) {        
+    if(m_server!=NULL) {
         vector<SocketThreadInfo> stis = m_server->getSocketThreadsInfo();
         //checking new connections
         for(int i=0;i<stis.size();i++) {
@@ -178,9 +178,9 @@ void GridMasterBase::refreshSlaveList()
                     m_slaves.push_back(si);
                     WriteLogMessage("New outcomming port with (IP="+stis[i].address.IPAddress()+" established");
                 }
-            }            
+            }
         }
-        
+
         //checking disconnections
         wxMutexLocker l(m_slaves_mutex);
         for (auto it_slaves = m_slaves.begin(); it_slaves != m_slaves.end(); ) {
@@ -192,14 +192,14 @@ void GridMasterBase::refreshSlaveList()
                 }
             }
             if(!found) {
-                //just delete                 
+                //just delete
                 //Clients usually try to reconnect, but here we are deleting it, so, just let him know and it will delete itself..
-                it_slaves->grid_client->Delete();                                
+                it_slaves->grid_client->Delete();
                 it_slaves = m_slaves.erase(it_slaves);
             } else {
                 ++it_slaves;
             }
-        }        
+        }
     }
 }
 bool GridMasterBase::isMsgReceived(long long msgID)
@@ -217,8 +217,8 @@ bool GridMasterBase::isMsgReceived(long long msgID)
                     return false;
                 }
             }
-        }        
-    }        
+        }
+    }
     return false;
 }
 void GridMasterBase::WriteLogMessage(wxString msg)
@@ -236,7 +236,6 @@ void GridMasterBase::WriteLogMessage(wxString msg)
       wxDateTime datetime = wxDateTime::Now();
       logfile.Write(datetime.Format(_T("%X ")) + msg + _T("\n"));
       logfile.Close();
-   } 
+   }
 #endif
 }
-

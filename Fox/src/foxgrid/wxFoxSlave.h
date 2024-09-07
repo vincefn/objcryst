@@ -59,12 +59,12 @@ private:
    void OnUpdateProcessTimer(wxTimerEvent& event);
    //void UpdateListOfProcesses(vector<FoxProcess> p);
    void InitClient();
-   
+
 
    wxWindow     * m_parent;
    //wxTextCtrl   * m_EventsWindow;
    wxTextCtrl   * m_nbCPUs;
-   
+
    //wxTextCtrl   * m_TryConnectWindow;
    wxButton     * m_ConnectButton;
    wxTimer      * m_ConnectTimer;
