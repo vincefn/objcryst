@@ -25,7 +25,8 @@ void MyProcess::OnTerminate(int pid, int status)
     //m_parent->AddPendingEvent( e );
     m_parent->QueueEvent(e);
     //m_parent->onProcessTerminate(pid, status, m_dir);
-    delete this;
+    //delete this; this could potentially make an error. We have to delete it after all calls
+    wxTheApp->CallAfter([this]{ delete this; });
 }
 
 
@@ -187,10 +188,12 @@ void FoxGridSlave::OnProcessEvent(ProcessMyEvent& pEvent)
    }
 
     #ifdef WIN32
-    if(filename.length()!=0) {
-        if(wxFileExists(pEvent.m_dir + _T("\\") + filename)) wxRemoveFile(pEvent.m_dir + _T("\\") + filename);
-    }
-    if(wxFileExists(pEvent.m_dir + _T("\\input.xml"))) wxRemoveFile(pEvent.m_dir + _T("\\input.xml"));
+    //It does not have to be here, it is removed when the process starts
+    //Probably, it was not a source of any error
+    //if(filename.length()!=0) {
+    //    if(wxFileExists(pEvent.m_dir + _T("\\") + filename)) wxRemoveFile(pEvent.m_dir + _T("\\") + filename);
+    //}
+    //if(wxFileExists(pEvent.m_dir + _T("\\input.xml"))) wxRemoveFile(pEvent.m_dir + _T("\\input.xml"));
     #else
     if(filename.length()!=0) {
         wxRemoveFile(pEvent.m_dir + _T("/") + filename);
@@ -319,7 +322,9 @@ void FoxGridSlave::CheckResultsAndSendOne()
         for(int j=0;j<m_jobs[i].results.size();j++) {
             if(m_jobs[i].results[j].data.length()!=0) {
                 if(sendMessage(m_jobs[i].results[j].data)>0) {
-                    m_jobs[i].results[j].data = "";
+                    //m_jobs[i].results[j].data = "";
+                    //the same as above, but it release the memory for sure
+                    m_jobs[i].results[j].data.swap(wxString());
                 }
                 return;
             }
@@ -342,6 +347,7 @@ void FoxGridSlave::CheckJobsAndStartCalculation()
                 WriteLogMessage("ERROR: Can't write a file " + proc->dir + _T("\\input.xml"));
                 return;
             }
+            
             wxString cmd_content;
             wxString appname = wxApp::GetInstance()->argv[0];
             if(rand) {

@@ -1012,8 +1012,13 @@ int main (int argc, char *argv[])
                }
                catch(const ObjCrystException &except)
                {
-                 wxMessageDialog d(NULL,_T("Failed loading file:\n")+name,_T("Error"),wxOK|wxICON_ERROR);
-                 d.ShowModal();
+                    if(useGUI) {
+                        cout<<"Failed loading xml file: "<<name<<endl;
+                        exit(-1);
+                    } else {
+                        wxMessageDialog d(NULL,_T("Failed loading file:\n")+name,_T("Error"),wxOK|wxICON_ERROR);
+                        d.ShowModal();
+                    }                    
               };
             }
             else
@@ -1036,8 +1041,13 @@ int main (int argc, char *argv[])
                   }
                   catch(const ObjCrystException &except)
                   {
-                     wxMessageDialog d(NULL,_T("Failed loading file:\n")+name,_T("Error"),wxOK|wxICON_ERROR);
-                     d.ShowModal();
+                     if(useGUI) {
+                        cout<<"Failed loading xml file: "<<name<<endl;
+                        exit(-1);
+                     } else {
+                        wxMessageDialog d(NULL,_T("Failed loading file:\n")+name,_T("Error"),wxOK|wxICON_ERROR);
+                        d.ShowModal();
+                     } 
                   };
                }
             }
