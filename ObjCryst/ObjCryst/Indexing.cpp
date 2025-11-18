@@ -63,7 +63,7 @@ float EstimateCellVolume(const float dmin, const float dmax, const float nbrefl,
    }
    // "*.85" means using D0_min rather than D0
    if(system==MONOCLINIC) {C0=1.047;D0=0.786*.85;}
-   if(system==ORTHOROMBIC){C0=0.524;D0=1.36 *.85;}
+   if(system==ORTHORHOMBIC){C0=0.524;D0=1.36 *.85;}
    if(system==HEXAGONAL)  {C0=0.150;D0=1.04 *.85;}
    if(system==RHOMBOEDRAL){C0=0.230;D0=1.04 *.85;}
    if(system==TETRAGONAL) {C0=0.214;D0=1.25 *.85;}
@@ -121,7 +121,7 @@ float RecUnitCell::hkl2d(const float h,const float k,const float l,REAL *derivpa
             return par[0]+par[1]*par[1]*h*h + par[2]*par[2]*k*k + par[3]*par[3]*l*l + 2*par[1]*par[3]*par[4]*h*l;
             break;
          }
-         case ORTHOROMBIC:
+         case ORTHORHOMBIC:
          {
             return par[0]+par[1]*par[1]*h*h + par[2]*par[2]*k*k + par[3]*par[3]*l*l;
             break;
@@ -162,7 +162,7 @@ float RecUnitCell::hkl2d(const float h,const float k,const float l,REAL *derivpa
             return 2*par[1]*par[1]*h + 2*par[1]*par[3]*par[4]*l;
             break;
          }
-         case ORTHOROMBIC:
+         case ORTHORHOMBIC:
          {
             return 2*par[1]*par[1]*h;
             break;
@@ -203,7 +203,7 @@ float RecUnitCell::hkl2d(const float h,const float k,const float l,REAL *derivpa
             return 2*par[2]*par[2]*k;
             break;
          }
-         case ORTHOROMBIC:
+         case ORTHORHOMBIC:
          {
             return 2*par[2]*par[2]*k;
             break;
@@ -244,7 +244,7 @@ float RecUnitCell::hkl2d(const float h,const float k,const float l,REAL *derivpa
             return 2*par[3]*par[3]*l + 2*par[1]*par[3]*par[4]*h;
             break;
          }
-         case ORTHOROMBIC:
+         case ORTHORHOMBIC:
          {
             return 2*par[3]*par[3]*l;
             break;
@@ -287,7 +287,7 @@ float RecUnitCell::hkl2d(const float h,const float k,const float l,REAL *derivpa
             return 2*par[1]*h*h + 2*par[3]*par[4]*h*l;
             break;
          }
-         case ORTHOROMBIC:
+         case ORTHORHOMBIC:
          {
             return 2*par[1]*h*h;
             break;
@@ -328,7 +328,7 @@ float RecUnitCell::hkl2d(const float h,const float k,const float l,REAL *derivpa
             return 2*par[2]*k*k;
             break;
          }
-         case ORTHOROMBIC:
+         case ORTHORHOMBIC:
          {
             return 2*par[2]*k*k;
             break;
@@ -369,7 +369,7 @@ float RecUnitCell::hkl2d(const float h,const float k,const float l,REAL *derivpa
             return 2*par[3]*l*l + 2*par[1]*par[4]*h*l;
             break;
          }
-         case ORTHOROMBIC:
+         case ORTHORHOMBIC:
          {
             return 2*par[3]*l*l;
             break;
@@ -520,7 +520,7 @@ void RecUnitCell::hkl2d_delta(const float h,const float k,const float l,
                   }
             }
       }
-      case ORTHOROMBIC: //OK
+      case ORTHORHOMBIC: //OK
       {
          dmin= p0m + p1m*p1m*h*h + p2m*p2m*k*k + p3m*p3m*l*l;
          dmax= p0p + p1p*p1p*h*h + p2p*p2p*k*k + p3p*p3p*l*l;
@@ -593,7 +593,7 @@ vector<float> RecUnitCell::DirectUnitCell(const bool equiv)const
          sgammaa=1;
          break;
       }
-      case ORTHOROMBIC:
+      case ORTHORHOMBIC:
       {
          aa=par[1];
          bb=par[2];
@@ -962,7 +962,7 @@ float Score(const PeakList &dhkl, const RecUnitCell &rpar, const unsigned int nb
       case MONOCLINIC:
          sk0=1;sl0=-1;
          break;
-      case ORTHOROMBIC:
+      case ORTHORHOMBIC:
          sk0=1;sl0=1;
          break;
       case HEXAGONAL:
@@ -1274,7 +1274,7 @@ void CellExplorer::Evolution(unsigned int ng,const bool randomize,const float f,
                }
                break;
             }
-            case ORTHOROMBIC:
+            case ORTHORHOMBIC:
                break;
             case HEXAGONAL:
                break;
@@ -1622,7 +1622,7 @@ bool DichoIndexed(const PeakList &dhkl, const RecUnitCell &par,const RecUnitCell
          sk0=1;sl0=-1;
          break;
       }
-      case ORTHOROMBIC:
+      case ORTHORHOMBIC:
          sk0=1;sl0=1;
          break;
       case HEXAGONAL:
@@ -1894,7 +1894,7 @@ unsigned int CellExplorer::RDicVol(RecUnitCell par0,RecUnitCell dpar, unsigned i
             if(vq0[2].first>0) {par0.par[3]=vq0[2].second/vq0[2].first ; vdepth[2]=mDicVolDepthReport;dpar.par[3]*=.0625;}
             break;
          }
-         case ORTHOROMBIC:
+         case ORTHORHOMBIC:
          {
             if(vq0[0].first>0) {par0.par[1]=vq0[0].second/vq0[0].first ; vdepth[0]=mDicVolDepthReport;dpar.par[1]*=.0625;}//pow((float)0.5,(int)(mDicVolDepthReport-depth));}
             if(vq0[1].first>0) {par0.par[2]=vq0[1].second/vq0[1].first ; vdepth[1]=mDicVolDepthReport;dpar.par[2]*=.0625;}//pow((float)0.5,(int)(mDicVolDepthReport-depth));}
@@ -2410,7 +2410,7 @@ void CellExplorer::DicVol(const float minScore,const unsigned int minDepth,const
             }//x4
             break;
          }
-         case ORTHOROMBIC:
+         case ORTHORHOMBIC:
          {
             if(false)
             {
@@ -2730,7 +2730,7 @@ void CellExplorer::Init()
          mMin[4]=0;mAmp[4]=amp_crossp;
 	 mnpar=5;
          break;
-      case ORTHOROMBIC:
+      case ORTHORHOMBIC:
          mMin[1]=min_latt;mAmp[1]=max_latt-min_latt;
          mMin[2]=min_latt;mAmp[2]=max_latt-min_latt;
          mMin[3]=min_latt;mAmp[3]=max_latt-min_latt;
@@ -2773,7 +2773,7 @@ void CellExplorer::Init()
          nb2=1;
          break;
       }
-      case ORTHOROMBIC:
+      case ORTHORHOMBIC:
       {
          nb1=3;
          break;

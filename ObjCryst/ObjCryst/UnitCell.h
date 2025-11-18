@@ -73,7 +73,7 @@ class UnitCell:public RefinableObj
    public:
       /// Default Constructor
       UnitCell();
-      /** \brief UnitCell Constructor (orthorombic)
+      /** \brief UnitCell Constructor (orthorhombic)
       *  \param a,b,c : unit cell dimension, in angstroems
       *  \param SpaceGroupId: space group symbol or number
       */
@@ -251,7 +251,7 @@ class UnitCell:public RefinableObj
       * \warning EXPERIMENTAL
       *
       * Normally lattice parameters are constrained by the space group choice
-      * (e.g. a=b=c and angles =90° for cubic spacegroups). Using this option
+      * (e.g. a=b=c and angles =90ï¿½ for cubic spacegroups). Using this option
       * allows you to override this, and choose any lattice parameter. THis works
       * as long as symmetry operations are applied to fractionnal coordinates.
       *

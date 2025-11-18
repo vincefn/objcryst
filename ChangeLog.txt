@@ -41,7 +41,7 @@ IMPROVEMENTS
     the list of atoms inside the group.
 
 BUG FIXES
-  * Correct EstimateCellVolume estimation for orthorombic F
+  * Correct EstimateCellVolume estimation for orthorhombic F
   * Correct calculation of integrated figures of merit (Rwp, etc..)
     with multiple crystalline phases (https://github.com/vincefn/objcryst/pull/53)
   * + several minor issues
