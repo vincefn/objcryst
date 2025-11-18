@@ -1018,7 +1018,7 @@ int main (int argc, char *argv[])
                     } else {
                         wxMessageDialog d(NULL,_T("Failed loading file:\n")+name,_T("Error"),wxOK|wxICON_ERROR);
                         d.ShowModal();
-                    }                    
+                    }
               };
             }
             else
@@ -1047,7 +1047,7 @@ int main (int argc, char *argv[])
                      } else {
                         wxMessageDialog d(NULL,_T("Failed loading file:\n")+name,_T("Error"),wxOK|wxICON_ERROR);
                         d.ShowModal();
-                     } 
+                     }
                   };
                }
             }

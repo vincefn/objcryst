@@ -347,7 +347,7 @@ void FoxGridSlave::CheckJobsAndStartCalculation()
                 WriteLogMessage("ERROR: Can't write a file " + proc->dir + _T("\\input.xml"));
                 return;
             }
-            
+
             wxString cmd_content;
             wxString appname = wxApp::GetInstance()->argv[0];
             if(rand) {
