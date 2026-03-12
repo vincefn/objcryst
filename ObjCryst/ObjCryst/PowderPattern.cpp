@@ -2554,7 +2554,7 @@ ObjRegistry<PowderPattern>
 
 PowderPattern::PowderPattern():
 mIsXAscending(true),mNbPoint(0),
-mXZero(0.),m2ThetaDisplacement(0.),m2ThetaTransparency(0.),
+mXZero(0.),m2ThetaDisplacement(0.),m2ThetaTransparency(0.),m2ThetaFlatDetDispRatio(0.),
 mDIFC(48277.14),mDIFA(-6.7),
 mScaleFactor(20),mMuR(0), mUseFastLessPreciseFunc(false),
 mStatisticsExcludeBackground(false),mMaxSinThetaOvLambda(10),mNbPointUsed(0)
@@ -2579,6 +2579,7 @@ mIsXAscending(old.mIsXAscending),mNbPoint(old.mNbPoint),
 mRadiation(old.mRadiation),
 mXZero(old.mXZero),m2ThetaDisplacement(old.m2ThetaDisplacement),
 m2ThetaTransparency(old.m2ThetaTransparency),
+m2ThetaFlatDetDispRatio(old.m2ThetaFlatDetDispRatio),
 mDIFC(old.mDIFC),mDIFA(old.mDIFA),
 mPowderPatternComponentRegistry(old.mPowderPatternComponentRegistry),
 mScaleFactor(old.mScaleFactor),mMuR(old.mMuR),
@@ -2945,6 +2946,17 @@ void PowderPattern::Set2ThetaTransparency(const REAL transparency)
 {
    m2ThetaTransparency=transparency;
    mClockPowderPatternPar.Click();
+}
+
+void PowderPattern::Set2ThetaFlatDetDispRatio(const REAL ratio)
+{
+   m2ThetaFlatDetDispRatio=ratio;
+   mClockPowderPatternPar.Click();
+}
+
+REAL PowderPattern::Get2ThetaFlatDetDispRatio() const
+{
+   return m2ThetaFlatDetDispRatio;
 }
 
 REAL PowderPattern::X2XCorr(const REAL x0)const
@@ -6635,6 +6647,13 @@ void PowderPattern::Init()
    {
       RefinablePar tmp("2ThetaTransp",&m2ThetaTransparency,-.05,.05,gpRefParTypeScattDataCorrPos,
                         REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,RAD2DEG);
+      tmp.AssignClock(mClockPowderPatternXCorr);
+      tmp.SetDerivStep(1e-6);
+      this->AddPar(tmp);
+   }
+   {
+      RefinablePar tmp("2ThetaFlatDetDispRatio",&m2ThetaFlatDetDispRatio,-.05,.05,gpRefParTypeScattDataCorrPos,
+                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,1.0);
       tmp.AssignClock(mClockPowderPatternXCorr);
       tmp.SetDerivStep(1e-6);
       this->AddPar(tmp);

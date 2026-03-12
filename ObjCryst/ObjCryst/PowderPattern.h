@@ -747,7 +747,7 @@ class PowderPattern : public RefinableObj
          /// When were the radiation parameter (radiation type, wavelength) changed ?
          const RefinableObjClock& GetClockPowderPatternRadiation()const;
          /// When were the parameters for 2theta/TOF correction (zero, transparency,
-         /// displacement) last changed ?
+         /// displacement, flat-detector displacement ratio) last changed ?
          const RefinableObjClock& GetClockPowderPatternXCorr()const;
          /// When were the absorption correction parameters (muR) last changed ?
          const RefinableObjClock& GetClockPowderPatternAbsCorr() const;
@@ -761,6 +761,11 @@ class PowderPattern : public RefinableObj
          ///Change transparency correction
          /// \f$ (2\theta)_{obs} = (2\theta)_{real} + b\sin(2\theta) \f$
          void Set2ThetaTransparency(const REAL transparency);
+         /// Change flat-detector transmission displacement ratio correction
+         /// \f$ \delta = \arctan\left(\frac{1}{2} c \sin(2\cdot 2\theta)\right) \f$
+         void Set2ThetaFlatDetDispRatio(const REAL ratio);
+         /// Get flat-detector transmission displacement ratio correction
+         REAL Get2ThetaFlatDetDispRatio() const;
 
       // Import & export powder pattern
          /** \brief Import fullprof-style diffraction data.
@@ -1099,6 +1104,9 @@ class PowderPattern : public RefinableObj
          /// Transparency correction :
          ///\f$ (2\theta)_{obs} = (2\theta)_{real} + b\sin(2\theta) \f$
          REAL m2ThetaTransparency;
+         /// Flat-detector transmission displacement ratio correction :
+         ///\f$ \delta = \arctan\left(\frac{1}{2} c \sin(2\cdot 2\theta)\right) \f$
+         REAL m2ThetaFlatDetDispRatio;
          /// Time Of Flight (TOF) parameters :
          ///\f$ t = DIFC*\frac{\sin(\theta)}{\lambda} + DIFA*\left(\frac{\sin(\theta)}{\lambda}\right)^2 + mXZero\f$
          REAL mDIFC,mDIFA;
