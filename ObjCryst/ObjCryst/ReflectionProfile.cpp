@@ -90,7 +90,7 @@ bool ReflectionProfile::IsAnisotropic()const
 ////////////////////////////////////////////////////////////////////////
 ReflectionProfilePseudoVoigt::ReflectionProfilePseudoVoigt():
 ReflectionProfile(),
-mCagliotiU(0),mCagliotiV(0),mCagliotiW(.01*DEG2RAD*DEG2RAD),
+mCagliotiU(0),mCagliotiV(0),mCagliotiW(.01*DEG2RAD*DEG2RAD),mScherrerP(0),
 mPseudoVoigtEta0(0.5),mPseudoVoigtEta1(0.0),
 mAsymBerarBaldinozziA0(0.0),mAsymBerarBaldinozziA1(0.0),
 mAsymBerarBaldinozziB0(0.0),mAsymBerarBaldinozziB1(0.0),
@@ -101,7 +101,7 @@ mAsym0(1.0),mAsym1(0.0),mAsym2(0.0)
 
 ReflectionProfilePseudoVoigt::ReflectionProfilePseudoVoigt
    (const ReflectionProfilePseudoVoigt &old):
-mCagliotiU(old.mCagliotiU),mCagliotiV(old.mCagliotiV),mCagliotiW(old.mCagliotiW),
+mCagliotiU(old.mCagliotiU),mCagliotiV(old.mCagliotiV),mCagliotiW(old.mCagliotiW),mScherrerP(old.mScherrerP),
 mPseudoVoigtEta0(old.mPseudoVoigtEta0),mPseudoVoigtEta1(old.mPseudoVoigtEta1),
 mAsymBerarBaldinozziA0(old.mAsymBerarBaldinozziA0),
 mAsymBerarBaldinozziA1(old.mAsymBerarBaldinozziA1),
@@ -138,9 +138,11 @@ CrystVector_REAL ReflectionProfilePseudoVoigt::GetProfile(const CrystVector_REAL
                             const REAL center,const REAL h, const REAL k, const REAL l)const
 {
    VFN_DEBUG_ENTRY("ReflectionProfilePseudoVoigt::GetProfile(),c="<<center,2)
+   const REAL costheta=cos(center/2.0);
    REAL fwhm= mCagliotiW
              +mCagliotiV*tan(center/2.0)
-             +mCagliotiU*pow(tan(center/2.0),2);
+             +mCagliotiU*pow(tan(center/2.0),2)
+             +mScherrerP/(costheta*costheta);
    if(fwhm<=0)
    {
       VFN_DEBUG_MESSAGE("ReflectionProfilePseudoVoigt::GetProfile(): fwhm**2<0 ! "
@@ -174,13 +176,15 @@ void ReflectionProfilePseudoVoigt::SetProfilePar(const REAL fwhmCagliotiW,
                    const REAL fwhmCagliotiU,
                    const REAL fwhmCagliotiV,
                    const REAL eta0,
-                   const REAL eta1)
+                   const REAL eta1,
+                   const REAL scherrerP)
 {
    mCagliotiU=fwhmCagliotiU;
    mCagliotiV=fwhmCagliotiV;
    mCagliotiW=fwhmCagliotiW;
    mPseudoVoigtEta0=eta0;
    mPseudoVoigtEta1=eta1;
+   mScherrerP=scherrerP;
    mClockMaster.Click();
 }
 
@@ -193,9 +197,11 @@ REAL ReflectionProfilePseudoVoigt::GetFullProfileWidth(const REAL relativeIntens
    const int halfnb=nb/2;
    CrystVector_REAL x(nb);
    REAL n=5.0;
+   const REAL costheta=cos(center/2.0);
    REAL fwhm= mCagliotiW
              +mCagliotiV*tan(center/2.0)
-             +mCagliotiU*pow(tan(center/2.0),2);
+             +mCagliotiU*pow(tan(center/2.0),2)
+             +mScherrerP/(costheta*costheta);
    if(fwhm<=0) fwhm=1e-6;
    else fwhm=sqrt(fwhm);
    CrystVector_REAL prof;
@@ -248,6 +254,14 @@ void ReflectionProfilePseudoVoigt::InitParameters()
    }
    {
       RefinablePar tmp("W",&mCagliotiW,0,1./RAD2DEG/RAD2DEG,
+                        gpRefParTypeScattDataProfileWidth,
+                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,RAD2DEG*RAD2DEG);
+      tmp.AssignClock(mClockMaster);
+      tmp.SetDerivStep(1e-9);
+      this->AddPar(tmp);
+   }
+   {
+      RefinablePar tmp("P",&mScherrerP,-1./RAD2DEG/RAD2DEG,1./RAD2DEG/RAD2DEG,
                         gpRefParTypeScattDataProfileWidth,
                         REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,RAD2DEG*RAD2DEG);
       tmp.AssignClock(mClockMaster);
@@ -338,6 +352,9 @@ void ReflectionProfilePseudoVoigt::XMLOutput(ostream &os,int indent)const
    this->GetPar(&mCagliotiW).XMLOutput(os,"W",indent);
    os <<endl;
 
+   this->GetPar(&mScherrerP).XMLOutput(os,"P",indent);
+   os <<endl;
+
    this->GetPar(&mPseudoVoigtEta0).XMLOutput(os,"Eta0",indent);
    os <<endl;
 
@@ -406,6 +423,11 @@ void ReflectionProfilePseudoVoigt::XMLInput(istream &is,const XMLCrystTag &tagg)
                if("W"==tag.GetAttributeValue(i))
                {
                   this->GetPar(&mCagliotiW).XMLInput(is,tag);
+                  break;
+               }
+               if("P"==tag.GetAttributeValue(i))
+               {
+                  this->GetPar(&mScherrerP).XMLInput(is,tag);
                   break;
                }
                if("Eta0"==tag.GetAttributeValue(i))

@@ -881,11 +881,12 @@ pair<const CrystVector_REAL*,const RefinableObjClock*>
 
 void PowderPatternDiffraction::SetReflectionProfilePar(const ReflectionProfileType prof,
                                                        const REAL w, const REAL u, const REAL v,
-                                                       const REAL eta0, const REAL eta1)
+                                                       const REAL eta0, const REAL eta1,
+                                                       const REAL scherrerP)
 {
    VFN_DEBUG_MESSAGE("PowderPatternDiffraction::SetReflectionProfilePar()",5)
    ReflectionProfilePseudoVoigt* p=new ReflectionProfilePseudoVoigt();
-   p->SetProfilePar(w,u,v,eta0,eta1);
+   p->SetProfilePar(w,u,v,eta0,eta1,scherrerP);
    this->SetProfile(p);
 }
 
