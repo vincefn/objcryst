@@ -138,11 +138,10 @@ CrystVector_REAL ReflectionProfilePseudoVoigt::GetProfile(const CrystVector_REAL
                             const REAL center,const REAL h, const REAL k, const REAL l)const
 {
    VFN_DEBUG_ENTRY("ReflectionProfilePseudoVoigt::GetProfile(),c="<<center,2)
-   const REAL costheta=cos(center/2.0);
    REAL fwhm= mCagliotiW
              +mCagliotiV*tan(center/2.0)
              +mCagliotiU*pow(tan(center/2.0),2)
-             +mScherrerP/(costheta*costheta);
+             +mScherrerP/pow(cos(center/2.0),2);
    if(fwhm<=0)
    {
       VFN_DEBUG_MESSAGE("ReflectionProfilePseudoVoigt::GetProfile(): fwhm**2<0 ! "
@@ -197,11 +196,10 @@ REAL ReflectionProfilePseudoVoigt::GetFullProfileWidth(const REAL relativeIntens
    const int halfnb=nb/2;
    CrystVector_REAL x(nb);
    REAL n=5.0;
-   const REAL costheta=cos(center/2.0);
    REAL fwhm= mCagliotiW
              +mCagliotiV*tan(center/2.0)
              +mCagliotiU*pow(tan(center/2.0),2)
-             +mScherrerP/(costheta*costheta);
+             +mScherrerP/pow(cos(center/2.0),2);
    if(fwhm<=0) fwhm=1e-6;
    else fwhm=sqrt(fwhm);
    CrystVector_REAL prof;
