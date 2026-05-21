@@ -1314,6 +1314,37 @@ const CrystVector_REAL& PowderPatternDiffraction::GetFhklObsSq() const
    return mpLeBailData->GetFhklObsSq();
 }
 
+void PowderPatternDiffraction::SetFhklObsSq(const CrystVector_REAL &obs)
+{
+   this->Prepare();
+   const unsigned long nbrefl=this->GetNbReflBelowMaxSinThetaOvLambda();
+   if(obs.numElements() != nbrefl)
+      throw ObjCrystException("PowderPatternDiffraction::SetFhklObsSq(): incorrect number of reflections !");
+
+   if(mFhklObsSq.numElements()!=this->GetNbRefl())
+   {
+      mFhklObsSq.resize(this->GetNbRefl());
+      mFhklObsSq=100;
+   }
+
+   CrystVector_REAL sigma(nbrefl);
+   CrystVector_long h(nbrefl),k(nbrefl),l(nbrefl);
+   sigma=1;
+   for(unsigned long i=0;i<nbrefl;++i)
+   {
+      h(i)=mIntH(i);
+      k(i)=mIntK(i);
+      l(i)=mIntL(i);
+      mFhklObsSq(i)=obs(i);
+   }
+
+   if(mpLeBailData==0) mpLeBailData=new DiffractionDataSingleCrystal(*mpCrystal,false);
+   mpLeBailData->SetHklIobs(h,k,l,obs,sigma);
+   mClockFhklObsSq.Click();
+   mClockIhklCalc.Reset();
+   mClockMaster.Reset();
+}
+
 void PowderPatternDiffraction::CalcPowderPattern() const
 {
    this->GetNbReflBelowMaxSinThetaOvLambda();
