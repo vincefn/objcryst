@@ -812,34 +812,37 @@ void LSQNumObj::CalcChiSquare()const
 REAL LSQNumObj::ChiSquare()const{return mChiSq;};
 
 
-void RecursiveMapFunc(RefinableObj &obj,map<RefinableObj*,unsigned int> &themap, const unsigned int value)
+void RecursiveVecFunc(RefinableObj &obj, vector<pair<RefinableObj*,unsigned int>> &thevec, const unsigned int value)
 {
-   themap[&obj]=value;
+   bool found=false;
+   for(auto& p : thevec)
+      if(p.first==&obj) { p.second=value; found=true; break; }
+   if(!found) thevec.push_back({&obj,value});
    ObjRegistry<RefinableObj> *pObjReg=&(obj.GetSubObjRegistry());
    for(int i=0;i<pObjReg->GetNb();i++)
-      RecursiveMapFunc(pObjReg->GetObj(i),themap,value);
-   return;
+      RecursiveVecFunc(pObjReg->GetObj(i),thevec,value);
 }
 
 void LSQNumObj::SetRefinedObj(RefinableObj &obj, const unsigned int LSQFuncIndex, const bool init, const bool recursive)
-
 {
-   if(init)
+   if(init) mvRefinedObjMap.clear();
+   if(recursive) RecursiveVecFunc(obj,mvRefinedObjMap,LSQFuncIndex);
+   else
    {
-      mvRefinedObjMap.clear();
+      for(auto& p : mvRefinedObjMap)
+         if(p.first==&obj) { p.second=LSQFuncIndex; return; }
+      mvRefinedObjMap.push_back({&obj,LSQFuncIndex});
    }
-   if(recursive) RecursiveMapFunc(obj,mvRefinedObjMap,LSQFuncIndex);
-   else mvRefinedObjMap[&obj]=LSQFuncIndex;
 }
 
 //ObjRegistry<RefinableObj> &LSQNumObj::GetRefinedObjList(){return mRecursiveRefinedObjList;}
 
-const map<RefinableObj*,unsigned int>& LSQNumObj::GetRefinedObjMap() const
+const vector<pair<RefinableObj*,unsigned int>>& LSQNumObj::GetRefinedObjMap() const
 {
    return mvRefinedObjMap;
 }
 
-map<RefinableObj*,unsigned int>& LSQNumObj::GetRefinedObjMap()
+vector<pair<RefinableObj*,unsigned int>>& LSQNumObj::GetRefinedObjMap()
 {
    return mvRefinedObjMap;
 }
@@ -913,11 +916,11 @@ const std::map<pair<const RefinablePar*,const RefinablePar*>,REAL > & LSQNumObj:
 void LSQNumObj::PrepareRefParList(const bool copy_param)
 {
    mRefParList.ResetParList();
-   for(map<RefinableObj*,unsigned int>::iterator pos=mvRefinedObjMap.begin();pos!=mvRefinedObjMap.end();++pos)
+   for(auto& pos : mvRefinedObjMap)
    {
-      VFN_DEBUG_MESSAGE("LSQNumObj::PrepareRefParList():"<<pos->first->GetName(),4);
+      VFN_DEBUG_MESSAGE("LSQNumObj::PrepareRefParList():"<<pos.first->GetName(),4);
       //mRecursiveRefinedObjList.GetObj(i).Print();
-      mRefParList.AddPar(*(pos->first),copy_param);
+      mRefParList.AddPar(*(pos.first),copy_param);
    }
    //mRefParList.Print();
    if(copy_param) mRefParList.SetDeleteRefParInDestructor(true);
@@ -928,10 +931,10 @@ const CrystVector_REAL& LSQNumObj::GetLSQCalc() const
 {
    const CrystVector_REAL *pV;
    long nb=0;
-   for(map<RefinableObj*,unsigned int>::const_iterator pos=mvRefinedObjMap.begin();pos!=mvRefinedObjMap.end();++pos)
+   for(auto& pos : mvRefinedObjMap)
    {
-      if(pos->first->GetNbLSQFunction()==0) continue;
-      pV=&(pos->first->GetLSQCalc(pos->second));
+      if(pos.first->GetNbLSQFunction()==0) continue;
+      pV=&(pos.first->GetLSQCalc(pos.second));
       const long n2 = pV->numElements();
       if((nb+n2)>mLSQCalc.numElements()) mLSQCalc.resizeAndPreserve(nb+pV->numElements());
       const REAL *p1=pV->data();
@@ -947,12 +950,12 @@ const CrystVector_REAL& LSQNumObj::GetLSQObs() const
 {
    const CrystVector_REAL *pV;
    long nb=0;
-   for(map<RefinableObj*,unsigned int>::const_iterator pos=mvRefinedObjMap.begin();pos!=mvRefinedObjMap.end();++pos)
+   for(auto& pos : mvRefinedObjMap)
    {
-      if(pos->first->GetNbLSQFunction()==0) continue;
-      pV=&(pos->first->GetLSQObs(pos->second));
+      if(pos.first->GetNbLSQFunction()==0) continue;
+      pV=&(pos.first->GetLSQObs(pos.second));
       const long n2 = pV->numElements();
-      mvRefinedObjLSQSize[pos->first]=n2;
+      mvRefinedObjLSQSize[pos.first]=n2;
       if((nb+n2)>mLSQObs.numElements()) mLSQObs.resizeAndPreserve(nb+pV->numElements());
       const REAL *p1=pV->data();
       REAL *p2=mLSQObs.data()+nb;
@@ -967,10 +970,10 @@ const CrystVector_REAL& LSQNumObj::GetLSQWeight() const
 {
    const CrystVector_REAL *pV;
    long nb=0;
-   for(map<RefinableObj*,unsigned int>::const_iterator pos=mvRefinedObjMap.begin();pos!=mvRefinedObjMap.end();++pos)
+   for(auto& pos : mvRefinedObjMap)
    {
-      if(pos->first->GetNbLSQFunction()==0) continue;
-      pV=&(pos->first->GetLSQWeight(pos->second));
+      if(pos.first->GetNbLSQFunction()==0) continue;
+      pV=&(pos.first->GetLSQWeight(pos.second));
       const long n2 = pV->numElements();
       if((nb+n2)>mLSQWeight.numElements()) mLSQWeight.resizeAndPreserve(nb+pV->numElements());
       const REAL *p1=pV->data();
@@ -986,10 +989,10 @@ const CrystVector_REAL& LSQNumObj::GetLSQDeriv(RefinablePar&par)
 {
    const CrystVector_REAL *pV;
    long nb=0;
-   for(map<RefinableObj*,unsigned int>::iterator pos=mvRefinedObjMap.begin();pos!=mvRefinedObjMap.end();++pos)
+   for(auto& pos : mvRefinedObjMap)
    {
-      if(pos->first->GetNbLSQFunction()==0) continue;
-      pV=&(pos->first->GetLSQDeriv(pos->second,par));
+      if(pos.first->GetNbLSQFunction()==0) continue;
+      pV=&(pos.first->GetLSQDeriv(pos.second,par));
       const long n2 = pV->numElements();
       if((nb+n2)>mLSQDeriv.numElements()) mLSQDeriv.resizeAndPreserve(nb+pV->numElements());
       const REAL *p1=pV->data();
@@ -1009,13 +1012,13 @@ const std::map<RefinablePar*,CrystVector_REAL>& LSQNumObj::GetLSQ_FullDeriv()
       vPar.insert(&(mRefParList.GetParNotFixed(i)));
    mLSQ_FullDeriv.clear();
    unsigned long nb=0;// full length of derivative vector
-   for(map<RefinableObj*,unsigned int>::iterator pos=mvRefinedObjMap.begin();pos!=mvRefinedObjMap.end();++pos)
+   for(auto& pos : mvRefinedObjMap)
    {
-      if(pos->first->GetNbLSQFunction()==0) continue;
-      const unsigned long n2=mvRefinedObjLSQSize[pos->first];
+      if(pos.first->GetNbLSQFunction()==0) continue;
+      const unsigned long n2=mvRefinedObjLSQSize[pos.first];
       if(n2==0) continue;//this object does not have an LSQ function
 
-      const std::map<RefinablePar*,CrystVector_REAL> *pvV=&(pos->first->GetLSQ_FullDeriv(pos->second,vPar));
+      const std::map<RefinablePar*,CrystVector_REAL> *pvV=&(pos.first->GetLSQ_FullDeriv(pos.second,vPar));
       for(std::map<RefinablePar*,CrystVector_REAL>::const_iterator d=pvV->begin();d!=pvV->end();d++)
       {
          if(mLSQ_FullDeriv[d->first].size()==0) mLSQ_FullDeriv[d->first].resize(mLSQObs.size());
@@ -1023,7 +1026,7 @@ const std::map<RefinablePar*,CrystVector_REAL>& LSQNumObj::GetLSQ_FullDeriv()
          if(d->second.size()==0)
          {  //derivative can be null and then the vector missing
             // But we must still fill in zeros
-            cout<<__FILE__<<":"<<__LINE__<<":"<<pos->first->GetClassName()<<":"<<pos->first->GetName()<<":"<<d->first->GetName()<<" (all deriv=0)"<<endl;
+            cout<<__FILE__<<":"<<__LINE__<<":"<<pos.first->GetClassName()<<":"<<pos.first->GetName()<<":"<<d->first->GetName()<<" (all deriv=0)"<<endl;
             for(unsigned long j=0;j<n2;++j) *p2++ = 0;
          }
          else
@@ -1039,14 +1042,14 @@ const std::map<RefinablePar*,CrystVector_REAL>& LSQNumObj::GetLSQ_FullDeriv()
 
 void LSQNumObj::BeginOptimization(const bool allowApproximations, const bool enableRestraints)
 {
-   for(map<RefinableObj*,unsigned int>::iterator pos=mvRefinedObjMap.begin();pos!=mvRefinedObjMap.end();++pos)
-      pos->first->BeginOptimization(allowApproximations, enableRestraints);
+   for(auto& pos : mvRefinedObjMap)
+      pos.first->BeginOptimization(allowApproximations, enableRestraints);
 }
 
 void LSQNumObj::EndOptimization()
 {
-   for(map<RefinableObj*,unsigned int>::iterator pos=mvRefinedObjMap.begin();pos!=mvRefinedObjMap.end();++pos)
-      pos->first->EndOptimization();
+   for(auto& pos : mvRefinedObjMap)
+      pos.first->EndOptimization();
 }
 
 #ifdef __WX__CRYST__
