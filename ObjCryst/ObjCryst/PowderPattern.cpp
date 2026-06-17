@@ -787,6 +787,237 @@ WXCrystObjBasic* PowderPatternBackground::WXCreate(wxWindow* parent)
 #endif
 ////////////////////////////////////////////////////////////////////////
 //
+//        PowderPatternBackgroundHist
+//
+////////////////////////////////////////////////////////////////////////
+PowderPatternBackgroundHist::PowderPatternBackgroundHist():
+mScale(1.0),
+mMaxSinThetaOvLambda(10)
+{
+   mClockMaster.AddChild(mClockHistogram);
+}
+
+PowderPatternBackgroundHist::PowderPatternBackgroundHist(const PowderPatternBackgroundHist &old):
+mHistogram(old.mHistogram),
+mScale(old.mScale),
+mMaxSinThetaOvLambda(old.mMaxSinThetaOvLambda)
+{
+   mClockMaster.AddChild(mClockHistogram);
+   this->InitRefParList();
+}
+
+PowderPatternBackgroundHist::~PowderPatternBackgroundHist(){}
+
+const string& PowderPatternBackgroundHist::GetClassName() const
+{
+   const static string className="PowderPatternBackgroundHist";
+   return className;
+}
+
+void PowderPatternBackgroundHist::SetParentPowderPattern(PowderPattern &s)
+{
+   if(mpParentPowderPattern!=0)
+      mClockMaster.RemoveChild(mpParentPowderPattern->GetIntegratedProfileLimitsClock());
+   mpParentPowderPattern = &s;
+   mClockMaster.AddChild(mpParentPowderPattern->GetIntegratedProfileLimitsClock());
+   mClockMaster.AddChild(mpParentPowderPattern->GetClockPowderPatternPar());
+   mClockMaster.AddChild(mpParentPowderPattern->GetClockPowderPatternXCorr());
+   mClockMaster.AddChild(mpParentPowderPattern->GetClockPowderPatternRadiation());
+}
+
+const CrystVector_REAL& PowderPatternBackgroundHist::GetPowderPatternCalc()const
+{
+   this->CalcPowderPattern();
+   return mPowderPatternCalc;
+}
+
+pair<const CrystVector_REAL*,const RefinableObjClock*>
+   PowderPatternBackgroundHist::GetPowderPatternIntegratedCalc()const
+{
+   this->CalcPowderPatternIntegrated();
+   return make_pair(&mPowderPatternIntegratedCalc,&mClockPowderPatternIntegratedCalc);
+}
+
+void PowderPatternBackgroundHist::SetHistogram(const CrystVector_REAL &histogram)
+{
+   mHistogram=histogram;
+   this->InitRefParList();
+   mClockHistogram.Click();
+}
+
+const CrystVector_REAL& PowderPatternBackgroundHist::GetHistogram()const
+{
+   return mHistogram;
+}
+
+void PowderPatternBackgroundHist::GetGeneGroup(const RefinableObj &obj,
+                            CrystVector_uint & groupIndex,
+                            unsigned int &first) const
+{
+   unsigned int index=0;
+   for(long i=0;i<obj.GetNbPar();i++)
+      for(long j=0;j<this->GetNbPar();j++)
+         if(&(obj.GetPar(i)) == &(this->GetPar(j)))
+         {
+            if(index==0) index=first++;
+            groupIndex(i)=index;
+         }
+}
+
+void PowderPatternBackgroundHist::BeginOptimization(const bool allowApproximations,
+                                                    const bool enableRestraints)
+{
+   this->RefinableObj::BeginOptimization(allowApproximations,enableRestraints);
+}
+
+const CrystVector_REAL& PowderPatternBackgroundHist::GetPowderPatternCalcVariance()const
+{
+   this->CalcPowderPattern();
+   return mPowderPatternCalcVariance;
+}
+
+pair<const CrystVector_REAL*,const RefinableObjClock*>
+   PowderPatternBackgroundHist::GetPowderPatternIntegratedCalcVariance()const
+{
+   this->CalcPowderPatternIntegrated();
+   return make_pair(&mPowderPatternIntegratedCalcVariance,
+                    &mClockPowderPatternIntegratedVarianceCalc);
+}
+
+bool PowderPatternBackgroundHist::HasPowderPatternCalcVariance()const {return false;}
+
+void PowderPatternBackgroundHist::TagNewBestConfig()const {}
+
+void PowderPatternBackgroundHist::CalcPowderPattern() const
+{
+   if(mClockPowderPatternCalc>mClockMaster) return;
+
+   const unsigned long nb=mpParentPowderPattern->GetNbPoint();
+   mPowderPatternCalc.resize(nb);
+   if(nb==0 || mHistogram.numElements()==0)
+   {
+      mPowderPatternCalc=0;
+   }
+   else
+   {
+      if((unsigned long)mHistogram.numElements()!=nb)
+         throw ObjCrystException("PowderPatternBackgroundHist::CalcPowderPattern():"
+                                 " histogram size does not match pattern size");
+      const REAL *h=mHistogram.data();
+      REAL *b=mPowderPatternCalc.data();
+      const REAL s=mScale;
+      for(unsigned long i=0;i<nb;i++) *b++ = s * *h++;
+   }
+   mClockPowderPatternCalc.Click();
+}
+
+void PowderPatternBackgroundHist::CalcPowderPattern_FullDeriv(std::set<RefinablePar*> &vPar)
+{
+   mPowderPattern_FullDeriv.clear();
+   const unsigned long nb=mpParentPowderPattern->GetNbPoint();
+   if(nb==0 || mHistogram.numElements()==0) return;
+
+   for(std::set<RefinablePar*>::iterator par=vPar.begin();par!=vPar.end();++par)
+   {
+      if(*par==0)
+      {
+         mPowderPattern_FullDeriv[*par]=this->GetPowderPatternCalc();
+      }
+      else if((*par)->GetPointer()==&mScale)
+      {
+         mPowderPattern_FullDeriv[*par]=mHistogram;
+         if(MaxAbs(mPowderPattern_FullDeriv[*par])==0)
+            mPowderPattern_FullDeriv[*par].resize(0);
+      }
+   }
+}
+
+void PowderPatternBackgroundHist::CalcPowderPatternIntegrated() const
+{
+   if(mClockPowderPatternCalc>mClockMaster) return;
+
+   this->CalcPowderPattern();
+   if(  (mClockPowderPatternIntegratedCalc>mClockPowderPatternCalc)
+      &&(mClockPowderPatternIntegratedCalc>mpParentPowderPattern->GetIntegratedProfileLimitsClock()))
+      return;
+
+   const CrystVector_long *pMin=&(mpParentPowderPattern->GetIntegratedProfileMin());
+   const CrystVector_long *pMax=&(mpParentPowderPattern->GetIntegratedProfileMax());
+   const long numInterval=pMin->numElements();
+   mPowderPatternIntegratedCalc.resize(numInterval);
+   REAL * RESTRICT p2=mPowderPatternIntegratedCalc.data();
+   for(int j=0;j<numInterval;j++)
+   {
+      const long max=(*pMax)(j);
+      const REAL * RESTRICT p1=mPowderPatternCalc.data()+(*pMin)(j);
+      *p2=0;
+      for(int k=(*pMin)(j);k<=max;k++) *p2 += *p1++;
+      p2++;
+   }
+   mClockPowderPatternIntegratedCalc.Click();
+}
+
+void PowderPatternBackgroundHist::CalcPowderPatternIntegrated_FullDeriv(std::set<RefinablePar*> &vPar)
+{
+   mPowderPatternIntegrated_FullDeriv.clear();
+   const unsigned long nb=mpParentPowderPattern->GetNbPoint();
+   if(nb==0 || mHistogram.numElements()==0) return;
+
+   const CrystVector_long *pMin=&(mpParentPowderPattern->GetIntegratedProfileMin());
+   const CrystVector_long *pMax=&(mpParentPowderPattern->GetIntegratedProfileMax());
+   const long numInterval=pMin->numElements();
+
+   for(std::set<RefinablePar*>::iterator par=vPar.begin();par!=vPar.end();++par)
+   {
+      if(*par==0)
+      {
+         mPowderPatternIntegrated_FullDeriv[*par]=*(this->GetPowderPatternIntegratedCalc().first);
+      }
+      else if((*par)->GetPointer()==&mScale)
+      {
+         CrystVector_REAL deriv(numInterval);
+         REAL * RESTRICT p2=deriv.data();
+         for(int j=0;j<numInterval;j++)
+         {
+            const long max=(*pMax)(j);
+            const REAL * RESTRICT p1=mHistogram.data()+(*pMin)(j);
+            *p2=0;
+            for(int k=(*pMin)(j);k<=max;k++) *p2 += *p1++;
+            p2++;
+         }
+         if(MaxAbs(deriv)==0) deriv.resize(0);
+         mPowderPatternIntegrated_FullDeriv[*par]=deriv;
+      }
+   }
+}
+
+void PowderPatternBackgroundHist::Prepare() {}
+
+const CrystVector_long& PowderPatternBackgroundHist::GetBraggLimits()const
+{
+   mIntegratedReflLimits.resize(0);
+   return mIntegratedReflLimits;
+}
+
+void PowderPatternBackgroundHist::SetMaxSinThetaOvLambda(const REAL max)
+{
+   mMaxSinThetaOvLambda=max;
+   mClockMaster.Click();
+}
+
+void PowderPatternBackgroundHist::InitRefParList()
+{
+   this->ResetParList();
+   RefinablePar tmp("Scale",&mScale,
+                    0.,1e10,gpRefParTypeScattDataBackground,REFPAR_DERIV_STEP_RELATIVE,
+                    true,true,true,false,1.);
+   tmp.AssignClock(mClockHistogram);
+   tmp.SetDerivStep(1e-4);
+   this->AddPar(tmp);
+}
+
+////////////////////////////////////////////////////////////////////////
+//
 //        PowderPatternDiffraction
 //
 ////////////////////////////////////////////////////////////////////////

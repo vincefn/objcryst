@@ -322,6 +322,64 @@ class PowderPatternBackground : public PowderPatternComponent
 };
 
 //######################################################################
+/** \brief Phase to compute a background contribution using a fixed histogram
+* scaled by a single refinable Scale parameter.
+*
+* The histogram must have the same number of points as the parent PowderPattern.
+* Only the overall Scale factor participates in LSQ refinement; the histogram
+* itself is fixed.
+*/
+//######################################################################
+class PowderPatternBackgroundHist : public PowderPatternComponent
+{
+   public:
+      PowderPatternBackgroundHist();
+      PowderPatternBackgroundHist(const PowderPatternBackgroundHist&);
+      virtual ~PowderPatternBackgroundHist();
+      virtual const string& GetClassName() const;
+
+      virtual void SetParentPowderPattern(PowderPattern&);
+      virtual const CrystVector_REAL& GetPowderPatternCalc()const;
+      virtual pair<const CrystVector_REAL*,const RefinableObjClock*>
+         GetPowderPatternIntegratedCalc()const;
+      /// Set the fixed background histogram (must match parent pattern length).
+      void SetHistogram(const CrystVector_REAL &histogram);
+      const CrystVector_REAL& GetHistogram()const;
+      virtual void XMLOutput(ostream &os,int indent=0)const;
+      virtual void XMLInput(istream &is,const XMLCrystTag &tag);
+      virtual void GetGeneGroup(const RefinableObj &obj,
+                                CrystVector_uint & groupIndex,
+                                unsigned int &firstGroup) const;
+      virtual void BeginOptimization(const bool allowApproximations=false,
+                                     const bool enableRestraints=false);
+      virtual const CrystVector_REAL& GetPowderPatternCalcVariance()const;
+      virtual pair<const CrystVector_REAL*,const RefinableObjClock*>
+         GetPowderPatternIntegratedCalcVariance() const;
+      virtual bool HasPowderPatternCalcVariance()const;
+      virtual void TagNewBestConfig()const;
+   protected:
+      virtual void CalcPowderPattern() const;
+      virtual void CalcPowderPattern_FullDeriv(std::set<RefinablePar *> &vPar);
+      virtual void CalcPowderPatternIntegrated() const;
+      virtual void CalcPowderPatternIntegrated_FullDeriv(std::set<RefinablePar *> &vPar);
+      virtual void Prepare();
+      virtual const CrystVector_long& GetBraggLimits()const;
+      virtual void SetMaxSinThetaOvLambda(const REAL max);
+      void InitRefParList();
+
+      /// Fixed background histogram
+      CrystVector_REAL mHistogram;
+      /// Scale factor applied to the histogram (the single refinable parameter)
+      REAL mScale;
+      /// Clock invalidated when histogram data or scale changes
+      RefinableObjClock mClockHistogram;
+
+      REAL mMaxSinThetaOvLambda;
+
+      friend class PowderPattern;
+};
+
+//######################################################################
 /** \brief Class to compute the contribution to a powder pattern from
 * a crystalline phase.
 *
