@@ -151,6 +151,7 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
       const REAL marquardtMult=4.;
    //initial Chi^2, needed for Levenberg-Marquardt
    this->CalcChiSquare();
+   mvRwHistory.clear();
    //store old values
    mIndexValuesSetInitial=mRefParList.CreateParamSet("LSQ Refinement-Initial Values");
    mIndexValuesSetLast=mRefParList.CreateParamSet("LSQ Refinement-Last Cycle Values");
@@ -692,6 +693,7 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
             tmpV1 *= mWeight;
             tmpV2 *= mWeight;
             mRw=sqrt(tmpV1.sum()/tmpV2.sum());
+            mvRwHistory.push_back(mRw);
       //OK, finished
          if(!silent) cout << "finished cycle #"<<cycle <<"/"<<nbCycle <<". Rw="<<Rw_ini<<"->"<<mRw<<",    Chi^2="<<ChisSqPreviousCycle<<"->"<<mChiSq<<endl;
          if (mSaveReportOnEachCycle) this->WriteReportToFile();
@@ -810,6 +812,8 @@ void LSQNumObj::CalcChiSquare()const
 }
 
 REAL LSQNumObj::ChiSquare()const{return mChiSq;};
+
+const std::vector<REAL>& LSQNumObj::GetRwHistory()const{return mvRwHistory;};
 
 
 void RecursiveMapFunc(RefinableObj &obj,map<RefinableObj*,unsigned int> &themap, const unsigned int value)
