@@ -27,7 +27,7 @@ run_test() {
   local test_timeout="${TEST_TIMEOUT:-}"
   local live_output="${TEST_LIVE_OUTPUT:-0}"
   local status=0
-  log="$(mktemp "${TMPDIR:-/tmp}/objcryst-test.XXXXXX.log")"
+  log="$(mktemp "${TMPDIR:-/tmp}/objcryst-test.XXXXXX")"
 
   if command -v timeout >/dev/null 2>&1; then
     timeout_bin="timeout"
