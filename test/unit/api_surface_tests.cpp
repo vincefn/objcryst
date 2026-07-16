@@ -127,6 +127,29 @@ std::vector<PowderPoint> LoadPowderGroundTruth(const std::string& path)
    return out;
 }
 
+CrystVector_REAL MakePowderPatternXGrid(const REAL xmin, const REAL step, const unsigned long nbPoint)
+{
+   CrystVector_REAL x(nbPoint);
+   for(unsigned long i = 0; i < nbPoint; ++i) x(i) = xmin + step * static_cast<REAL>(i);
+   return x;
+}
+
+ObjCryst::ReflectionProfilePseudoVoigtAnisotropic MakePbso4AnisotropicProfile()
+{
+   using namespace ObjCryst;
+   ReflectionProfilePseudoVoigtAnisotropic profile;
+   profile.SetProfilePar(.02f * DEG2RAD * DEG2RAD, .003f * DEG2RAD * DEG2RAD, 0, 0,
+                         0.002f * DEG2RAD, 0.002f * DEG2RAD, 0, 0, 0, 0, 0, 0, 0.4f, 0, 0, 0, 0);
+   return profile;
+}
+
+REAL StolToTwoTheta(const REAL stol, const REAL wavelength)
+{
+   const REAL x = stol * wavelength;
+   if(std::fabs(x) >= 1.0) return 2 * M_PI;
+   return 2 * asin(x);
+}
+
 void CompareSingleCrystalToGroundTruth(const ObjCryst::DiffractionDataSingleCrystal& sc,
                                        const std::string& filePath,
                                        const REAL absTol,
@@ -224,6 +247,75 @@ void ComparePowderSimulationToGroundTruth(const ObjCryst::RadiationType radiatio
       }
    }
    Trace(std::string(testLabel) + ": comparison done");
+}
+
+void TestReflectionProfilePseudoVoigtAnisotropicDirect()
+{
+   using namespace ObjCryst;
+   const REAL wavelength = 1.54056f;
+   const REAL xMin = 10 * DEG2RAD;
+   const REAL step = 0.05f * DEG2RAD;
+   const unsigned long nbPoint = 240;
+   const REAL xMax = xMin + step * static_cast<REAL>(nbPoint - 1);
+   const CrystVector_REAL patternX = MakePowderPatternXGrid(xMin, step, nbPoint);
+
+   Crystal c = MakePbso4Crystal();
+   DiffractionDataSingleCrystal sc(c, false);
+   sc.SetRadiationType(RAD_XRAY);
+   sc.SetWavelength(wavelength);
+   sc.GenHKLFullSpace2(0.32f, true);
+
+   ReflectionProfilePseudoVoigtAnisotropic profile = MakePbso4AnisotropicProfile();
+
+   const auto& h = sc.GetH();
+   const auto& k = sc.GetK();
+   const auto& l = sc.GetL();
+   const auto& stol = sc.GetSinThetaOverLambda();
+
+   unsigned long computedProfiles = 0;
+   for(long i = 0; i < sc.GetNbRefl(); ++i)
+   {
+      const REAL center = StolToTwoTheta(stol(i), wavelength);
+      if(center < xMin || center > xMax) continue;
+
+      {
+         std::ostringstream os;
+         os << "reflectionprofile-pv-anisotropic-direct: reflection#" << i
+            << " hkl=(" << static_cast<long>(h(i)) << "," << static_cast<long>(k(i)) << "," << static_cast<long>(l(i)) << ")"
+            << " center=" << center;
+         Trace(os.str());
+      }
+
+      Trace("reflectionprofile-pv-anisotropic-direct: computing full profile width");
+      const REAL halfwidth = profile.GetFullProfileWidth(0.04f, center, h(i), k(i), l(i)) * 5.0f;
+      Check(std::isfinite(halfwidth), "Direct anisotropic profile halfwidth is not finite");
+      Check(halfwidth > 0, "Direct anisotropic profile halfwidth should be positive");
+
+      long first = static_cast<long>((center - halfwidth - xMin) / step) - 1;
+      long last = static_cast<long>((center + halfwidth - xMin) / step) + 1;
+      if(last < 0 || first >= static_cast<long>(nbPoint)) continue;
+      if(first < 0) first = 0;
+      if(last >= static_cast<long>(nbPoint)) last = static_cast<long>(nbPoint) - 1;
+
+      CrystVector_REAL vx(last - first + 1);
+      for(long j = first; j <= last; ++j) vx(j - first) = patternX(j);
+
+      {
+         std::ostringstream os;
+         os << "reflectionprofile-pv-anisotropic-direct: calling GetProfile() with "
+            << vx.numElements() << " points over pixels [" << first << "," << last << "]";
+         Trace(os.str());
+      }
+      const CrystVector_REAL reflProfile = profile.GetProfile(vx, center, h(i), k(i), l(i));
+      Check(reflProfile.numElements() == vx.numElements(), "Direct anisotropic profile size mismatch");
+      Check(reflProfile.max() > 0, "Direct anisotropic profile should have positive intensity");
+      for(long j = 0; j < reflProfile.numElements(); ++j)
+      {
+         Check(std::isfinite(reflProfile(j)), "Direct anisotropic profile contains non-finite values");
+      }
+      ++computedProfiles;
+   }
+   Check(computedProfiles > 0, "Direct anisotropic profile test did not compute any in-range reflections");
 }
 
 void DumpGroundTruthData()
@@ -625,9 +717,7 @@ void TestPowderGroundTruthXrayPseudoVoigtLorentzian()
 void TestPowderGroundTruthXrayAnisotropic()
 {
    using namespace ObjCryst;
-   auto* profile = new ReflectionProfilePseudoVoigtAnisotropic();
-   profile->SetProfilePar(.02f * DEG2RAD * DEG2RAD, .003f * DEG2RAD * DEG2RAD, 0, 0,
-                          0.002f * DEG2RAD, 0.002f * DEG2RAD, 0, 0, 0, 0, 0, 0, 0.4f, 0, 0, 0, 0);
+   auto* profile = new ReflectionProfilePseudoVoigtAnisotropic(MakePbso4AnisotropicProfile());
    ComparePowderSimulationToGroundTruth(RAD_XRAY, 1.54056f, profile,
                                         "powder-groundtruth-xray-anisotropic",
                                         "../../test/data/ground_truth/powder_xray_anisotropic_pbso4.txt", 1e-2f, 1e-5f);
@@ -683,6 +773,7 @@ int main(int argc, char* argv[])
    else if(testName == "singlecrystal-groundtruth-neutron") TestSingleCrystalGroundTruthNeutron();
    else if(testName == "powder-groundtruth-xray-pv-gaussian") TestPowderGroundTruthXrayPseudoVoigtGaussian();
    else if(testName == "powder-groundtruth-xray-pv-lorentzian") TestPowderGroundTruthXrayPseudoVoigtLorentzian();
+   else if(testName == "reflectionprofile-pv-anisotropic-direct") TestReflectionProfilePseudoVoigtAnisotropicDirect();
    else if(testName == "powder-groundtruth-xray-anisotropic") TestPowderGroundTruthXrayAnisotropic();
    else if(testName == "powder-groundtruth-neutron-pv-gaussian") TestPowderGroundTruthNeutronPseudoVoigtGaussian();
    else if(testName == "powder-groundtruth-neutron-pv-lorentzian") TestPowderGroundTruthNeutronPseudoVoigtLorentzian();

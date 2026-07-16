@@ -28,8 +28,10 @@ run_test "unit::singlecrystal-groundtruth-neutron" "$SCRIPT_DIR/api_surface_test
 run_test "unit::powder-groundtruth-xray-pv-gaussian" "$SCRIPT_DIR/api_surface_tests" "powder-groundtruth-xray-pv-gaussian"
 run_test "unit::powder-groundtruth-xray-pv-lorentzian" "$SCRIPT_DIR/api_surface_tests" "powder-groundtruth-xray-pv-lorentzian"
 if [ "${CI:-}" = "true" ]; then
+  TEST_LIVE_OUTPUT=1 OBJCRYST_TEST_TRACE=1 run_test "unit::reflectionprofile-pv-anisotropic-direct" "$SCRIPT_DIR/api_surface_tests" "reflectionprofile-pv-anisotropic-direct"
   TEST_LIVE_OUTPUT=1 OBJCRYST_TEST_TRACE=1 run_test "unit::powder-groundtruth-xray-anisotropic" "$SCRIPT_DIR/api_surface_tests" "powder-groundtruth-xray-anisotropic"
 else
+  run_test "unit::reflectionprofile-pv-anisotropic-direct" "$SCRIPT_DIR/api_surface_tests" "reflectionprofile-pv-anisotropic-direct"
   run_test "unit::powder-groundtruth-xray-anisotropic" "$SCRIPT_DIR/api_surface_tests" "powder-groundtruth-xray-anisotropic"
 fi
 run_test "unit::powder-groundtruth-neutron-pv-gaussian" "$SCRIPT_DIR/api_surface_tests" "powder-groundtruth-neutron-pv-gaussian"
