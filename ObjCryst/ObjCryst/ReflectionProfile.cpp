@@ -652,6 +652,8 @@ REAL ReflectionProfilePseudoVoigtAnisotropic::GetFullProfileWidth(const REAL rel
             << ", eta=" << eta
             << ", maxProfile=" << max
             << ", threshold=" << test
+            << ", prof(0)=" << prof(0)
+            << ", prof(nb-1)=" << prof(nb-1)
             << ", expansionN=" << n;
          throw std::runtime_error(os.str());
       }
