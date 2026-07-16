@@ -3,6 +3,7 @@ OBJCRYST_DIR := $(ROOT_DIR)/ObjCryst
 LOG_DIR := $(CURDIR)/.tmp/build-logs
 
 TEST_FLAGS := wxcryst=0 opengl=0 fftw=0 cod=0
+FOX_BUILD_VERBOSE ?= 0
 
 SUBDIRS := unit integration regression
 
@@ -20,7 +21,12 @@ unit:
 
 build-fox-nogui:
 	@mkdir -p $(LOG_DIR)
+ifeq ($(FOX_BUILD_VERBOSE),1)
+	@echo "[test] Building Fox-nogui (verbose mode enabled)"
+	@time $(MAKE) --no-print-directory -f gnu.mak -C $(ROOT_DIR)/Fox Fox-nogui debug=$(debug)
+else
 	@$(MAKE) --no-print-directory -s -f gnu.mak -C $(ROOT_DIR)/Fox Fox-nogui debug=$(debug) >$(LOG_DIR)/fox-build.log 2>&1 || (cat $(LOG_DIR)/fox-build.log && exit 1)
+endif
 
 integration:
 	@$(MAKE) --no-print-directory -s -f gnu.mak -C integration ROOT_DIR=$(ROOT_DIR)
