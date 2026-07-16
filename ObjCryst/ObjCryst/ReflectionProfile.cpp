@@ -21,6 +21,8 @@
 *
 */
 #include <limits>
+#include <sstream>
+#include <stdexcept>
 #include "ObjCryst/ObjCryst/ReflectionProfile.h"
 #include "ObjCryst/Quirks/VFNStreamFormat.h"
 #ifdef __WX__CRYST__
@@ -636,6 +638,23 @@ REAL ReflectionProfilePseudoVoigtAnisotropic::GetFullProfileWidth(const REAL rel
                         <<fwhm<<","<<center<<","<<h<<","<<k<<","<<l<<","<<max<<","<<test,2)
       VFN_DEBUG_MESSAGE(FormatVertVector<REAL>(x,prof),1)
       n*=2.0;
+      if(n>320.0)
+      {
+         std::ostringstream os;
+         os << "ReflectionProfilePseudoVoigtAnisotropic::GetFullProfileWidth() failed to bracket profile width"
+            << " after repeated expansion;"
+            << " relativeIntensity=" << relativeIntensity
+            << ", center=" << center
+            << ", hkl=(" << h << "," << k << "," << l << ")"
+            << ", fwhmApprox=" << fwhm
+            << ", fwhmG=" << fwhmG
+            << ", fwhmL=" << fwhmL
+            << ", eta=" << eta
+            << ", maxProfile=" << max
+            << ", threshold=" << test
+            << ", expansionN=" << n;
+         throw std::runtime_error(os.str());
+      }
    }
 }
 
