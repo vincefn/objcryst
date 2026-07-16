@@ -593,6 +593,40 @@ CrystVector_REAL ReflectionProfilePseudoVoigtAnisotropic::GetProfile(const Cryst
    {
       if(!IsFiniteReal(profile(i)))
       {
+         CrystVector_REAL gaussProfile;
+         CrystVector_REAL lorentzProfile;
+         bool gaussComputed = false;
+         bool lorentzComputed = false;
+         long gaussBadIndex = -1;
+         long lorentzBadIndex = -1;
+
+         if(fwhmG > 0)
+         {
+            gaussProfile = PowderProfileGauss(x, fwhmG, center, asym);
+            gaussComputed = true;
+            for(long j = 0; j < gaussProfile.numElements(); ++j)
+            {
+               if(!IsFiniteReal(gaussProfile(j)))
+               {
+                  gaussBadIndex = j;
+                  break;
+               }
+            }
+         }
+         if(fwhmL > 0)
+         {
+            lorentzProfile = PowderProfileLorentz(x, fwhmL, center, asym);
+            lorentzComputed = true;
+            for(long j = 0; j < lorentzProfile.numElements(); ++j)
+            {
+               if(!IsFiniteReal(lorentzProfile(j)))
+               {
+                  lorentzBadIndex = j;
+                  break;
+               }
+            }
+         }
+
          std::ostringstream os;
          os << "ReflectionProfilePseudoVoigtAnisotropic::GetProfile() produced non-finite profile value"
             << " at index=" << i
@@ -604,8 +638,31 @@ CrystVector_REAL ReflectionProfilePseudoVoigtAnisotropic::GetProfile(const Cryst
             << ", gam=" << gam
             << ", fwhmL=" << fwhmL
             << ", eta=" << eta
-            << ", asym=" << asym
+            << ", asym=" << asym;
+         if(gaussComputed)
+         {
+            os << ", gauss=PowderProfileGauss(...): "
+               << (gaussBadIndex >= 0 ? "non-finite" : "finite");
+            if(gaussBadIndex >= 0)
+               os << " at index=" << gaussBadIndex
+                  << ", x=" << x(gaussBadIndex)
+                  << ", value=" << gaussProfile(gaussBadIndex);
+         }
+         else os << ", gauss=skipped(fwhmG<=0)";
+         if(lorentzComputed)
+         {
+            os << ", lorentz=PowderProfileLorentz(...): "
+               << (lorentzBadIndex >= 0 ? "non-finite" : "finite");
+            if(lorentzBadIndex >= 0)
+               os << " at index=" << lorentzBadIndex
+                  << ", x=" << x(lorentzBadIndex)
+                  << ", value=" << lorentzProfile(lorentzBadIndex);
+         }
+         else os << ", lorentz=skipped(fwhmL<=0)";
+         os
             << "\n" << FormatVertVector<REAL>(x,profile);
+         if(gaussComputed) os << "\n[gauss]\n" << FormatVertVector<REAL>(x,gaussProfile);
+         if(lorentzComputed) os << "\n[lorentz]\n" << FormatVertVector<REAL>(x,lorentzProfile);
          throw std::runtime_error(os.str());
       }
    }
