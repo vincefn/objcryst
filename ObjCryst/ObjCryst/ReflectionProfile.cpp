@@ -22,6 +22,8 @@
 */
 #include <limits>
 #include <cmath>
+#include <cstring>
+#include <stdint.h>
 #include <sstream>
 #include <stdexcept>
 #include "ObjCryst/ObjCryst/ReflectionProfile.h"
@@ -36,6 +38,26 @@
 
 namespace ObjCryst
 {
+namespace
+{
+bool IsFiniteReal(const REAL v)
+{
+   if(sizeof(REAL)==sizeof(float))
+   {
+      uint32_t bits=0;
+      std::memcpy(&bits,&v,sizeof(bits));
+      return (bits & 0x7f800000U) != 0x7f800000U;
+   }
+   if(sizeof(REAL)==sizeof(double))
+   {
+      uint64_t bits=0;
+      std::memcpy(&bits,&v,sizeof(bits));
+      return (bits & 0x7ff0000000000000ULL) != 0x7ff0000000000000ULL;
+   }
+   return std::isfinite(static_cast<double>(v));
+}
+}
+
 #if defined(_MSC_VER) || defined(__BORLANDC__)
 #undef min // Predefined macros.... (wx?)
 #undef max
@@ -541,8 +563,8 @@ CrystVector_REAL ReflectionProfilePseudoVoigtAnisotropic::GetProfile(const Cryst
    CrystVector_REAL profile(x.numElements()),tmpV(x.numElements());
    const REAL asym=mAsym0+mAsym1/sin(center)+mAsym2/pow((REAL)sin(center),(REAL)2.0);
    VFN_DEBUG_MESSAGE("ReflectionProfilePseudoVoigtAnisotropic::GetProfile():("<<int(h)<<","<<int(k)<<","<<int(l)<<"),fwhmG="<<fwhmG<<",fwhmL="<<fwhmL<<",gam="<<gam<<",asym="<<asym<<",center="<<center<<",eta="<<eta, 2)
-   if(!std::isfinite(fwhmG) || !std::isfinite(gam) || !std::isfinite(fwhmL)
-      || !std::isfinite(eta) || !std::isfinite(center) || !std::isfinite(asym))
+   if(!IsFiniteReal(fwhmG) || !IsFiniteReal(gam) || !IsFiniteReal(fwhmL)
+      || !IsFiniteReal(eta) || !IsFiniteReal(center) || !IsFiniteReal(asym))
    {
       std::ostringstream os;
       os << "ReflectionProfilePseudoVoigtAnisotropic::GetProfile() non-finite profile parameters"
@@ -569,7 +591,7 @@ CrystVector_REAL ReflectionProfilePseudoVoigtAnisotropic::GetProfile(const Cryst
    }
    for(long i = 0; i < profile.numElements(); ++i)
    {
-      if(!std::isfinite(profile(i)))
+      if(!IsFiniteReal(profile(i)))
       {
          std::ostringstream os;
          os << "ReflectionProfilePseudoVoigtAnisotropic::GetProfile() produced non-finite profile value"
