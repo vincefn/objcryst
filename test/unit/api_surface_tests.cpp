@@ -74,6 +74,19 @@ struct PowderPoint
 
 ObjCryst::Crystal MakePbso4Crystal();
 
+bool IsTraceEnabled()
+{
+   const char* const trace = std::getenv("OBJCRYST_TEST_TRACE");
+   if(nullptr == trace || '\0' == trace[0]) return false;
+   const std::string value(trace);
+   return value != "0" && value != "false" && value != "FALSE";
+}
+
+void Trace(const std::string& message)
+{
+   if(IsTraceEnabled()) std::cout << "[trace] " << message << std::endl;
+}
+
 std::vector<SingleCrystalPoint> LoadSingleCrystalGroundTruth(const std::string& path)
 {
    std::ifstream in(path.c_str());
@@ -154,13 +167,16 @@ void CompareSingleCrystalSimulationToGroundTruth(const ObjCryst::RadiationType r
 void ComparePowderSimulationToGroundTruth(const ObjCryst::RadiationType radiation,
                                           const REAL wavelength,
                                           ObjCryst::ReflectionProfile* profile,
+                                          const char* const testLabel,
                                           const std::string& filePath,
                                           const REAL absTol,
                                           const REAL relTol)
 {
    using namespace ObjCryst;
+   Trace(std::string(testLabel) + ": creating crystal");
    Crystal c = MakePbso4Crystal();
 
+   Trace(std::string(testLabel) + ": preparing powder pattern");
    PowderPattern p;
    p.SetRadiationType(radiation);
    p.SetWavelength(wavelength);
@@ -173,16 +189,35 @@ void ComparePowderSimulationToGroundTruth(const ObjCryst::RadiationType radiatio
    phase->SetCrystal(c);
    phase->SetProfile(profile);
    p.AddPowderPatternComponent(*phase);
+   Trace(std::string(testLabel) + ": running PowderPattern::Prepare()");
    p.Prepare();
+   Trace(std::string(testLabel) + ": PowderPattern::Prepare() done");
 
    const std::vector<PowderPoint> gt = LoadPowderGroundTruth(filePath);
    const auto& calc = p.GetPowderPatternCalc();
    const unsigned long nbPoint = p.GetNbPoint();
-   for(const auto& pt : gt)
    {
-      Check(pt.idx < nbPoint, "Powder ground-truth index out of range");
-      CheckNearAbsRel(calc(pt.idx), pt.intensity, absTol, relTol, "Powder intensity mismatch against ground truth");
+      std::ostringstream os;
+      os << testLabel << ": validating " << gt.size() << " ground-truth points";
+      Trace(os.str());
    }
+   for(size_t i = 0; i < gt.size(); ++i)
+   {
+      const auto& pt = gt[i];
+      Check(pt.idx < nbPoint, "Powder ground-truth index out of range");
+      const REAL actual = calc(pt.idx);
+      CheckNearAbsRel(actual, pt.intensity, absTol, relTol, "Powder intensity mismatch against ground truth");
+      if(IsTraceEnabled() && (i == 0 || i + 1 == gt.size() || (i % 10) == 0))
+      {
+         std::ostringstream os;
+         os << testLabel << ": compared point#" << i
+            << " (idx=" << pt.idx
+            << ", actual=" << actual
+            << ", expected=" << pt.intensity << ")";
+         Trace(os.str());
+      }
+   }
+   Trace(std::string(testLabel) + ": comparison done");
 }
 
 void DumpGroundTruthData()
@@ -567,6 +602,7 @@ void TestPowderGroundTruthXrayPseudoVoigtGaussian()
    auto* profile = new ReflectionProfilePseudoVoigt();
    profile->SetProfilePar(.03f * DEG2RAD * DEG2RAD, 0, 0, 0.0f, 0);
    ComparePowderSimulationToGroundTruth(RAD_XRAY, 1.54056f, profile,
+                                        "powder-groundtruth-xray-pv-gaussian",
                                         "../../test/data/ground_truth/powder_xray_pv_gaussian_pbso4.txt", 1e-2f, 1e-5f);
 }
 
@@ -576,6 +612,7 @@ void TestPowderGroundTruthXrayPseudoVoigtLorentzian()
    auto* profile = new ReflectionProfilePseudoVoigt();
    profile->SetProfilePar(.03f * DEG2RAD * DEG2RAD, 0, 0, 1.0f, 0);
    ComparePowderSimulationToGroundTruth(RAD_XRAY, 1.54056f, profile,
+                                        "powder-groundtruth-xray-pv-lorentzian",
                                         "../../test/data/ground_truth/powder_xray_pv_lorentzian_pbso4.txt", 1e-2f, 1e-5f);
 }
 
@@ -586,6 +623,7 @@ void TestPowderGroundTruthXrayAnisotropic()
    profile->SetProfilePar(.02f * DEG2RAD * DEG2RAD, .003f * DEG2RAD * DEG2RAD, 0, 0,
                           0.002f * DEG2RAD, 0.002f * DEG2RAD, 0, 0, 0, 0, 0, 0, 0.4f, 0, 0, 0, 0);
    ComparePowderSimulationToGroundTruth(RAD_XRAY, 1.54056f, profile,
+                                        "powder-groundtruth-xray-anisotropic",
                                         "../../test/data/ground_truth/powder_xray_anisotropic_pbso4.txt", 1e-2f, 1e-5f);
 }
 
@@ -595,6 +633,7 @@ void TestPowderGroundTruthNeutronPseudoVoigtGaussian()
    auto* profile = new ReflectionProfilePseudoVoigt();
    profile->SetProfilePar(.03f * DEG2RAD * DEG2RAD, 0, 0, 0.0f, 0);
    ComparePowderSimulationToGroundTruth(RAD_NEUTRON, 1.54056f, profile,
+                                        "powder-groundtruth-neutron-pv-gaussian",
                                         "../../test/data/ground_truth/powder_neutron_pv_gaussian_pbso4.txt", 1e-2f, 1e-5f);
 }
 
@@ -604,6 +643,7 @@ void TestPowderGroundTruthNeutronPseudoVoigtLorentzian()
    auto* profile = new ReflectionProfilePseudoVoigt();
    profile->SetProfilePar(.03f * DEG2RAD * DEG2RAD, 0, 0, 1.0f, 0);
    ComparePowderSimulationToGroundTruth(RAD_NEUTRON, 1.54056f, profile,
+                                        "powder-groundtruth-neutron-pv-lorentzian",
                                         "../../test/data/ground_truth/powder_neutron_pv_lorentzian_pbso4.txt", 1e-2f, 1e-5f);
 }
 

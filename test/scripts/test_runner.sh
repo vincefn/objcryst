@@ -25,6 +25,8 @@ run_test() {
   local log
   local timeout_bin=""
   local test_timeout="${TEST_TIMEOUT:-}"
+  local live_output="${TEST_LIVE_OUTPUT:-0}"
+  local status=0
   log="$(mktemp "${TMPDIR:-/tmp}/objcryst-test.XXXXXX.log")"
 
   if command -v timeout >/dev/null 2>&1; then
@@ -33,13 +35,29 @@ run_test() {
     timeout_bin="gtimeout"
   fi
 
-  if [ -n "$test_timeout" ] && [ -n "$timeout_bin" ]; then
-    if "$timeout_bin" --signal=TERM --kill-after=20s "$test_timeout" "$@" >"$log" 2>&1; then
-      print_result_line "$name" "PASS" "$COLOR_GREEN"
-      rm -f "$log"
-      return 0
+  if [ "$live_output" = "1" ]; then
+    set +e
+    if [ -n "$test_timeout" ] && [ -n "$timeout_bin" ]; then
+      "$timeout_bin" --signal=TERM --kill-after=20s "$test_timeout" "$@" 2>&1 | tee "$log"
+      status=${PIPESTATUS[0]}
+    else
+      "$@" 2>&1 | tee "$log"
+      status=${PIPESTATUS[0]}
     fi
-  elif "$@" >"$log" 2>&1; then
+    set -e
+  else
+    set +e
+    if [ -n "$test_timeout" ] && [ -n "$timeout_bin" ]; then
+      "$timeout_bin" --signal=TERM --kill-after=20s "$test_timeout" "$@" >"$log" 2>&1
+      status=$?
+    else
+      "$@" >"$log" 2>&1
+      status=$?
+    fi
+    set -e
+  fi
+
+  if [ "$status" -eq 0 ]; then
     print_result_line "$name" "PASS" "$COLOR_GREEN"
     rm -f "$log"
     return 0
