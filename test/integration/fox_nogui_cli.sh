@@ -8,6 +8,14 @@ TMP_DIR="$ROOT_DIR/test/integration/.tmp"
 # shellcheck source=/dev/null
 . "$ROOT_DIR/test/scripts/test_runner.sh"
 
+if [ "${CI:-}" = "true" ] || [ "${FOX_SKIP_INTEGRATION_TESTS:-}" = "1" ]; then
+  print_result_line "integration::cimetidine-cli" "SKIP" ""
+  print_result_line "integration::tutorial-cimetidine" "SKIP" ""
+  print_result_line "integration::tutorial-pbso4-joint" "SKIP" ""
+  print_result_line "integration::tutorial-ylid-singlecrystal" "SKIP" ""
+  exit 0
+fi
+
 rm -rf "$TMP_DIR"
 mkdir -p "$TMP_DIR"
 
@@ -19,7 +27,7 @@ fi
 
 TEST_TIMEOUT="${FOX_TEST_TIMEOUT:-180s}"
 
-if [ "${CI:-}" = "true" ] || [ "${FOX_SKIP_CIMETIDINE_CLI_TEST:-}" = "1" ]; then
+if [ "${FOX_SKIP_CIMETIDINE_CLI_TEST:-}" = "1" ]; then
   print_result_line "integration::cimetidine-cli" "SKIP" ""
 else
   run_test "integration::cimetidine-cli" \
