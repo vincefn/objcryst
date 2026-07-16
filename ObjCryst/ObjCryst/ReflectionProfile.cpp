@@ -21,6 +21,7 @@
 *
 */
 #include <limits>
+#include <cmath>
 #include <sstream>
 #include <stdexcept>
 #include "ObjCryst/ObjCryst/ReflectionProfile.h"
@@ -540,6 +541,20 @@ CrystVector_REAL ReflectionProfilePseudoVoigtAnisotropic::GetProfile(const Cryst
    CrystVector_REAL profile(x.numElements()),tmpV(x.numElements());
    const REAL asym=mAsym0+mAsym1/sin(center)+mAsym2/pow((REAL)sin(center),(REAL)2.0);
    VFN_DEBUG_MESSAGE("ReflectionProfilePseudoVoigtAnisotropic::GetProfile():("<<int(h)<<","<<int(k)<<","<<int(l)<<"),fwhmG="<<fwhmG<<",fwhmL="<<fwhmL<<",gam="<<gam<<",asym="<<asym<<",center="<<center<<",eta="<<eta, 2)
+   if(!std::isfinite(fwhmG) || !std::isfinite(gam) || !std::isfinite(fwhmL)
+      || !std::isfinite(eta) || !std::isfinite(center) || !std::isfinite(asym))
+   {
+      std::ostringstream os;
+      os << "ReflectionProfilePseudoVoigtAnisotropic::GetProfile() non-finite profile parameters"
+         << " hkl=(" << h << "," << k << "," << l << ")"
+         << ", center=" << center
+         << ", fwhmG=" << fwhmG
+         << ", gam=" << gam
+         << ", fwhmL=" << fwhmL
+         << ", eta=" << eta
+         << ", asym=" << asym;
+      throw std::runtime_error(os.str());
+   }
    if(fwhmG>0)
    {
       profile=PowderProfileGauss(x,fwhmG,center,asym);
@@ -551,6 +566,26 @@ CrystVector_REAL ReflectionProfilePseudoVoigtAnisotropic::GetProfile(const Cryst
       tmpV=PowderProfileLorentz(x,fwhmL,center,asym);
       tmpV *= eta;
       profile += tmpV;
+   }
+   for(long i = 0; i < profile.numElements(); ++i)
+   {
+      if(!std::isfinite(profile(i)))
+      {
+         std::ostringstream os;
+         os << "ReflectionProfilePseudoVoigtAnisotropic::GetProfile() produced non-finite profile value"
+            << " at index=" << i
+            << ", x=" << x(i)
+            << ", profile=" << profile(i)
+            << ", hkl=(" << h << "," << k << "," << l << ")"
+            << ", center=" << center
+            << ", fwhmG=" << fwhmG
+            << ", gam=" << gam
+            << ", fwhmL=" << fwhmL
+            << ", eta=" << eta
+            << ", asym=" << asym
+            << "\n" << FormatVertVector<REAL>(x,profile);
+         throw std::runtime_error(os.str());
+      }
    }
    VFN_DEBUG_MESSAGE(FormatVertVector<REAL>(x,profile),1)
    VFN_DEBUG_EXIT("ReflectionProfilePseudoVoigtAnisotropic::GetProfile()",2)
