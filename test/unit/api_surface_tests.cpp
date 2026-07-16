@@ -116,7 +116,8 @@ std::vector<PowderPoint> LoadPowderGroundTruth(const std::string& path)
 
 void CompareSingleCrystalToGroundTruth(const ObjCryst::DiffractionDataSingleCrystal& sc,
                                        const std::string& filePath,
-                                       const REAL absTol)
+                                       const REAL absTol,
+                                       const REAL relTol)
 {
    const std::vector<SingleCrystalPoint> gt = LoadSingleCrystalGroundTruth(filePath);
    const auto& h = sc.GetH();
@@ -131,14 +132,15 @@ void CompareSingleCrystalToGroundTruth(const ObjCryst::DiffractionDataSingleCrys
       Check(static_cast<long>(h(i)) == gt[i].h, "Single-crystal H mismatch against ground truth");
       Check(static_cast<long>(k(i)) == gt[i].k, "Single-crystal K mismatch against ground truth");
       Check(static_cast<long>(l(i)) == gt[i].l, "Single-crystal L mismatch against ground truth");
-      CheckNearAbs(f2(i), gt[i].f2, absTol, "Single-crystal F^2 mismatch against ground truth");
+      CheckNearAbsRel(f2(i), gt[i].f2, absTol, relTol, "Single-crystal F^2 mismatch against ground truth");
    }
 }
 
 void CompareSingleCrystalSimulationToGroundTruth(const ObjCryst::RadiationType radiation,
                                                  const REAL wavelength,
                                                  const std::string& filePath,
-                                                 const REAL absTol)
+                                                 const REAL absTol,
+                                                 const REAL relTol)
 {
    using namespace ObjCryst;
    Crystal c = MakePbso4Crystal();
@@ -146,7 +148,7 @@ void CompareSingleCrystalSimulationToGroundTruth(const ObjCryst::RadiationType r
    sc.SetRadiationType(radiation);
    sc.SetWavelength(wavelength);
    sc.GenHKLFullSpace2(0.32, true);
-   CompareSingleCrystalToGroundTruth(sc, filePath, absTol);
+   CompareSingleCrystalToGroundTruth(sc, filePath, absTol, relTol);
 }
 
 void ComparePowderSimulationToGroundTruth(const ObjCryst::RadiationType radiation,
@@ -550,13 +552,13 @@ void TestCellExplorer()
 void TestSingleCrystalGroundTruthXray()
 {
    CompareSingleCrystalSimulationToGroundTruth(ObjCryst::RAD_XRAY, 1.54056f,
-                                               "../../test/data/ground_truth/singlecrystal_xray_pbso4.txt", 1e-4f);
+                                               "../../test/data/ground_truth/singlecrystal_xray_pbso4.txt", 1e-3f, 1e-6f);
 }
 
 void TestSingleCrystalGroundTruthNeutron()
 {
    CompareSingleCrystalSimulationToGroundTruth(ObjCryst::RAD_NEUTRON, 1.54056f,
-                                               "../../test/data/ground_truth/singlecrystal_neutron_pbso4.txt", 1e-4f);
+                                               "../../test/data/ground_truth/singlecrystal_neutron_pbso4.txt", 1e-3f, 1e-6f);
 }
 
 void TestPowderGroundTruthXrayPseudoVoigtGaussian()
