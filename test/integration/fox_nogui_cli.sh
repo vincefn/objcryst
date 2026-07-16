@@ -17,6 +17,8 @@ if [ ! -x "$FOX_NOGUI" ]; then
   exit 1
 fi
 
+TEST_TIMEOUT="${FOX_TEST_TIMEOUT:-180s}"
+
 run_test "integration::cimetidine-cli" \
   bash -c '"$1" "$2/Fox/example/Cimetidine-powder.xml" --nogui --silent -n 0 -o "$3/cimetidine-out.xml" && [ -s "$3/cimetidine-out.xml" ] && grep -q "Cimetidine" "$3/cimetidine-out.xml"' \
   -- "$FOX_NOGUI" "$ROOT_DIR" "$TMP_DIR"

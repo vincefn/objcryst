@@ -24,7 +24,6 @@ jobs:
 
       - name: Run non-GUI test suite
         env:
-          TEST_TIMEOUT: 180s
           FOX_TEST_TIMEOUT: 180s
         run: |
           make -C test all
