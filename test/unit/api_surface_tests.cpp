@@ -139,7 +139,7 @@ ObjCryst::ReflectionProfilePseudoVoigtAnisotropic MakePbso4AnisotropicProfile()
    using namespace ObjCryst;
    ReflectionProfilePseudoVoigtAnisotropic profile;
    profile.SetProfilePar(.02f * DEG2RAD * DEG2RAD, .003f * DEG2RAD * DEG2RAD, 0, 0,
-                         0.002f * DEG2RAD, 0.002f * DEG2RAD, 0, 0, 0, 0, 0, 0, 0.4f, 0, 0, 0, 0);
+                         0.002f * DEG2RAD, 0.002f * DEG2RAD, 0, 0, 0, 0, 0, 0, 0.9f, 0, 0, 0, 0);
    return profile;
 }
 
@@ -393,7 +393,7 @@ void DumpGroundTruthData()
    phaseXa->SetCrystal(cXa);
    auto* anisoX = new ReflectionProfilePseudoVoigtAnisotropic();
    anisoX->SetProfilePar(.02f * DEG2RAD * DEG2RAD, .003f * DEG2RAD * DEG2RAD, 0, 0,
-                         0.002f * DEG2RAD, 0.002f * DEG2RAD, 0, 0, 0, 0, 0, 0, 0.4f, 0, 0, 0, 0);
+                         0.002f * DEG2RAD, 0.002f * DEG2RAD, 0, 0, 0, 0, 0, 0, 0.9f, 0, 0, 0, 0);
    phaseXa->SetProfile(anisoX);
    pXa.AddPowderPatternComponent(*phaseXa);
    pXa.Prepare();
