@@ -192,10 +192,16 @@ void ComparePowderSimulationToGroundTruth(const ObjCryst::RadiationType radiatio
    Trace(std::string(testLabel) + ": running PowderPattern::Prepare()");
    p.Prepare();
    Trace(std::string(testLabel) + ": PowderPattern::Prepare() done");
+   Trace(std::string(testLabel) + ": loading powder ground-truth file");
 
    const std::vector<PowderPoint> gt = LoadPowderGroundTruth(filePath);
+   Trace(std::string(testLabel) + ": powder ground-truth loaded");
+   Trace(std::string(testLabel) + ": getting calculated powder pattern");
    const auto& calc = p.GetPowderPatternCalc();
+   Trace(std::string(testLabel) + ": calculated powder pattern retrieved");
+   Trace(std::string(testLabel) + ": getting number of points");
    const unsigned long nbPoint = p.GetNbPoint();
+   Trace(std::string(testLabel) + ": number of points retrieved");
    {
       std::ostringstream os;
       os << testLabel << ": validating " << gt.size() << " ground-truth points";
