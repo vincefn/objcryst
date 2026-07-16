@@ -53,29 +53,3 @@ Follow the instructions at: http://fox.vincefn.net/Install
 Tutorials
 =========
 New to FOX ? See: http://fox.vincefn.net/Tutorials
-
-Testing (non-GUI)
-=================
-An initial non-GUI test suite is available in the ``test/`` directory.
-
-To run it locally:
-
-.. code-block:: shell
-
-  cd ObjCryst
-  ln -sf rules-gnu.mak rules.mak
-  make test wxcryst=0 opengl=0 fftw=0 cod=0
-
-or directly:
-
-.. code-block:: shell
-
-  make -C test all
-
-The suite currently includes:
-
-- library-level unit tests (crystal creation, single-crystal and powder diffraction workflows, indexing, CIF parsing, powder data import),
-- quantitative ground-truth comparisons for simulated single-crystal and powder diffraction (x-ray and neutron),
-- powder-profile coverage including pseudo-Voigt Gaussian/Lorentzian limits and anisotropic profile modelling,
-- non-GUI integration tests for ``Fox-nogui`` including tutorial datasets,
-- basic regression checks for command-line output naming.
