@@ -1,0 +1,8 @@
+.tmp/
+unit/unit_cell_smoke
+unit/crystallography_workflow
+unit/api_surface_tests
+unit/*.o
+unit/*.dep
+integration/.tmp/
+regression/.tmp/
