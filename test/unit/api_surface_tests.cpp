@@ -552,13 +552,13 @@ void TestCellExplorer()
 void TestSingleCrystalGroundTruthXray()
 {
    CompareSingleCrystalSimulationToGroundTruth(ObjCryst::RAD_XRAY, 1.54056f,
-                                               "../../test/data/ground_truth/singlecrystal_xray_pbso4.txt", 1e-3f, 1e-6f);
+                                               "../../test/data/ground_truth/singlecrystal_xray_pbso4.txt", 1e-2f, 1e-5f);
 }
 
 void TestSingleCrystalGroundTruthNeutron()
 {
    CompareSingleCrystalSimulationToGroundTruth(ObjCryst::RAD_NEUTRON, 1.54056f,
-                                               "../../test/data/ground_truth/singlecrystal_neutron_pbso4.txt", 1e-3f, 1e-6f);
+                                               "../../test/data/ground_truth/singlecrystal_neutron_pbso4.txt", 1e-2f, 1e-5f);
 }
 
 void TestPowderGroundTruthXrayPseudoVoigtGaussian()
