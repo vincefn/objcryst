@@ -3,6 +3,9 @@ NEW FEATURES
   * Added an extensive non-GUI test suite (unit, integration and regression
     tests) under test/, covering the main ObjCryst++ API components
 
+BUG FIXES
+  * Fix orthorhombic typo (@cadenmyers13), with backward compatibility
+
 #### 2024.1 (August 2024)
 NEW FEATURES
   * Added inter-molecular restraints, to take into account information
