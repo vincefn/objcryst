@@ -26,6 +26,7 @@
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
+#include <list>
 #include <string>
 
 #include "ObjCryst/ObjCryst/Crystal.h"
@@ -34,6 +35,7 @@
 #include "ObjCryst/ObjCryst/ReflectionProfile.h"
 #include "ObjCryst/ObjCryst/ZScatterer.h"
 #include "ObjCryst/RefinableObj/GlobalOptimObj.h"
+#include "ObjCryst/RefinableObj/LSQNumObj.h"
 
 #include "../unit/test_common.h"
 
@@ -60,6 +62,115 @@ Crystal* CreateCimetidineCrystal(const std::string& fhzPath)
    cryst->AddScatterer(ZScatterer2Molecule(&scatt));
 
    return cryst;
+}
+
+// Full-profile Le Bail fitting, reproducing the "Le Bail + Fit Profile !"
+// automatic button of WXProfileFitting::OnFit() (see
+// ObjCryst/wxCryst/wxPowderPattern.cpp): Le Bail extraction mode is
+// activated (reflection intensities are then extracted from the data
+// instead of being calculated from the -- still unrefined -- crystal
+// structure), 20 initial Le Bail cycles bring the extracted intensities
+// close to convergence, and then progressively more parameters are
+// unfixed and least-squares-refined -- each stage followed by a couple
+// more Le Bail cycles -- exactly mirroring OnFit()'s sequence: zero
+// shift + constant width (W), then variable width (U,V) + fixed
+// gaussian/lorentzian mix (Eta0), then variable mix (Eta1), then peak
+// asymmetry (Asym0-2) + sample displacement/transparency, then
+// background, then unit cell. Le Bail mode is deactivated again at the
+// end, so that later steps (e.g. the global structure optimization)
+// calculate intensities from the structure as usual.
+void FitProfileLeBail(PowderPattern& pattern, PowderPatternDiffraction& diffData)
+{
+   diffData.SetExtractionMode(true, true);
+
+   // 20 initial Le Bail cycles (10 calls x 2 cycles each), refitting the
+   // overall scale factor after each call, as done in OnFit() before the
+   // progressive profile fit starts.
+   for(int i = 0; i < 10; ++i)
+   {
+      diffData.ExtractLeBail(2);
+      pattern.FitScaleFactorForRw();
+   }
+
+   LSQNumObj lsq("Cimetidine Le Bail profile fitting");
+   lsq.SetRefinedObj(pattern, 0, true, true);
+   lsq.PrepareRefParList(true);
+   // Only fit pattern-level parameters (scale, profile, background, cell),
+   // not the scatterer (atom/molecule) parameters: those are irrelevant in
+   // Le Bail mode, where intensities are extracted rather than calculated
+   // from the structure.
+   lsq.SetParIsUsed(gpRefParTypeScatt, false);
+   lsq.SetParIsUsed(gpRefParTypeScattPow, false);
+
+   std::list<RefinablePar*> vnewpar;
+   std::list<const RefParType*> vnewpartype;
+
+   // Scale factor first.
+   lsq.SetParIsFixed(gpRefParTypeScattDataScale, false);
+   lsq.SafeRefine(vnewpar, vnewpartype, 2, 1, true, true);
+
+   // Stage 1: zero shift + constant Caglioti width (W).
+   vnewpar.push_back(&lsq.GetCompiledRefinedObj().GetPar("Zero"));
+   vnewpar.push_back(&lsq.GetCompiledRefinedObj().GetPar("W"));
+   lsq.SafeRefine(vnewpar, vnewpartype, 1.01, 5, true, true);
+   vnewpar.clear();
+   diffData.ExtractLeBail(2);
+
+   // Stage 2: variable Caglioti width (U,V) + fixed gaussian/lorentzian
+   // mix (Eta0).
+   vnewpar.push_back(&lsq.GetCompiledRefinedObj().GetPar("U"));
+   vnewpar.push_back(&lsq.GetCompiledRefinedObj().GetPar("V"));
+   vnewpar.push_back(&lsq.GetCompiledRefinedObj().GetPar("Eta0"));
+   lsq.SafeRefine(vnewpar, vnewpartype, 1.01, 5, true, true);
+   vnewpar.clear();
+   diffData.ExtractLeBail(2);
+
+   // Stage 3: variable gaussian/lorentzian mix (Eta1).
+   lsq.SetParIsFixed(diffData.GetProfile().GetPar("Eta1"), false);
+   lsq.SafeRefine(vnewpar, vnewpartype, 1.01, 5, true, true);
+   diffData.ExtractLeBail(2);
+
+   // Stage 4: peak asymmetry + sample displacement/transparency.
+   vnewpar.push_back(&lsq.GetCompiledRefinedObj().GetPar("Asym0"));
+   vnewpar.push_back(&lsq.GetCompiledRefinedObj().GetPar("Asym1"));
+   vnewpar.push_back(&lsq.GetCompiledRefinedObj().GetPar("Asym2"));
+   vnewpar.push_back(&lsq.GetCompiledRefinedObj().GetPar("2ThetaDispl"));
+   vnewpar.push_back(&lsq.GetCompiledRefinedObj().GetPar("2ThetaTransp"));
+   lsq.SafeRefine(vnewpar, vnewpartype, 1.01, 5, true, true);
+   vnewpar.clear();
+   diffData.ExtractLeBail(2);
+
+   // Stage 5: background (skipping points beyond the max resolution, as
+   // OnFit() does).
+   lsq.SetParIsFixed(gpRefParTypeScattDataBackground, false);
+   for(unsigned int i = 0; i < pattern.GetNbPowderPatternComponent(); ++i)
+      if(pattern.GetPowderPatternComponent(i).GetClassName() == "PowderPatternBackground")
+      {
+         PowderPatternBackground* pBack
+            = dynamic_cast<PowderPatternBackground*>(&(pattern.GetPowderPatternComponent(i)));
+         pBack->FixParametersBeyondMaxresolution(lsq.GetCompiledRefinedObj());
+      }
+   for(unsigned int i = 0; i < lsq.GetCompiledRefinedObj().GetNbPar(); ++i)
+      if(!lsq.GetCompiledRefinedObj().GetPar(i).IsFixed()
+         && lsq.GetCompiledRefinedObj().GetPar(i).GetType() == gpRefParTypeScattDataBackground)
+         vnewpar.push_back(&lsq.GetCompiledRefinedObj().GetPar(i));
+   lsq.SafeRefine(vnewpar, vnewpartype, 1.01, 5, true, true);
+   vnewpar.clear();
+   diffData.ExtractLeBail(2);
+
+   // Stage 6: unit cell parameters.
+   vnewpartype.push_back(gpRefParTypeUnitCell);
+   lsq.SafeRefine(vnewpar, vnewpartype, 1.01, 5, true, true);
+   vnewpartype.clear();
+   diffData.ExtractLeBail(2);
+
+   pattern.FitScaleFactorForRw();
+   std::cout << "tutorial_cimetidine: Le Bail + profile fit Rwp=" << pattern.GetRw() * 100 << "%" << std::endl;
+
+   // Deactivate Le Bail mode: reflection intensities are once again
+   // calculated from the (still unrefined) crystal structure, as needed
+   // for the global structure optimization performed afterwards.
+   diffData.SetExtractionMode(false);
 }
 
 // Step 3-5: create the PowderPattern, import the x-ray data, add the
@@ -128,6 +239,14 @@ PowderPattern* CreateCimetidinePowderPattern(Crystal& cryst, const std::string& 
 
    pattern->Prepare();
    pattern->FitScaleFactorForRw();
+
+   // Full-profile Le Bail fitting: since the crystal structure (molecule
+   // position/orientation) is not known yet at this stage, reflection
+   // intensities are extracted from the data (Le Bail mode) rather than
+   // calculated from the structure, allowing the profile shape, background
+   // and unit cell parameters to be refined beforehand -- exactly what the
+   // GUI's "Le Bail + Fit Profile !" button (WXProfileFitting::OnFit()) does.
+   FitProfileLeBail(*pattern, *diffData);
 
    // Restrict refinement to the low-angle data, as recommended in the tutorial.
    pattern->SetMaxSinThetaOvLambda(0.25);
