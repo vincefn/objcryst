@@ -1,12 +1,42 @@
 ROOT_DIR ?= $(abspath $(CURDIR)/../..)
+BUILD_DIR := $(ROOT_DIR)
 
-.PHONY: all clean tidy
+RM ?= rm -f
 
-all:
+ifneq ($(filter clean tidy,$(MAKECMDGOALS)),)
+SKIP_BUILD_SETUP := 1
+endif
+
+ifndef SKIP_BUILD_SETUP
+include $(BUILD_DIR)/ObjCryst/rules.mak
+endif
+
+BINARIES := tutorial_cimetidine
+
+OBJ := $(addsuffix .o,$(BINARIES))
+
+.PHONY: all build run clean tidy
+
+all: build run
+
+build: $(BINARIES)
+
+run:
 	./fox_nogui_cli.sh $(ROOT_DIR)
+	./run_integration_tests.sh
+
+%.o : %.cpp
+	@$(MAKEDEPEND)
+	${CXX} ${CPPFLAGS} ${CXXFLAGS} -c $< -o $@
+
+-include $(OBJ:.o=.dep)
+
+tutorial_cimetidine: tutorial_cimetidine.o libCrystVector libQuirks libRefinableObj $(libcctbx) libCryst
+	${LINKER} ${CRYST_LDFLAGS} -o $@ ${filter-out %.h %.a %.so lib%, $^} ${LOADLIBES}
 
 tidy:
-	@true
+	@$(RM) core *.o *.dep
 
-clean:
+clean: tidy
+	@$(RM) $(BINARIES)
 	@rm -rf .tmp

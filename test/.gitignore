@@ -13,5 +13,8 @@ unit/ground_truth
 unit/ObjCryst*.xml
 unit/*.o
 unit/*.dep
+integration/tutorial_cimetidine
+integration/*.o
+integration/*.dep
 integration/.tmp/
 regression/.tmp/

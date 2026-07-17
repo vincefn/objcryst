@@ -29,7 +29,9 @@ else
 endif
 
 integration:
-	@$(MAKE) --no-print-directory -s -f gnu.mak -C integration ROOT_DIR=$(ROOT_DIR)
+	@mkdir -p $(LOG_DIR)
+	@$(MAKE) --no-print-directory -s -f gnu.mak -C integration build $(TEST_FLAGS) ROOT_DIR=$(ROOT_DIR) >$(LOG_DIR)/integration-build.log 2>&1 || (cat $(LOG_DIR)/integration-build.log && exit 1)
+	@$(MAKE) --no-print-directory -s -f gnu.mak -C integration run ROOT_DIR=$(ROOT_DIR)
 
 regression:
 	@$(MAKE) --no-print-directory -s -f gnu.mak -C regression ROOT_DIR=$(ROOT_DIR)
