@@ -37,7 +37,9 @@ namespace ObjCryst
 *
 */
 enum CrystalSystem
-{ TRICLINIC, MONOCLINIC, ORTHOROMBIC, HEXAGONAL, RHOMBOEDRAL, TETRAGONAL, CUBIC};
+{ TRICLINIC, MONOCLINIC, ORTHORHOMBIC, HEXAGONAL, RHOMBOEDRAL, TETRAGONAL, CUBIC,
+ORTHOROMBIC=ORTHORHOMBIC // Fix historical typo for backwards compatibility
+};
 
 enum CrystalCentering
 { LATTICE_P,LATTICE_I,LATTICE_A,LATTICE_B,LATTICE_C,LATTICE_F};
@@ -91,7 +93,7 @@ class RecUnitCell
       *   d*_hkl^2 = par[0] + par[1] h^2 + par[1] k^2 + par[2]^2 l^2 + par[3] hk + par[4] kl + par[5] hl
       * for monoclinic:
       *   d*_hkl^2 = zero + par[0]^2 h^2 + par[1]^2 k^2 + par[2]^2 l^2 + par[0]*par[2]*par[3] hl
-      * for orthorombic:
+      * for orthorhombic:
       *   d*_hkl^2 = zero + par[0]^2 h^2 + par[1]^2 k^2 + par[2]^2 l^2
       * for hexagonal:
       *   d*_hkl^2 = zero + par[0]^2 h^2 + par[0]^2 k^2 + par[2]^2 l^2 + sqrt(3)/2*par[0]^2 hk

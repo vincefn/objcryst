@@ -99,7 +99,7 @@ class Crystal:public UnitCell
    public:
       /// Default Constructor
       Crystal();
-      /** \brief Crystal Constructor (orthorombic)
+      /** \brief Crystal Constructor (orthorhombic)
       *  \param a,b,c : unit cell dimension, in angstroems
       *  \param SpaceGroupId: space group symbol or number
       */

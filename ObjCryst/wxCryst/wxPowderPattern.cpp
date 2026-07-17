@@ -2313,9 +2313,9 @@ wxWindow(parent,-1),mpGraph(graph),mpPeakList(&peaklist),mpCellExplorer(0),mpCry
    mpLog->AppendText(wxString::Format(_T("  Cubic F         v=%6.0f -> %6.0f A\n"),EstimateCellVolume(dmin,dmax,nb,CUBIC      ,LATTICE_F,1.2),EstimateCellVolume(dmin,dmax,nb,CUBIC      ,LATTICE_F,0.3)));
    mpLog->AppendText(wxString::Format(_T("  Tetragonal P    v=%6.0f -> %6.0f A\n"),EstimateCellVolume(dmin,dmax,nb,TETRAGONAL ,LATTICE_P,1.2),EstimateCellVolume(dmin,dmax,nb,TETRAGONAL ,LATTICE_P,0.3)));
    mpLog->AppendText(wxString::Format(_T("  Tetragonal I    v=%6.0f -> %6.0f A\n"),EstimateCellVolume(dmin,dmax,nb,TETRAGONAL ,LATTICE_I,1.2),EstimateCellVolume(dmin,dmax,nb,TETRAGONAL ,LATTICE_I,0.3)));
-   mpLog->AppendText(wxString::Format(_T("  Orthorombic P   v=%6.0f -> %6.0f A\n"),EstimateCellVolume(dmin,dmax,nb,ORTHOROMBIC,LATTICE_P,1.2),EstimateCellVolume(dmin,dmax,nb,ORTHOROMBIC,LATTICE_P,0.3)));
-   mpLog->AppendText(wxString::Format(_T("  Orthorombic I,C v=%6.0f -> %6.0f A\n"),EstimateCellVolume(dmin,dmax,nb,ORTHOROMBIC,LATTICE_I,1.2),EstimateCellVolume(dmin,dmax,nb,ORTHOROMBIC,LATTICE_I,0.3)));
-   mpLog->AppendText(wxString::Format(_T("  Orthorombic F   v=%6.0f -> %6.0f A\n"),EstimateCellVolume(dmin,dmax,nb,ORTHOROMBIC,LATTICE_F,1.2),EstimateCellVolume(dmin,dmax,nb,ORTHOROMBIC,LATTICE_F,0.3)));
+   mpLog->AppendText(wxString::Format(_T("  Orthorombic P   v=%6.0f -> %6.0f A\n"),EstimateCellVolume(dmin,dmax,nb,ORTHORHOMBIC,LATTICE_P,1.2),EstimateCellVolume(dmin,dmax,nb,ORTHORHOMBIC,LATTICE_P,0.3)));
+   mpLog->AppendText(wxString::Format(_T("  Orthorombic I,C v=%6.0f -> %6.0f A\n"),EstimateCellVolume(dmin,dmax,nb,ORTHORHOMBIC,LATTICE_I,1.2),EstimateCellVolume(dmin,dmax,nb,ORTHORHOMBIC,LATTICE_I,0.3)));
+   mpLog->AppendText(wxString::Format(_T("  Orthorombic F   v=%6.0f -> %6.0f A\n"),EstimateCellVolume(dmin,dmax,nb,ORTHORHOMBIC,LATTICE_F,1.2),EstimateCellVolume(dmin,dmax,nb,ORTHORHOMBIC,LATTICE_F,0.3)));
    mpLog->AppendText(wxString::Format(_T("  Hexagonal       v=%6.0f -> %6.0f A\n"),EstimateCellVolume(dmin,dmax,nb,HEXAGONAL  ,LATTICE_P,1.2),EstimateCellVolume(dmin,dmax,nb,HEXAGONAL  ,LATTICE_P,0.3)));
    mpLog->AppendText(wxString::Format(_T("  Monoclinic P    v=%6.0f -> %6.0f A\n"),EstimateCellVolume(dmin,dmax,nb,MONOCLINIC ,LATTICE_P,1.2),EstimateCellVolume(dmin,dmax,nb,MONOCLINIC ,LATTICE_P,0.3)));
    mpLog->AppendText(wxString::Format(_T("  Monoclinic C    v=%6.0f -> %6.0f A\n"),EstimateCellVolume(dmin,dmax,nb,MONOCLINIC ,LATTICE_C,1.2),EstimateCellVolume(dmin,dmax,nb,MONOCLINIC ,LATTICE_C,0.3)));
@@ -2486,17 +2486,17 @@ void WXCellExplorer::OnIndex(wxCommandEvent &event)
                case 4:cent=LATTICE_C;centc='C';break;
                case 5:cent=LATTICE_F;centc='F';break;
             }
-            minv=EstimateCellVolume(dmin,dmax,nb,ORTHOROMBIC,cent,1.5);
-            maxv=EstimateCellVolume(dmin,dmax,nb,ORTHOROMBIC,cent,0.4*weak_f);
+            minv=EstimateCellVolume(dmin,dmax,nb,ORTHORHOMBIC,cent,1.5);
+            maxv=EstimateCellVolume(dmin,dmax,nb,ORTHORHOMBIC,cent,0.4*weak_f);
             mpCellExplorer->SetVolumeMinMax(minv,maxv);
             lengthmax=pow(maxv,(float)(1/3.0))*3;
             if(lengthmax<25)lengthmax=25;
             mpCellExplorer->SetLengthMinMax(3,lengthmax);
-            mpCellExplorer->SetCrystalSystem(ORTHOROMBIC);
+            mpCellExplorer->SetCrystalSystem(ORTHORHOMBIC);
             mpCellExplorer->SetCrystalCentering(cent);
-            mpLog->AppendText(wxString::Format(_T("ORTHOROMBIC %c: V= %6.0f -> %6.0f A^3, max length=%6.2fA"),centc,minv,maxv,lengthmax));
+            mpLog->AppendText(wxString::Format(_T("ORTHORHOMBIC %c: V= %6.0f -> %6.0f A^3, max length=%6.2fA"),centc,minv,maxv,lengthmax));
             t0=chrono.seconds();
-            if(dlgProgress.Update(4,wxString::Format(_T("ORTHOROMBIC %c (%u spurious), V=%6.0f-%6.0f, l<%6.2fA\n")
+            if(dlgProgress.Update(4,wxString::Format(_T("ORTHORHOMBIC %c (%u spurious), V=%6.0f-%6.0f, l<%6.2fA\n")
                                                    _T("Best Score=%6.1f"),centc,
                                                    nbSpurious,minv,maxv,lengthmax,mpCellExplorer->GetBestScore()))==false) break;
             mpCellExplorer->DicVol(reportOnScore,reportOnDepth,stopOnScore,stopOnDepth);
@@ -2612,7 +2612,7 @@ void WXCellExplorer::OnIndex(wxCommandEvent &event)
          {
             case TRICLINIC:sys="TRICLINIC"; break;
             case MONOCLINIC:sys="MONOCLINIC"; break;
-            case ORTHOROMBIC:sys="ORTHOROMBIC"; break;
+            case ORTHORHOMBIC:sys="ORTHORHOMBIC"; break;
             case HEXAGONAL:sys="HEXAGONAL"; break;
             case RHOMBOEDRAL:sys="RHOMBOEDRAL"; break;
             case TETRAGONAL:sys="TETRAGONAL"; break;
@@ -2678,7 +2678,7 @@ void WXCellExplorer::OnSelectCell(wxCommandEvent &event)
                {
                   case TRICLINIC:mpCrystal->ChangeSpaceGroup("P-1");break;
                   case MONOCLINIC:mpCrystal->ChangeSpaceGroup("P2/m");break;
-                  case ORTHOROMBIC:mpCrystal->ChangeSpaceGroup("Pmmm");break;
+                  case ORTHORHOMBIC:mpCrystal->ChangeSpaceGroup("Pmmm");break;
                   case HEXAGONAL:mpCrystal->ChangeSpaceGroup("P6/mmm");break;
                   case RHOMBOEDRAL:mpCrystal->ChangeSpaceGroup("R-3m");break;
                   case TETRAGONAL:mpCrystal->ChangeSpaceGroup("P4/mmm");break;
@@ -2691,7 +2691,7 @@ void WXCellExplorer::OnSelectCell(wxCommandEvent &event)
                switch(pos->first.mlattice)
                {
                   case MONOCLINIC:mpCrystal->ChangeSpaceGroup("I2/m");break;
-                  case ORTHOROMBIC:mpCrystal->ChangeSpaceGroup("I222");break;
+                  case ORTHORHOMBIC:mpCrystal->ChangeSpaceGroup("I222");break;
                   case TETRAGONAL:mpCrystal->ChangeSpaceGroup("I4/mmm");break;
                   case CUBIC:mpCrystal->ChangeSpaceGroup("Im-3m");break;
                }
@@ -2702,7 +2702,7 @@ void WXCellExplorer::OnSelectCell(wxCommandEvent &event)
                switch(pos->first.mlattice)
                {
                   case MONOCLINIC:mpCrystal->ChangeSpaceGroup("A2/m");break;
-                  case ORTHOROMBIC:mpCrystal->ChangeSpaceGroup("Amm2");break;
+                  case ORTHORHOMBIC:mpCrystal->ChangeSpaceGroup("Amm2");break;
                }
                break;
             }
@@ -2711,7 +2711,7 @@ void WXCellExplorer::OnSelectCell(wxCommandEvent &event)
                switch(pos->first.mlattice)
                {
                   case MONOCLINIC:mpCrystal->ChangeSpaceGroup("C2/m");break;
-                  case ORTHOROMBIC:mpCrystal->ChangeSpaceGroup("Cmmm");break;
+                  case ORTHORHOMBIC:mpCrystal->ChangeSpaceGroup("Cmmm");break;
                }
                break;
             }
@@ -2719,7 +2719,7 @@ void WXCellExplorer::OnSelectCell(wxCommandEvent &event)
             {
                switch(pos->first.mlattice)
                {
-                  case ORTHOROMBIC:mpCrystal->ChangeSpaceGroup("Fmmm");break;
+                  case ORTHORHOMBIC:mpCrystal->ChangeSpaceGroup("Fmmm");break;
                   case CUBIC:mpCrystal->ChangeSpaceGroup("Fm-3m");break;
                }
                break;
@@ -3209,7 +3209,7 @@ void WXCellExplorer::OnExportIndexingResults(wxCommandEvent &event)
       {
          case TRICLINIC:sys="TRICLINIC"; break;
          case MONOCLINIC:sys="MONOCLINIC"; break;
-         case ORTHOROMBIC:sys="ORTHOROMBIC"; break;
+         case ORTHORHOMBIC:sys="ORTHORHOMBIC"; break;
          case HEXAGONAL:sys="HEXAGONAL"; break;
          case RHOMBOEDRAL:sys="RHOMBOEDRAL"; break;
          case TETRAGONAL:sys="TETRAGONAL"; break;
