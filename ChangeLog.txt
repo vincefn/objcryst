@@ -1,3 +1,8 @@
+#### Development version
+NEW FEATURES
+  * Added an extensive non-GUI test suite (unit, integration and regression
+    tests) under test/, covering the main ObjCryst++ API components
+
 #### 2024.1 (August 2024)
 NEW FEATURES
   * Added inter-molecular restraints, to take into account information

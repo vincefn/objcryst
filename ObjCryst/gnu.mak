@@ -13,7 +13,7 @@ include rules.mak
 
 #test-cristallo
 test:
-	  cd ${DIR_TEST} && make all
+	  @cd ${DIR_TEST} && $(MAKE) --no-print-directory -s all
 
 ######################################################################
 #####################      OTHER TARGETS      ########################

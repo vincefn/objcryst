@@ -807,7 +807,8 @@ void PeakList::Import2ThetaIntensity(istream &is, const float wavelength)
 float PeakList::Simulate(float zero, float a, float b, float c,
               float alpha, float beta, float gamma,
               bool deg, unsigned int nb, unsigned int nbspurious,
-              float sigma,float percentMissing, const bool verbose)
+              float sigma,float percentMissing, const bool verbose,
+              const bool merge)
 {
    if(deg){alpha*=DEG2RAD;beta*=DEG2RAD;gamma*=DEG2RAD;}
    const float v=sqrt(1-cos(alpha)*cos(alpha)-cos(beta)*cos(beta)-cos(gamma)*cos(gamma)
@@ -842,6 +843,16 @@ float PeakList::Simulate(float zero, float a, float b, float c,
       if((rand()/float(RAND_MAX))<percentMissing) *pos=1e10;
    }
    vd2.sort();
+   if(merge)
+   {// Remove duplicate reflections (e.g. symmetry-equivalent) with (near-)identical d-spacing,
+    // so that they are counted only once amongst the 'nb' observed peaks.
+      const float atol=1e-5;
+      for(std::list<float>::iterator p1=vd2.begin(), p2=++vd2.begin(); p2!=vd2.end();)
+      {
+         if(fabs(*p2-*p1)<atol) p2=vd2.erase(p2);
+         else {++p1;++p2;}
+      }
+   }
    pos=vd2.begin();
    const float dmin=*pos/2;
    for(unsigned int i=0;i<nb;++i)pos++;
