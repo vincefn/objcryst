@@ -68,12 +68,7 @@ run_test "unit::reflectionprofile-pseudo-voigt" "$SCRIPT_DIR/api_powderpattern" 
 run_test "unit::reflectionprofile-double-exponential-pv" "$SCRIPT_DIR/api_powderpattern" "reflectionprofile-double-exponential-pv"
 run_test "unit::powder-groundtruth-xray-pv-gaussian" "$SCRIPT_DIR/api_powderpattern" "powder-groundtruth-xray-pv-gaussian"
 run_test "unit::powder-groundtruth-xray-pv-lorentzian" "$SCRIPT_DIR/api_powderpattern" "powder-groundtruth-xray-pv-lorentzian"
-if [ "${CI:-}" = "true" ]; then
-  TEST_LIVE_OUTPUT=1 OBJCRYST_TEST_TRACE=1 run_test "unit::reflectionprofile-pv-anisotropic-direct" "$SCRIPT_DIR/api_powderpattern" "reflectionprofile-pv-anisotropic-direct"
-  TEST_LIVE_OUTPUT=1 OBJCRYST_TEST_TRACE=1 run_test "unit::powder-groundtruth-xray-anisotropic" "$SCRIPT_DIR/api_powderpattern" "powder-groundtruth-xray-anisotropic"
-else
-  run_test "unit::reflectionprofile-pv-anisotropic-direct" "$SCRIPT_DIR/api_powderpattern" "reflectionprofile-pv-anisotropic-direct"
-  run_test "unit::powder-groundtruth-xray-anisotropic" "$SCRIPT_DIR/api_powderpattern" "powder-groundtruth-xray-anisotropic"
-fi
+run_test "unit::reflectionprofile-pv-anisotropic-direct" "$SCRIPT_DIR/api_powderpattern" "reflectionprofile-pv-anisotropic-direct"
+run_test "unit::powder-groundtruth-xray-anisotropic" "$SCRIPT_DIR/api_powderpattern" "powder-groundtruth-xray-anisotropic"
 run_test "unit::powder-groundtruth-neutron-pv-gaussian" "$SCRIPT_DIR/api_powderpattern" "powder-groundtruth-neutron-pv-gaussian"
 run_test "unit::powder-groundtruth-neutron-pv-lorentzian" "$SCRIPT_DIR/api_powderpattern" "powder-groundtruth-neutron-pv-lorentzian"
