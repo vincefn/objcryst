@@ -3,7 +3,6 @@
 // ScatteringCorr subclasses.
 #include <cmath>
 #include <iostream>
-#include <sstream>
 #include <string>
 
 #include "ObjCryst/ObjCryst/Crystal.h"
@@ -196,15 +195,6 @@ void TestReflectionProfilePseudoVoigtAnisotropicDirect()
       const REAL center = StolToTwoTheta(stol(i), wavelength);
       if(center < xMin || center > xMax) continue;
 
-      {
-         std::ostringstream os;
-         os << "reflectionprofile-pv-anisotropic-direct: reflection#" << i
-            << " hkl=(" << static_cast<long>(h(i)) << "," << static_cast<long>(k(i)) << "," << static_cast<long>(l(i)) << ")"
-            << " center=" << center;
-         Trace(os.str());
-      }
-
-      Trace("reflectionprofile-pv-anisotropic-direct: computing full profile width");
       const REAL halfwidth = profile.GetFullProfileWidth(0.04f, center, h(i), k(i), l(i)) * 5.0f;
       Check(std::isfinite(halfwidth), "Direct anisotropic profile halfwidth is not finite");
       Check(halfwidth > 0, "Direct anisotropic profile halfwidth should be positive");
@@ -218,12 +208,6 @@ void TestReflectionProfilePseudoVoigtAnisotropicDirect()
       CrystVector_REAL vx(last - first + 1);
       for(long j = first; j <= last; ++j) vx(j - first) = patternX(j);
 
-      {
-         std::ostringstream os;
-         os << "reflectionprofile-pv-anisotropic-direct: calling GetProfile() with "
-            << vx.numElements() << " points over pixels [" << first << "," << last << "]";
-         Trace(os.str());
-      }
       const CrystVector_REAL reflProfile = profile.GetProfile(vx, center, h(i), k(i), l(i));
       Check(reflProfile.numElements() == vx.numElements(), "Direct anisotropic profile size mismatch");
       Check(reflProfile.max() > 0, "Direct anisotropic profile should have positive intensity");

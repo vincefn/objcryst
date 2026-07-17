@@ -25,6 +25,5 @@ jobs:
       - name: Run non-GUI test suite
         env:
           FOX_TEST_TIMEOUT: 30s
-          FOX_BUILD_VERBOSE: 1
         run: |
           make -C test all
