@@ -55,6 +55,8 @@ run_test "unit::peaklist-simulate-volume" "$SCRIPT_DIR/api_indexing" "peaklist-s
 run_test "unit::peaklist-add-remove" "$SCRIPT_DIR/api_indexing" "peaklist-add-remove"
 run_test "unit::cellexplorer" "$SCRIPT_DIR/api_indexing" "cellexplorer"
 run_test "unit::cellexplorer-configuration" "$SCRIPT_DIR/api_indexing" "cellexplorer-configuration"
+run_test "unit::cellexplorer-dicvol-tetragonal" "$SCRIPT_DIR/api_indexing" "cellexplorer-dicvol-tetragonal"
+run_test "unit::cellexplorer-dicvol-monoclinic" "$SCRIPT_DIR/api_indexing" "cellexplorer-dicvol-monoclinic"
 
 # --- api_powderpattern ---
 run_test "unit::powderpattern-background" "$SCRIPT_DIR/api_powderpattern" "powderpattern-background"
