@@ -3862,6 +3862,21 @@ supplied vector of observed intensities does not have the expected number of poi
       (*fpObjCrystInformUser)((string)buf);
    }
 }
+
+void PowderPattern::SetPowderPatternObsSigma(const CrystVector_REAL& sigma)
+{
+   VFN_DEBUG_MESSAGE("PowderPattern::SetPowderPatternObsSigma()",5)
+   if((unsigned long)sigma.numElements() != mNbPoint)
+   {
+      throw(ObjCrystException("PowderPattern::SetPowderPatternObsSigma(vect): The \
+supplied vector of sigma does not have the expected number of points!"));
+   }
+
+   mPowderPatternObsSigma = sigma;
+   mPowderPatternWeight.resize(mNbPoint);
+   this->SetWeightToInvSigmaSq();
+   mClockIntegratedFactorsPrep.Reset();
+}
 void PowderPattern::SavePowderPattern(const string &filename) const
 {
    VFN_DEBUG_MESSAGE("PowderPattern::SavePowderPattern",5)

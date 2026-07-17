@@ -149,7 +149,9 @@ CrystVector_REAL ReflectionProfilePseudoVoigt::GetProfile(const CrystVector_REAL
    }
    else fwhm=sqrt(fwhm);
    CrystVector_REAL profile,tmpV;
-   const REAL asym=mAsym0+mAsym1/sin(center)+mAsym2/pow((REAL)sin(center),(REAL)2.0);
+   REAL asym=mAsym0+mAsym1/sin(center)+mAsym2/pow((REAL)sin(center),(REAL)2.0);
+   if(asym<0.05) asym=0.05;
+   if(asym>20.0) asym=20.0;
    profile=PowderProfileGauss(x,fwhm,center,asym);
 
    // Eta for gaussian/lorentzian mix. Make sure 0<=eta<=1, else profiles could be <0 !
@@ -536,7 +538,9 @@ CrystVector_REAL ReflectionProfilePseudoVoigtAnisotropic::GetProfile(const Cryst
    if(eta<0) eta=0;
 
    CrystVector_REAL profile(x.numElements()),tmpV(x.numElements());
-   const REAL asym=mAsym0+mAsym1/sin(center)+mAsym2/pow((REAL)sin(center),(REAL)2.0);
+   REAL asym=mAsym0+mAsym1/sin(center)+mAsym2/pow((REAL)sin(center),(REAL)2.0);
+   if(asym<0.05) asym=0.05;
+   if(asym>20.0) asym=20.0;
    VFN_DEBUG_MESSAGE("ReflectionProfilePseudoVoigtAnisotropic::GetProfile():("<<int(h)<<","<<int(k)<<","<<int(l)<<"),fwhmG="<<fwhmG<<",fwhmL="<<fwhmL<<",gam="<<gam<<",asym="<<asym<<",center="<<center<<",eta="<<eta, 2)
    if(fwhmG>0)
    {

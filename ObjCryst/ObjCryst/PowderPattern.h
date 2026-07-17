@@ -816,6 +816,8 @@ class PowderPattern : public RefinableObj
          * for example by calling DiffractionDataPowder::InitPowderPatternPar().
          */
          void SetPowderPatternObs(const CrystVector_REAL& obs);
+         /// Set sigma for each point of the observed powder pattern.
+         void SetPowderPatternObsSigma(const CrystVector_REAL& sigma);
 
          ///Save powder pattern to one file, text format, 3 columns theta Iobs Icalc.
          ///If Iobs is missing, the column is omitted.
