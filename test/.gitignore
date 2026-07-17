@@ -14,6 +14,7 @@ unit/ObjCryst*.xml
 unit/*.o
 unit/*.dep
 integration/tutorial_cimetidine
+integration/tutorial_pbso4
 integration/*.o
 integration/*.dep
 integration/.tmp/

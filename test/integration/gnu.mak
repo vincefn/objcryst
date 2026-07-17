@@ -11,7 +11,7 @@ ifndef SKIP_BUILD_SETUP
 include $(BUILD_DIR)/ObjCryst/rules.mak
 endif
 
-BINARIES := tutorial_cimetidine
+BINARIES := tutorial_cimetidine tutorial_pbso4
 
 OBJ := $(addsuffix .o,$(BINARIES))
 
@@ -32,6 +32,9 @@ run:
 -include $(OBJ:.o=.dep)
 
 tutorial_cimetidine: tutorial_cimetidine.o libCrystVector libQuirks libRefinableObj $(libcctbx) libCryst
+	${LINKER} ${CRYST_LDFLAGS} -o $@ ${filter-out %.h %.a %.so lib%, $^} ${LOADLIBES}
+
+tutorial_pbso4: tutorial_pbso4.o libCrystVector libQuirks libRefinableObj $(libcctbx) libCryst
 	${LINKER} ${CRYST_LDFLAGS} -o $@ ${filter-out %.h %.a %.so lib%, $^} ${LOADLIBES}
 
 tidy:

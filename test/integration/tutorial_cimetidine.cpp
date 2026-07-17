@@ -117,8 +117,14 @@ PowderPattern* CreateCimetidinePowderPattern(Crystal& cryst, const std::string& 
    pattern->SetWavelength(1.52904);
    pattern->GetRadiation().SetLinearPolarRate(0.98);
 
-   // Pseudo-Voigt profile: W=.001, U=V=0, Eta0=0.5.
-   dynamic_cast<ReflectionProfilePseudoVoigt&>(diffData->GetProfile()).SetProfilePar(0.001, 0, 0, 0.5, 0.);
+   // Pseudo-Voigt profile: W=.001, U=V=0, Eta0=0.5. The tutorial's Caglioti
+   // U/V/W value is entered in the GUI in degrees^2 (the GUI applies a
+   // RAD2DEG^2 "human" scale on top of the internal radians^2 parameters --
+   // see ReflectionProfilePseudoVoigt::InitParameters()), so it must be
+   // converted to radians^2 here since SetProfilePar() sets the internal
+   // (unscaled) value directly.
+   dynamic_cast<ReflectionProfilePseudoVoigt&>(diffData->GetProfile())
+      .SetProfilePar(0.001 * DEG2RAD * DEG2RAD, 0, 0, 0.5, 0.);
 
    pattern->Prepare();
    pattern->FitScaleFactorForRw();
