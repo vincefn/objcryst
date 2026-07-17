@@ -7,6 +7,8 @@ ROOT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 # shellcheck source=/dev/null
 . "$ROOT_DIR/test/scripts/test_runner.sh"
 
+TEST_TIMEOUT="${FOX_TEST_TIMEOUT:-30s}"
+
 run_test "unit::unit_cell_smoke" "$SCRIPT_DIR/unit_cell_smoke"
 run_test "unit::crystallography_workflow" "$SCRIPT_DIR/crystallography_workflow"
 

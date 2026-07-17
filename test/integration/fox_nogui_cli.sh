@@ -8,14 +8,6 @@ TMP_DIR="$ROOT_DIR/test/integration/.tmp"
 # shellcheck source=/dev/null
 . "$ROOT_DIR/test/scripts/test_runner.sh"
 
-if [ "${CI:-}" = "true" ] || [ "${FOX_SKIP_INTEGRATION_TESTS:-}" = "1" ]; then
-  print_result_line "integration::cimetidine-cli" "SKIP" ""
-  print_result_line "integration::tutorial-cimetidine" "SKIP" ""
-  print_result_line "integration::tutorial-pbso4-joint" "SKIP" ""
-  print_result_line "integration::tutorial-ylid-singlecrystal" "SKIP" ""
-  exit 0
-fi
-
 rm -rf "$TMP_DIR"
 mkdir -p "$TMP_DIR"
 
@@ -25,15 +17,11 @@ if [ ! -x "$FOX_NOGUI" ]; then
   exit 1
 fi
 
-TEST_TIMEOUT="${FOX_TEST_TIMEOUT:-180s}"
+TEST_TIMEOUT="${FOX_TEST_TIMEOUT:-30s}"
 
-if [ "${FOX_SKIP_CIMETIDINE_CLI_TEST:-}" = "1" ]; then
-  print_result_line "integration::cimetidine-cli" "SKIP" ""
-else
-  run_test "integration::cimetidine-cli" \
-    bash -c '"$1" "$2/Fox/example/Cimetidine-powder.xml" --nogui --silent -n 100 -o "$3/cimetidine-out.xml" && [ -s "$3/cimetidine-out.xml" ] && grep -q "Cimetidine" "$3/cimetidine-out.xml"' \
-    -- "$FOX_NOGUI" "$ROOT_DIR" "$TMP_DIR"
-fi
+run_test "integration::cimetidine-cli" \
+  bash -c '"$1" "$2/Fox/example/Cimetidine-powder.xml" --nogui --silent -n 100 -o "$3/cimetidine-out.xml" && [ -s "$3/cimetidine-out.xml" ] && grep -q "Cimetidine" "$3/cimetidine-out.xml"' \
+  -- "$FOX_NOGUI" "$ROOT_DIR" "$TMP_DIR"
 
 # Tutorial-equivalent cimetidine workflow:
 # crystal + xray powder pattern + MonteCarlo already encoded in example XML.

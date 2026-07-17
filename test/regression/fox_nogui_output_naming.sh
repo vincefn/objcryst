@@ -17,7 +17,7 @@ if [ ! -x "$FOX_NOGUI" ]; then
   exit 1
 fi
 
-TEST_TIMEOUT="${FOX_TEST_TIMEOUT:-180s}"
+TEST_TIMEOUT="${FOX_TEST_TIMEOUT:-30s}"
 
 run_test "regression::output-placeholder-expansion" \
   bash -c 'cd "$3" && "$1" "$2/Fox/example/Cimetidine-powder.xml" --nogui --silent -n 1 -o result-#cost.xml && [ ! -e "$3/result-#cost.xml" ] && [ "$(find "$3" -maxdepth 1 -type f -name "result-*" | wc -l | tr -d " ")" = "1" ] && ! find "$3" -maxdepth 1 -type f -name "result-*" | grep -q "#"' \
