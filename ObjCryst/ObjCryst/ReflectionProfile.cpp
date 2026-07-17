@@ -21,11 +21,6 @@
 *
 */
 #include <limits>
-#include <cmath>
-#include <cstring>
-#include <stdint.h>
-#include <sstream>
-#include <stdexcept>
 #include "ObjCryst/ObjCryst/ReflectionProfile.h"
 #include "ObjCryst/Quirks/VFNStreamFormat.h"
 #ifdef __WX__CRYST__
@@ -38,26 +33,6 @@
 
 namespace ObjCryst
 {
-namespace
-{
-bool IsFiniteReal(const REAL v)
-{
-   if(sizeof(REAL)==sizeof(float))
-   {
-      uint32_t bits=0;
-      std::memcpy(&bits,&v,sizeof(bits));
-      return (bits & 0x7f800000U) != 0x7f800000U;
-   }
-   if(sizeof(REAL)==sizeof(double))
-   {
-      uint64_t bits=0;
-      std::memcpy(&bits,&v,sizeof(bits));
-      return (bits & 0x7ff0000000000000ULL) != 0x7ff0000000000000ULL;
-   }
-   return std::isfinite(static_cast<double>(v));
-}
-}
-
 #if defined(_MSC_VER) || defined(__BORLANDC__)
 #undef min // Predefined macros.... (wx?)
 #undef max
@@ -174,7 +149,9 @@ CrystVector_REAL ReflectionProfilePseudoVoigt::GetProfile(const CrystVector_REAL
    }
    else fwhm=sqrt(fwhm);
    CrystVector_REAL profile,tmpV;
-   const REAL asym=mAsym0+mAsym1/sin(center)+mAsym2/pow((REAL)sin(center),(REAL)2.0);
+   REAL asym=mAsym0+mAsym1/sin(center)+mAsym2/pow((REAL)sin(center),(REAL)2.0);
+   if(asym<0.05) asym=0.05;
+   if(asym>20.0) asym=20.0;
    profile=PowderProfileGauss(x,fwhm,center,asym);
 
    // Eta for gaussian/lorentzian mix. Make sure 0<=eta<=1, else profiles could be <0 !
@@ -565,20 +542,6 @@ CrystVector_REAL ReflectionProfilePseudoVoigtAnisotropic::GetProfile(const Cryst
    if(asym<0.05) asym=0.05;
    if(asym>20.0) asym=20.0;
    VFN_DEBUG_MESSAGE("ReflectionProfilePseudoVoigtAnisotropic::GetProfile():("<<int(h)<<","<<int(k)<<","<<int(l)<<"),fwhmG="<<fwhmG<<",fwhmL="<<fwhmL<<",gam="<<gam<<",asym="<<asym<<",center="<<center<<",eta="<<eta, 2)
-   if(!IsFiniteReal(fwhmG) || !IsFiniteReal(gam) || !IsFiniteReal(fwhmL)
-      || !IsFiniteReal(eta) || !IsFiniteReal(center) || !IsFiniteReal(asym))
-   {
-      std::ostringstream os;
-      os << "ReflectionProfilePseudoVoigtAnisotropic::GetProfile() non-finite profile parameters"
-         << " hkl=(" << h << "," << k << "," << l << ")"
-         << ", center=" << center
-         << ", fwhmG=" << fwhmG
-         << ", gam=" << gam
-         << ", fwhmL=" << fwhmL
-         << ", eta=" << eta
-         << ", asym=" << asym;
-      throw std::runtime_error(os.str());
-   }
    if(fwhmG>0)
    {
       profile=PowderProfileGauss(x,fwhmG,center,asym);
@@ -590,83 +553,6 @@ CrystVector_REAL ReflectionProfilePseudoVoigtAnisotropic::GetProfile(const Cryst
       tmpV=PowderProfileLorentz(x,fwhmL,center,asym);
       tmpV *= eta;
       profile += tmpV;
-   }
-   for(long i = 0; i < profile.numElements(); ++i)
-   {
-      if(!IsFiniteReal(profile(i)))
-      {
-         CrystVector_REAL gaussProfile;
-         CrystVector_REAL lorentzProfile;
-         bool gaussComputed = false;
-         bool lorentzComputed = false;
-         long gaussBadIndex = -1;
-         long lorentzBadIndex = -1;
-
-         if(fwhmG > 0)
-         {
-            gaussProfile = PowderProfileGauss(x, fwhmG, center, asym);
-            gaussComputed = true;
-            for(long j = 0; j < gaussProfile.numElements(); ++j)
-            {
-               if(!IsFiniteReal(gaussProfile(j)))
-               {
-                  gaussBadIndex = j;
-                  break;
-               }
-            }
-         }
-         if(fwhmL > 0)
-         {
-            lorentzProfile = PowderProfileLorentz(x, fwhmL, center, asym);
-            lorentzComputed = true;
-            for(long j = 0; j < lorentzProfile.numElements(); ++j)
-            {
-               if(!IsFiniteReal(lorentzProfile(j)))
-               {
-                  lorentzBadIndex = j;
-                  break;
-               }
-            }
-         }
-
-         std::ostringstream os;
-         os << "ReflectionProfilePseudoVoigtAnisotropic::GetProfile() produced non-finite profile value"
-            << " at index=" << i
-            << ", x=" << x(i)
-            << ", profile=" << profile(i)
-            << ", hkl=(" << h << "," << k << "," << l << ")"
-            << ", center=" << center
-            << ", fwhmG=" << fwhmG
-            << ", gam=" << gam
-            << ", fwhmL=" << fwhmL
-            << ", eta=" << eta
-            << ", asym=" << asym;
-         if(gaussComputed)
-         {
-            os << ", gauss=PowderProfileGauss(...): "
-               << (gaussBadIndex >= 0 ? "non-finite" : "finite");
-            if(gaussBadIndex >= 0)
-               os << " at index=" << gaussBadIndex
-                  << ", x=" << x(gaussBadIndex)
-                  << ", value=" << gaussProfile(gaussBadIndex);
-         }
-         else os << ", gauss=skipped(fwhmG<=0)";
-         if(lorentzComputed)
-         {
-            os << ", lorentz=PowderProfileLorentz(...): "
-               << (lorentzBadIndex >= 0 ? "non-finite" : "finite");
-            if(lorentzBadIndex >= 0)
-               os << " at index=" << lorentzBadIndex
-                  << ", x=" << x(lorentzBadIndex)
-                  << ", value=" << lorentzProfile(lorentzBadIndex);
-         }
-         else os << ", lorentz=skipped(fwhmL<=0)";
-         os
-            << "\n" << FormatVertVector<REAL>(x,profile);
-         if(gaussComputed) os << "\n[gauss]\n" << FormatVertVector<REAL>(x,gaussProfile);
-         if(lorentzComputed) os << "\n[lorentz]\n" << FormatVertVector<REAL>(x,lorentzProfile);
-         throw std::runtime_error(os.str());
-      }
    }
    VFN_DEBUG_MESSAGE(FormatVertVector<REAL>(x,profile),1)
    VFN_DEBUG_EXIT("ReflectionProfilePseudoVoigtAnisotropic::GetProfile()",2)
@@ -754,25 +640,6 @@ REAL ReflectionProfilePseudoVoigtAnisotropic::GetFullProfileWidth(const REAL rel
                         <<fwhm<<","<<center<<","<<h<<","<<k<<","<<l<<","<<max<<","<<test,2)
       VFN_DEBUG_MESSAGE(FormatVertVector<REAL>(x,prof),1)
       n*=2.0;
-      if(n>320.0)
-      {
-         std::ostringstream os;
-         os << "ReflectionProfilePseudoVoigtAnisotropic::GetFullProfileWidth() failed to bracket profile width"
-            << " after repeated expansion;"
-            << " relativeIntensity=" << relativeIntensity
-            << ", center=" << center
-            << ", hkl=(" << h << "," << k << "," << l << ")"
-            << ", fwhmApprox=" << fwhm
-            << ", fwhmG=" << fwhmG
-            << ", fwhmL=" << fwhmL
-            << ", eta=" << eta
-            << ", maxProfile=" << max
-            << ", threshold=" << test
-            << ", prof(0)=" << prof(0)
-            << ", prof(nb-1)=" << prof(nb-1)
-            << ", expansionN=" << n;
-         throw std::runtime_error(os.str());
-      }
    }
 }
 
