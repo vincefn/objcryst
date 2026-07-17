@@ -1,7 +1,15 @@
 .tmp/
 unit/unit_cell_smoke
 unit/crystallography_workflow
-unit/api_surface_tests
+unit/api_spacegroup
+unit/api_crystal
+unit/api_molecule
+unit/api_scattering
+unit/api_powderpattern
+unit/api_cif
+unit/api_optimization
+unit/api_indexing
+unit/ground_truth
 unit/ObjCryst*.xml
 unit/*.o
 unit/*.dep
