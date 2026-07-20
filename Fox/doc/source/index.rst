@@ -49,6 +49,7 @@ If you would also like to *choose your own criterion and algorithm to solve the 
    :caption: Using Fox to solve Crystal structures
 
    tutorials
+   testing
    manual-intro
    screenshots
 

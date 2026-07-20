@@ -134,12 +134,18 @@ class PeakList
       * \param sigma: the maximum relative error for d* - the d* values will be within [d_calc*(1-sigma) ;d_calc*(1+sigma)]
       * \param percentMissing: percentage (between 0 and 1) of missing reflections - maximum allowed 0.9
       * \param verbose: print some info
+      * \param merge: if true, merge symmetry-related (or otherwise coincident) reflections which have
+      * an identical d-spacing (within an absolute tolerance of 1e-5) into a single observed peak, before
+      * picking the \b nb lines with the largest d-spacing. This is disabled by default for speed and
+      * backwards compatibility - this function has no symmetry information so this is only a d-spacing
+      * comparison, which is not as fast as the simple (no comparison) reflection generation above.
       * \return: the volume of the simulated unit cell
       */
       float Simulate(float zero, float a, float b, float c,
                     float alpha, float beta, float gamma,
                     bool deg, unsigned int nb=20, unsigned int nbspurious=0,
-                    float sigma=0, float percentMissing=0, const bool verbose=false);
+                    float sigma=0, float percentMissing=0, const bool verbose=false,
+                    const bool merge=false);
       void ExportDhklDSigmaIntensity(std::ostream &out)const;
       /// Add one peak
       ///\param d: 1/d for this peak (Angstroem)
