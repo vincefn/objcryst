@@ -10,6 +10,7 @@ DIR_STATIC_LIBS = $(BUILD_DIR)/static-libs
 #Internal directories
 DIR_CRYSTVECTOR = ${DIR_CRYST}/CrystVector
 DIR_EXAMPLE = ${DIR_CRYST}/example
+DIR_TEST = ${DIR_CRYST}/../test
 DIR_LIBCRYST = ${DIR_CRYST}/ObjCryst
 DIR_REFOBJ = ${DIR_CRYST}/RefinableObj
 DIR_VFNQUIRKS = ${DIR_CRYST}/Quirks

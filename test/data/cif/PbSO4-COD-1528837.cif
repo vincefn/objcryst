@@ -1,0 +1,74 @@
+#------------------------------------------------------------------------------
+#$Date: 2025-08-18 18:02:58 +0300 (Mon, 18 Aug 2025) $
+#$Revision: 301777 $
+#$URL: file:///home/coder/svn-repositories/_RELOADED_COD/cod-reloaded/cif/1/52/88/1528837.cif $
+#------------------------------------------------------------------------------
+#
+# This file is available in the Crystallography Open Database (COD),
+# http://www.crystallography.net/
+#
+# All data on this site have been placed in the public domain by the
+# contributors.
+#
+data_1528837
+loop_
+_publ_author_name
+'Sahl, K.'
+_publ_section_title
+;
+ Die Verfeinerung der Kristallstrukutren von Pb Cl2 (Cotunnit), Ba Cl2, Pb
+ S O4 (Anglesit) und Ba S O4 (Baryt)
+;
+_journal_name_full
+'Beitraege zur Mineralogie und Petrographie (-11,1965)'
+_journal_page_first              111
+_journal_page_last               132
+_journal_volume                  9
+_journal_year                    1963
+_chemical_formula_sum            'O4 Pb S'
+_chemical_name_systematic        'Pb (S O4)'
+_space_group_IT_number           62
+_symmetry_space_group_name_Hall  '-P 2ac 2n'
+_symmetry_space_group_name_H-M   'P n m a'
+_cell_angle_alpha                90
+_cell_angle_beta                 90
+_cell_angle_gamma                90
+_cell_formula_units_Z            4
+_cell_length_a                   8.516
+_cell_length_b                   5.399
+_cell_length_c                   6.989
+_cell_volume                     321.339
+_citation_journal_id_ASTM        BMUPA4
+_cod_data_source_file            Sahl_BMUPA4_1963_366.cif
+_cod_data_source_block           O4Pb1S1
+_cod_original_cell_volume        321.3394
+_cod_original_formula_sum        'O4 Pb1 S1'
+_cod_database_code               1528837
+loop_
+_symmetry_equiv_pos_as_xyz
+x,y,z
+-x+1/2,-y,z+1/2
+x+1/2,-y+1/2,-z+1/2
+-x,y+1/2,-z
+-x,-y,-z
+x-1/2,y,-z-1/2
+-x-1/2,y-1/2,z-1/2
+x,-y-1/2,z
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+_atom_site_U_iso_or_equiv
+O2 O-2 0.319 0.75 0.043 1 0.0
+O1 O-2 0.595 0.75 0.1 1 0.0
+O3 O-2 0.415 0.974 0.306 1 0.0
+Pb1 Pb+2 0.1882 0.25 0.167 1 0.0
+S1 S+6 0.437 0.75 0.186 1 0.0
+loop_
+_cod_related_entry_id
+_cod_related_entry_database
+_cod_related_entry_code
+1 PubChem 24008
