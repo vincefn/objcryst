@@ -556,8 +556,8 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
       bool mExtractionMode;
       /// Single crystal data extracted from the powder pattern.
       DiffractionDataSingleCrystal *mpLeBailData;
-      /// Phase-specific offset added to the pattern flat-detector transmission
-      /// displacement ratio before applying the correction
+      /// Phase-specific offset added to m2ThetaFlatDetDispRatio before applying
+      /// the flat-detector transmission displacement correction.
       REAL m2ThetaPhaseFlatDetDispRatio;
       /// a,b and c in Angstroems, angles (stored) in radians
       /// This is used to override lattice parameter from the Crystal structure,
@@ -762,7 +762,7 @@ class PowderPattern : public RefinableObj
          /// \f$ (2\theta)_{obs} = (2\theta)_{real} + b\sin(2\theta) \f$
          void Set2ThetaTransparency(const REAL transparency);
          /// Change flat-detector transmission displacement ratio correction
-         /// \f$ \delta = \arctan\left(\frac{1}{2} c \sin(2\cdot 2\theta)\right) \f$
+         /// (see m2ThetaFlatDetDispRatio for the formula and reference).
          void Set2ThetaFlatDetDispRatio(const REAL ratio);
          /// Get flat-detector transmission displacement ratio correction
          REAL Get2ThetaFlatDetDispRatio() const;
@@ -1104,8 +1104,9 @@ class PowderPattern : public RefinableObj
          /// Transparency correction :
          ///\f$ (2\theta)_{obs} = (2\theta)_{real} + b\sin(2\theta) \f$
          REAL m2ThetaTransparency;
-         /// Flat-detector transmission displacement ratio correction :
-         ///\f$ \delta = \arctan\left(\frac{1}{2} c \sin(2\cdot 2\theta)\right) \f$
+         /// Relative sample displacement \f$c=d/R\f$ in transmission geometry with flat detector
+         /// \f$\delta=\arctan\left(\frac{c\sin(4\theta)}{2-2c\sin^2(2\theta)}\right)\f$;
+         /// see https://doi.org/10.1107/S1600576722011360.
          REAL m2ThetaFlatDetDispRatio;
          /// Time Of Flight (TOF) parameters :
          ///\f$ t = DIFC*\frac{\sin(\theta)}{\lambda} + DIFA*\left(\frac{\sin(\theta)}{\lambda}\right)^2 + mXZero\f$
