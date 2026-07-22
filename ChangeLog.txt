@@ -3,9 +3,6 @@ NEW FEATURES
   * Added an extensive non-GUI test suite (unit, integration and regression
     tests) under test/, covering the main ObjCryst++ API components
 
-BUG FIXES
-  * Fix orthorhombic typo (@cadenmyers13), with backward compatibility
-
 #### 2024.1 (August 2024)
 NEW FEATURES
   * Added inter-molecular restraints, to take into account information
@@ -49,7 +46,7 @@ IMPROVEMENTS
     the list of atoms inside the group.
 
 BUG FIXES
-  * Correct EstimateCellVolume estimation for orthorhombic F
+  * Correct EstimateCellVolume estimation for orthorombic F
   * Correct calculation of integrated figures of merit (Rwp, etc..)
     with multiple crystalline phases (https://github.com/vincefn/objcryst/pull/53)
   * + several minor issues
