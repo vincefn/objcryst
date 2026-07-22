@@ -1587,15 +1587,15 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
 
                #if 0
                // Report GoF values (Chi^2 / nbObs) values for all objects
-               for(map<RefinableObj*,unsigned int>::iterator pos=mLSQ.GetRefinedObjMap().begin();pos!=mLSQ.GetRefinedObjMap().end();++pos)
-                  if(pos->first->GetNbLSQFunction()>0)
+               for(auto& pos : mLSQ.GetRefinedObjMap())
+                  if(pos.first->GetNbLSQFunction()>0)
                   {
                      CrystVector_REAL tmp;
-                     tmp =pos->first->GetLSQCalc(pos->second);
-                     tmp-=pos->first->GetLSQObs (pos->second);
+                     tmp =pos.first->GetLSQCalc(pos.second);
+                     tmp-=pos.first->GetLSQObs (pos.second);
                      tmp*=tmp;
-                     tmp*=pos->first->GetLSQWeight(pos->second);
-                     cout<<pos->first->GetClassName()<<":"<<pos->first->GetName()<<": GoF="<<tmp.sum()/tmp.numElements();
+                     tmp*=pos.first->GetLSQWeight(pos.second);
+                     cout<<pos.first->GetClassName()<<":"<<pos.first->GetName()<<": GoF="<<tmp.sum()/tmp.numElements();
                   }
                cout<<endl;
                #endif
@@ -1606,15 +1606,15 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
                catch(const ObjCrystException &except){};
                #if 0
                // Report GoF values (Chi^2 / nbObs) values for all objects
-               for(map<RefinableObj*,unsigned int>::iterator pos=mLSQ.GetRefinedObjMap().begin();pos!=mLSQ.GetRefinedObjMap().end();++pos)
-                  if(pos->first->GetNbLSQFunction()>0)
+               for(auto& pos : mLSQ.GetRefinedObjMap())
+                  if(pos.first->GetNbLSQFunction()>0)
                   {
                      CrystVector_REAL tmp;
-                     tmp =pos->first->GetLSQCalc(pos->second);
-                     tmp-=pos->first->GetLSQObs (pos->second);
+                     tmp =pos.first->GetLSQCalc(pos.second);
+                     tmp-=pos.first->GetLSQObs (pos.second);
                      tmp*=tmp;
-                     tmp*=pos->first->GetLSQWeight(pos->second);
-                     cout<<pos->first->GetClassName()<<":"<<pos->first->GetName()<<": GoF="<<tmp.sum()/tmp.numElements();
+                     tmp*=pos.first->GetLSQWeight(pos.second);
+                     cout<<pos.first->GetClassName()<<":"<<pos.first->GetName()<<": GoF="<<tmp.sum()/tmp.numElements();
                   }
                cout<<endl;
                #endif
@@ -2298,8 +2298,8 @@ void MonteCarloObj::InitLSQ(const bool useFullPowderPatternProfile)
 
    if(!useFullPowderPatternProfile)
    {// Use LSQ function #1 for powder patterns (integrated patterns - faster !)
-      for(map<RefinableObj*,unsigned int>::iterator pos=mLSQ.GetRefinedObjMap().begin();pos!=mLSQ.GetRefinedObjMap().end();++pos)
-         if(pos->first->GetClassName()=="PowderPattern") pos->second=1;
+      for(auto& pos : mLSQ.GetRefinedObjMap())
+         if(pos.first->GetClassName()=="PowderPattern") pos.second=1;
    }
    // Only refine structural parameters (excepting parameters already fixed) and scale factor
    mLSQ.PrepareRefParList(true);

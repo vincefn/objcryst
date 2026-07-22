@@ -28,6 +28,7 @@
 #include <string>
 #include <map>
 #include <list>
+#include <vector>
 
 namespace ObjCryst
 {
@@ -139,16 +140,16 @@ class LSQNumObj
       // of sub-objects before refinement (such as for removing certain types
       // of objects).
       //ObjRegistry<RefinableObj> &GetRefinedObjList();
-      /** Get the map of refined objects - this is a recursive list of all the objects
-      * that are taken into account for the refinement. The key is a pointer to the
-      * object and the value is the LSQ function index for that object.
+      /** Get the ordered list of refined objects.
+      * Objects are returned in first-insertion order. Each entry contains the
+      * object pointer and the LSQ function index for that object.
       */
-      const std::map<RefinableObj*,unsigned int>& GetRefinedObjMap() const;
-      /** Get the map of refined objects - this is a recursive list of all the objects
-      * that are taken into account for the refinement. The key is a pointer to the
-      * object and the value is the LSQ function index for that object.
+      const std::vector<std::pair<RefinableObj*,unsigned int>>& GetRefinedObjMap() const;
+      /** Get the ordered list of refined objects.
+      * Objects are returned in first-insertion order. Each entry contains the
+      * object pointer and the LSQ function index for that object.
       */
-      std::map<RefinableObj*,unsigned int>& GetRefinedObjMap();
+      std::vector<std::pair<RefinableObj*,unsigned int>>& GetRefinedObjMap();
       /** Access to the RefinableObj which is the compilation of all parameters
       * from the object supplied for optimization and its sub-objects.
       *
@@ -248,12 +249,10 @@ class LSQNumObj
       // The index of the LSQ function in the refined object (if there are several...)
       //unsigned int mLSQFuncIndex;
 
-      /** Map of the recursive list of the objects to be refined. The key is the pointer
-      * to the object and the value the LSQ function index
-      *
-      * Individual LSQ functions can be changed using GetRefinedObjMap().
+      /** Ordered list of objects to be refined, in SetRefinedObj() call order.
+      * Each entry is (object pointer, LSQ function index).
       */
-      std::map<RefinableObj*,unsigned int> mvRefinedObjMap;
+      std::vector<std::pair<RefinableObj*,unsigned int>> mvRefinedObjMap;
       /// Size of each object LSQ data. This is initialized in LSQNumObj::GetLSQObs()
       mutable std::map<RefinableObj*,unsigned int> mvRefinedObjLSQSize;
 
