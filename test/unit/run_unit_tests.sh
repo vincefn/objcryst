@@ -62,6 +62,7 @@ run_test "unit::cellexplorer-dicvol-monoclinic" "$SCRIPT_DIR/api_indexing" "cell
 run_test "unit::powderpattern-background" "$SCRIPT_DIR/api_powderpattern" "powderpattern-background"
 run_test "unit::powderpattern-diffraction" "$SCRIPT_DIR/api_powderpattern" "powderpattern-diffraction"
 run_test "unit::powderpattern-diffraction-mur" "$SCRIPT_DIR/api_powderpattern" "powderpattern-diffraction-mur"
+run_test "unit::powderpattern-diffraction-lebail-fhklobs" "$SCRIPT_DIR/api_powderpattern" "powderpattern-diffraction-lebail-fhklobs"
 run_test "unit::powderpattern-import" "$SCRIPT_DIR/api_powderpattern" "powderpattern-import"
 run_test "unit::scatteringcorr-subclasses" "$SCRIPT_DIR/api_powderpattern" "scatteringcorr-subclasses"
 run_test "unit::reflectionprofile-pseudo-voigt" "$SCRIPT_DIR/api_powderpattern" "reflectionprofile-pseudo-voigt"

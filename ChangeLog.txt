@@ -2,9 +2,14 @@
 NEW FEATURES
   * Added an extensive non-GUI test suite (unit, integration and regression
     tests) under test/, covering the main ObjCryst++ API components
+  * Add PowderPatternDiffraction::SetFhklObsSq to set extracted structure
+    factors from Le Bail data (PR #76, @clemisch)
 
 BUG FIXES
-  * Fix orthorhombic typo (@cadenmyers13), with backward compatibility
+  * Fix CIF rhombohedral symmetry scoring mutating imported lattice
+    (PR #70, @clemisch)
+  * Add per-phase sample-detector displacement ratio support with flat detector
+    geometry in powder diffraction (PR #73, @clemisch)
 
 #### 2024.1 (August 2024)
 NEW FEATURES
@@ -49,7 +54,7 @@ IMPROVEMENTS
     the list of atoms inside the group.
 
 BUG FIXES
-  * Correct EstimateCellVolume estimation for orthorhombic F
+  * Correct EstimateCellVolume estimation for orthorombic F
   * Correct calculation of integrated figures of merit (Rwp, etc..)
     with multiple crystalline phases (https://github.com/vincefn/objcryst/pull/53)
   * + several minor issues

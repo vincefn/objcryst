@@ -4060,6 +4060,14 @@ mFreezeLatticePar(false),mFrozenLatticePar(6),mNeedLayout(false)
             .WXCreate(this);
       mList.Add(fieldGlobalBiso);
       mpSizer->Add(fieldGlobalBiso);
+   // Phase-specific flat-detector displacement ratio
+      WXCrystObjBasic* fieldFlatDetDispRatioPhase
+         =mpPowderPatternDiffraction->GetPar(&(mpPowderPatternDiffraction->m2ThetaPhaseFlatDetDispRatio))
+            .WXCreate(this);
+      fieldFlatDetDispRatioPhase->SetToolTip(_T("Phase-specific peak shift for flat-detector transmission geometry:\n")
+                                             _T("added to the pattern-global flat-detector displacement ratio"));
+      mList.Add(fieldFlatDetDispRatioPhase);
+      mpSizer->Add(fieldFlatDetDispRatioPhase);
    // Texture (March Dollase
       WXTextureMarchDollase* pTexMD
          =new WXTextureMarchDollase(this,&(mpPowderPatternDiffraction->mCorrTextureMarchDollase));

@@ -411,6 +411,12 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
       void FreezeLatticePar(const bool use);
       /// Do we use local cell parameters ? (see mFrozenLatticePar)
       bool FreezeLatticePar() const;
+      /// Change the phase-specific offset added to the pattern flat-detector
+      /// displacement ratio before applying the correction
+      void Set2ThetaPhaseFlatDetDispRatio(const REAL ratio);
+      /// Get the phase-specific offset added to the pattern flat-detector
+      /// displacement ratio before applying the correction
+      REAL Get2ThetaPhaseFlatDetDispRatio() const;
       /** Get the 'net' number of observed intensities, minus the number of reflections, for a profile fit.
       * This calculation takes into account where each reflection appears:
       * - if in a low angle region there are 500 points and 2 reflections, this will contribute 498 net
@@ -436,6 +442,9 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
       * sin(theta)/lambda value.
       */
       void SetFhklObsSq(const CrystVector_REAL &obs);
+      /// Apply pattern-global x corrections and one flat-detector correction
+      /// using the sum of pattern and phase flat-detector ratios.
+      REAL X2XCorrPhase(const REAL x) const;
    protected:
       virtual void CalcPowderPattern() const;
       virtual void CalcPowderPattern_FullDeriv(std::set<RefinablePar *> &vPar);
@@ -553,6 +562,9 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
       bool mExtractionMode;
       /// Single crystal data extracted from the powder pattern.
       DiffractionDataSingleCrystal *mpLeBailData;
+      /// Phase-specific offset added to m2ThetaFlatDetDispRatio before applying
+      /// the flat-detector transmission displacement correction.
+      REAL m2ThetaPhaseFlatDetDispRatio;
       /// a,b and c in Angstroems, angles (stored) in radians
       /// This is used to override lattice parameter from the Crystal structure,
       /// e.g. for multiple datasets collected at different temperatures
@@ -741,7 +753,7 @@ class PowderPattern : public RefinableObj
          /// When were the radiation parameter (radiation type, wavelength) changed ?
          const RefinableObjClock& GetClockPowderPatternRadiation()const;
          /// When were the parameters for 2theta/TOF correction (zero, transparency,
-         /// displacement) last changed ?
+         /// displacement, flat-detector displacement ratio) last changed ?
          const RefinableObjClock& GetClockPowderPatternXCorr()const;
          /// When were the absorption correction parameters (muR) last changed ?
          const RefinableObjClock& GetClockPowderPatternAbsCorr() const;
@@ -755,6 +767,11 @@ class PowderPattern : public RefinableObj
          ///Change transparency correction
          /// \f$ (2\theta)_{obs} = (2\theta)_{real} + b\sin(2\theta) \f$
          void Set2ThetaTransparency(const REAL transparency);
+         /// Change flat-detector transmission displacement ratio correction
+         /// (see m2ThetaFlatDetDispRatio for the formula and reference).
+         void Set2ThetaFlatDetDispRatio(const REAL ratio);
+         /// Get flat-detector transmission displacement ratio correction
+         REAL Get2ThetaFlatDetDispRatio() const;
 
       // Import & export powder pattern
          /** \brief Import fullprof-style diffraction data.
@@ -1093,6 +1110,10 @@ class PowderPattern : public RefinableObj
          /// Transparency correction :
          ///\f$ (2\theta)_{obs} = (2\theta)_{real} + b\sin(2\theta) \f$
          REAL m2ThetaTransparency;
+         /// Relative sample displacement \f$c=d/R\f$ in transmission geometry with flat detector
+         /// \f$\delta=\arctan\left(\frac{c\sin(4\theta)}{2-2c\sin^2(2\theta)}\right)\f$;
+         /// see https://doi.org/10.1107/S1600576722011360.
+         REAL m2ThetaFlatDetDispRatio;
          /// Time Of Flight (TOF) parameters :
          ///\f$ t = DIFC*\frac{\sin(\theta)}{\lambda} + DIFA*\left(\frac{\sin(\theta)}{\lambda}\right)^2 + mXZero\f$
          REAL mDIFC,mDIFA;
