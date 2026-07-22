@@ -1823,6 +1823,7 @@ void PowderPatternDiffraction::XMLOutput(ostream &os,int indent)const
    if(mpReflectionProfile!=0) mpReflectionProfile->XMLOutput(os,indent);
 
    this->GetPar(&mGlobalBiso).XMLOutput(os,"globalBiso",indent);
+   this->GetPar(&m2ThetaPhaseFlatDetDispRatio).XMLOutput(os,"2ThetaFlatDetDispRatioPhase",indent);
    os <<endl;
 
    if(mCorrTextureMarchDollase.GetNbPhase()>0)
@@ -1930,6 +1931,11 @@ void PowderPatternDiffraction::XMLInput(istream &is,const XMLCrystTag &tagg)
                if("globalBiso"==tag.GetAttributeValue(i))
                {
                   this->GetPar(&mGlobalBiso).XMLInput(is,tag);
+                  break;
+               }
+               if("2ThetaFlatDetDispRatioPhase"==tag.GetAttributeValue(i))
+               {
+                  this->GetPar(&m2ThetaPhaseFlatDetDispRatio).XMLInput(is,tag);
                   break;
                }
                if("U"==tag.GetAttributeValue(i))
@@ -2177,6 +2183,9 @@ void PowderPattern::XMLOutput(ostream &os,int indent)const
 
       this->GetPar(&m2ThetaTransparency).XMLOutput(os,"2ThetaTransparency",indent);
       os <<endl;
+
+      this->GetPar(&m2ThetaFlatDetDispRatio).XMLOutput(os,"2ThetaFlatDetDispRatio",indent);
+      os <<endl;
    }
    if(mMuR>0)
    {
@@ -2304,6 +2313,11 @@ void PowderPattern::XMLInput(istream &is,const XMLCrystTag &tagg)
                if("2ThetaTransparency"==tag.GetAttributeValue(i))
                {
                   this->GetPar(&m2ThetaTransparency).XMLInput(is,tag);
+                  break;
+               }
+               if("2ThetaFlatDetDispRatio"==tag.GetAttributeValue(i))
+               {
+                  this->GetPar(&m2ThetaFlatDetDispRatio).XMLInput(is,tag);
                   break;
                }
                if("TOF-DIFC"==tag.GetAttributeValue(i))
