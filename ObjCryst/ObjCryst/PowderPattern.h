@@ -436,6 +436,12 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
       * Raises an exception if this is not available.
       */
       const CrystVector_REAL& GetFhklObsSq() const;
+      /** Set the extracted structure factors modulus (squared), e.g. using the Le Bail method.
+      *
+      * The supplied vector must match the number of reflections below the maximum
+      * sin(theta)/lambda value.
+      */
+      void SetFhklObsSq(const CrystVector_REAL &obs);
       /// Apply pattern-global x corrections and one flat-detector correction
       /// using the sum of pattern and phase flat-detector ratios.
       REAL X2XCorrPhase(const REAL x) const;

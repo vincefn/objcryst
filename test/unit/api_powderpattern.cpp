@@ -91,6 +91,64 @@ void TestPowderPatternDiffractionMuRAbsorption()
    Check(p.GetPowderPatternCalc().max() > 0, "PowderPattern calc with muR absorption should be non-empty");
 }
 
+void TestPowderPatternDiffractionLeBailFhklObsSq()
+{
+   using namespace ObjCryst;
+   Crystal c = MakePbso4Crystal();
+
+   PowderPattern p;
+   p.SetRadiationType(RAD_XRAY);
+   p.SetWavelength("CuA1");
+   p.SetPowderPatternPar(10 * DEG2RAD, 0.02 * DEG2RAD, 4000);
+   CrystVector_REAL obs(4000);
+   obs = 1;
+   p.SetPowderPatternObs(obs);
+
+   auto* phase = new PowderPatternDiffraction;
+   phase->SetCrystal(c);
+   phase->SetReflectionProfilePar(PROFILE_PSEUDO_VOIGT, .03 * DEG2RAD * DEG2RAD, 0, 0, 0.3, 0);
+   p.AddPowderPatternComponent(*phase);
+   p.Prepare();
+
+   Check(!phase->GetExtractionMode(), "Extraction mode should be disabled by default");
+   phase->SetExtractionMode(true, true);
+   Check(phase->GetExtractionMode(), "Extraction mode should be enabled");
+   phase->ExtractLeBail(1);
+   Check(phase->HasFhklObsSq(), "Le Bail extraction should populate FhklObsSq");
+
+   const unsigned long nbrefl = phase->GetNbReflBelowMaxSinThetaOvLambda();
+   Check(nbrefl > 0, "Le Bail test requires at least one reflection");
+   const CrystVector_REAL extracted = phase->GetFhklObsSq();
+   Check(static_cast<unsigned long>(extracted.numElements()) == nbrefl,
+         "Extracted FhklObsSq size mismatch");
+
+   CrystVector_REAL assigned(nbrefl);
+   for(unsigned long i = 0; i < nbrefl; ++i) assigned(i) = extracted(i) + 1.0;
+   phase->SetFhklObsSq(assigned);
+   const CrystVector_REAL assignedOut = phase->GetFhklObsSq();
+   Check(static_cast<unsigned long>(assignedOut.numElements()) == nbrefl,
+         "Assigned FhklObsSq size mismatch");
+   const unsigned long nbcheck = (nbrefl < 5) ? nbrefl : 5;
+   for(unsigned long i = 0; i < nbcheck; ++i)
+      CheckNearAbs(assignedOut(i), assigned(i), 1e-10, "Assigned FhklObsSq value mismatch");
+
+   CrystVector_REAL negative = assigned;
+   negative(0) = -1.0;
+   bool negativeThrown = false;
+   try
+   {
+      phase->SetFhklObsSq(negative);
+   }
+   catch(const ObjCrystException&)
+   {
+      negativeThrown = true;
+   }
+   Check(negativeThrown, "SetFhklObsSq should reject negative intensities");
+
+   phase->SetExtractionMode(false);
+   Check(!phase->GetExtractionMode(), "Extraction mode should be disabled after request");
+}
+
 void TestPowderPatternImport()
 {
    using namespace ObjCryst;
@@ -284,6 +342,7 @@ int main(int argc, char* argv[])
    if(testName == "powderpattern-background") TestPowderPatternBackground();
    else if(testName == "powderpattern-diffraction") TestPowderPatternDiffraction();
    else if(testName == "powderpattern-diffraction-mur") TestPowderPatternDiffractionMuRAbsorption();
+   else if(testName == "powderpattern-diffraction-lebail-fhklobs") TestPowderPatternDiffractionLeBailFhklObsSq();
    else if(testName == "powderpattern-import") TestPowderPatternImport();
    else if(testName == "scatteringcorr-subclasses") TestScatteringCorrSubclasses();
    else if(testName == "reflectionprofile-pseudo-voigt") TestReflectionProfilePseudoVoigt();
