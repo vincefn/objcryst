@@ -3,6 +3,12 @@ NEW FEATURES
   * Added an extensive non-GUI test suite (unit, integration and regression
     tests) under test/, covering the main ObjCryst++ API components
 
+BUG FIXES
+  * Fix CIF rhombohedral symmetry scoring mutating imported lattice
+    (PR #70, @clemisch)
+  * Add per-phase sample-detector displacement ratio support with flat detector
+    geometry in powder diffraction (PR #73, @clemisch)
+
 #### 2024.1 (August 2024)
 NEW FEATURES
   * Added inter-molecular restraints, to take into account information
