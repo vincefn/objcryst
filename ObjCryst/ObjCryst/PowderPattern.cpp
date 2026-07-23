@@ -871,17 +871,13 @@ PowderPatternDiffraction* PowderPatternDiffraction::CreateCopy()const
 void PowderPatternDiffraction::SetParentPowderPattern(PowderPattern &s)
 {
    if(mpParentPowderPattern!=0)
-   {
       mClockMaster.RemoveChild(mpParentPowderPattern->GetIntegratedProfileLimitsClock());
-      mClockMaster.RemoveChild(mpParentPowderPattern->GetRadiation().GetClockLinearPolarRate());
-   }
    mpParentPowderPattern = &s;
    mClockMaster.AddChild(mpParentPowderPattern->GetIntegratedProfileLimitsClock());
    mClockMaster.AddChild(mpParentPowderPattern->GetClockPowderPatternPar());
    mClockMaster.AddChild(mpParentPowderPattern->GetClockPowderPatternXCorr());
    mClockMaster.AddChild(mpParentPowderPattern->GetClockPowderPatternRadiation());
    mClockMaster.AddChild(mpParentPowderPattern->GetClockPowderPatternAbsCorr());
-   mClockMaster.AddChild(mpParentPowderPattern->GetRadiation().GetClockLinearPolarRate());
 }
 
 const CrystVector_REAL& PowderPatternDiffraction::GetPowderPatternCalc()const
