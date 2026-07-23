@@ -42,6 +42,13 @@ run_test "unit::cif-import" "$SCRIPT_DIR/api_cif" "cif-import"
 run_test "unit::cif-data-fields" "$SCRIPT_DIR/api_cif" "cif-data-fields"
 run_test "unit::cif-coordinate-conversion" "$SCRIPT_DIR/api_cif" "cif-coordinate-conversion"
 
+# --- api_refinableobj ---
+run_test "unit::refinableobj-proxy-one-parent-prefix" "$SCRIPT_DIR/api_refinableobj" "proxy-one-parent-prefix"
+run_test "unit::refinableobj-proxy-two-parent-prefix" "$SCRIPT_DIR/api_refinableobj" "proxy-two-parent-prefix"
+run_test "unit::refinableobj-proxy-delegation" "$SCRIPT_DIR/api_refinableobj" "proxy-delegation"
+run_test "unit::refinableobj-proxy-deep-hierarchy" "$SCRIPT_DIR/api_refinableobj" "proxy-deep-hierarchy"
+run_test "unit::refinableobj-proxy-collision-fallback" "$SCRIPT_DIR/api_refinableobj" "proxy-collision-fallback"
+
 # --- api_optimization ---
 run_test "unit::refinablepar" "$SCRIPT_DIR/api_optimization" "refinablepar"
 run_test "unit::refinableobj" "$SCRIPT_DIR/api_optimization" "refinableobj"
@@ -49,6 +56,7 @@ run_test "unit::optimizationobj" "$SCRIPT_DIR/api_optimization" "optimizationobj
 run_test "unit::optimizationobj-limits-options" "$SCRIPT_DIR/api_optimization" "optimizationobj-limits-options"
 run_test "unit::lsqnumobj" "$SCRIPT_DIR/api_optimization" "lsqnumobj"
 run_test "unit::lsqnumobj-residual-statistics" "$SCRIPT_DIR/api_optimization" "lsqnumobj-residual-statistics"
+run_test "unit::lsqnumobj-preserve-original-parameter-names" "$SCRIPT_DIR/api_optimization" "lsqnumobj-preserve-original-parameter-names"
 
 # --- api_indexing ---
 run_test "unit::peaklist-simulate-volume" "$SCRIPT_DIR/api_indexing" "peaklist-simulate-volume"

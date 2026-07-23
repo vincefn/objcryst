@@ -4,6 +4,15 @@ NEW FEATURES
     tests) under test/, covering the main ObjCryst++ API components
   * Add PowderPatternDiffraction::SetFhklObsSq to set extracted structure
     factors from Le Bail data (PR #76, @clemisch)
+  * Introduce `RefinableParProxy`: when `RefinableObj::AddPar(obj, copyParam=false)`
+    is used (e.g. in `LSQNumObj::PrepareRefParList`), parameters are now represented
+    as lightweight proxies that keep their own hierarchy-prefixed name
+    ("ParentClass:ParentName:paramName") while delegating all other operations
+    (value, limits, flags, type) to the original `RefinablePar`. This prevents
+    in-place mutation of the original parameter names (fixes #71 in a clean way,
+    superseding the deterministic-order approach of PR #77).
+    `RefinableObj::GetParNameHierarchy(par, max_parents)` is added as a public
+    helper to build such hierarchy-prefixed names.
 
 BUG FIXES
   * Fix CIF rhombohedral symmetry scoring mutating imported lattice
