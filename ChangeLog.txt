@@ -10,6 +10,8 @@ BUG FIXES
     (PR #70, @clemisch)
   * Add per-phase sample-detector displacement ratio support with flat detector
     geometry in powder diffraction (PR #73, @clemisch)
+  * Recompute PolarizationCorr when the linear polarization rate changes,
+    using a dedicated Radiation clock (related to pyobjcryst issue #38)
 
 #### 2024.1 (August 2024)
 NEW FEATURES
