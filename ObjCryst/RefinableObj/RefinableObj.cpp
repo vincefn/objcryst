@@ -729,6 +729,146 @@ void RefinablePar::WXNotifyDelete()
 }
 #endif
 
+RefinableParProxy::RefinableParProxy(RefinablePar &srcPar, const string &proxyName):
+RefinablePar(srcPar),mpSrcPar(&srcPar),mProxyName(proxyName)
+{
+   RefinablePar::SetName(proxyName);
+}
+
+RefinableParProxy::~RefinableParProxy()
+{}
+
+REAL RefinableParProxy::GetValue()const {return mpSrcPar->GetValue();}
+const REAL* RefinableParProxy::GetPointer()const {return mpSrcPar->GetPointer();}
+void RefinableParProxy::SetValue(const REAL value)
+{
+   if(mpSrcPar->GetValue() == value) return;
+   mpSrcPar->SetValue(value);
+   this->Click();
+}
+const REAL& RefinableParProxy::GetHumanValue() const {return mpSrcPar->GetHumanValue();}
+void RefinableParProxy::SetHumanValue(const REAL &value)
+{
+   if(mpSrcPar->GetHumanValue() == value) return;
+   mpSrcPar->SetHumanValue(value);
+   this->Click();
+}
+void RefinableParProxy::Mutate(const REAL mutateValue)
+{
+   mpSrcPar->Mutate(mutateValue);
+   this->Click();
+}
+void RefinableParProxy::MutateTo(const REAL newValue)
+{
+   mpSrcPar->MutateTo(newValue);
+   this->Click();
+}
+REAL RefinableParProxy::GetSigma()const {return mpSrcPar->GetSigma();}
+REAL RefinableParProxy::GetHumanSigma()const {return mpSrcPar->GetHumanSigma();}
+void RefinableParProxy::SetSigma(const REAL sigma)
+{
+   mpSrcPar->SetSigma(sigma);
+   this->Click();
+}
+string RefinableParProxy::GetName()const {return mProxyName;}
+void RefinableParProxy::SetName(const string &name) {mProxyName=name;}
+void RefinableParProxy::Print() const
+{
+   cout << this->GetName() << " : " << this->GetHumanValue()
+        << " Fixed:"<< this->IsFixed() <<" Periodic:"<<this->IsPeriodic()<<" Limited:"<<this->IsLimited()
+        << " Min:" << this->GetHumanMin() << " Max:" << this->GetHumanMax()
+        << " Step:" << this->GetGlobalOptimStep()
+   #ifdef __DEBUG__
+        << ",HasClock=proxy"
+   #endif
+        <<endl;
+}
+bool RefinableParProxy::IsFixed()const {return mpSrcPar->IsFixed();}
+void RefinableParProxy::SetIsFixed(const bool b) {mpSrcPar->SetIsFixed(b);}
+bool RefinableParProxy::IsLimited()const {return mpSrcPar->IsLimited();}
+void RefinableParProxy::SetIsLimited(const bool b)
+{
+   mpSrcPar->SetIsLimited(b);
+   this->Click();
+}
+bool RefinableParProxy::IsUsed()const {return mpSrcPar->IsUsed();}
+void RefinableParProxy::SetIsUsed(const bool b)
+{
+   mpSrcPar->SetIsUsed(b);
+   this->Click();
+}
+bool RefinableParProxy::IsPeriodic()const {return mpSrcPar->IsPeriodic();}
+void RefinableParProxy::SetIsPeriodic(const bool b,REAL period)
+{
+   mpSrcPar->SetIsPeriodic(b,period);
+   this->Click();
+}
+REAL RefinableParProxy::GetHumanScale()const {return mpSrcPar->GetHumanScale();}
+void RefinableParProxy::SetHumanScale(const REAL scale) {mpSrcPar->SetHumanScale(scale);}
+REAL RefinableParProxy::GetMin()const   {return mpSrcPar->GetMin();}
+void RefinableParProxy::SetMin(const REAL min)
+{
+   mpSrcPar->SetMin(min);
+   this->Click();
+}
+REAL RefinableParProxy::GetHumanMin()const   {return mpSrcPar->GetHumanMin();}
+void RefinableParProxy::SetHumanMin(const REAL min)
+{
+   mpSrcPar->SetHumanMin(min);
+   this->Click();
+}
+REAL RefinableParProxy::GetMax()const   {return mpSrcPar->GetMax();}
+void RefinableParProxy::SetMax(const REAL max)
+{
+   mpSrcPar->SetMax(max);
+   this->Click();
+}
+REAL RefinableParProxy::GetHumanMax()const   {return mpSrcPar->GetHumanMax();}
+void RefinableParProxy::SetHumanMax(const REAL max)
+{
+   mpSrcPar->SetHumanMax(max);
+   this->Click();
+}
+REAL RefinableParProxy::GetPeriod()const   {return mpSrcPar->GetPeriod();}
+void RefinableParProxy::SetPeriod(const REAL period)
+{
+   mpSrcPar->SetPeriod(period);
+   this->Click();
+}
+REAL RefinableParProxy::GetDerivStep()const {return mpSrcPar->GetDerivStep();}
+void RefinableParProxy::SetDerivStep(const REAL step)
+{
+   mpSrcPar->SetDerivStep(step);
+   this->Click();
+}
+REAL RefinableParProxy::GetGlobalOptimStep()const {return mpSrcPar->GetGlobalOptimStep();}
+void RefinableParProxy::SetGlobalOptimStep(const REAL step) {mpSrcPar->SetGlobalOptimStep(step);}
+const RefParType* RefinableParProxy::GetType()const {return mpSrcPar->GetType();}
+void RefinableParProxy::SetType(const RefParType *type)
+{
+   mpSrcPar->SetType(type);
+   this->Click();
+}
+void RefinableParProxy::AssignClock(RefinableObjClock &clock)
+{
+   RefinablePar::AssignClock(clock);
+}
+void RefinableParProxy::SetLimitsAbsolute(const REAL min, const REAL max)
+{
+   mpSrcPar->SetLimitsAbsolute(min,max);
+   this->Click();
+}
+void RefinableParProxy::SetLimitsRelative(const REAL min, const REAL max)
+{
+   mpSrcPar->SetLimitsRelative(min,max);
+   this->Click();
+}
+void RefinableParProxy::SetLimitsProportional(const REAL min, const REAL max)
+{
+   mpSrcPar->SetLimitsProportional(min,max);
+   this->Click();
+}
+
 //######################################################################
 //    RefObjOpt
 //######################################################################
@@ -1420,6 +1560,32 @@ const RefinablePar& RefinableObj::GetPar(const string & name) const
    return *(mvpRefPar[i]);
 }
 
+/// Recursive helper: climbs the ancestry chain via the first client registry
+/// entry at each level, collecting "ClassName:Name:" prefix strings.
+static void CollectParentPrefixes(const ObjCryst::RefinableObj *obj,
+                                  int depth, int max_parents,
+                                  std::vector<std::string> &prefixes)
+{
+   if(depth>=max_parents) return;
+   const ObjCryst::ObjRegistry<ObjCryst::RefinableObj> &clients=obj->GetClientRegistry();
+   if(clients.GetNb()<=0) return;
+   const ObjCryst::RefinableObj &parent=clients.GetObj(0);
+   prefixes.push_back(parent.GetClassName()+":"+parent.GetName()+":");
+   CollectParentPrefixes(&parent, depth+1, max_parents, prefixes);
+}
+
+string RefinableObj::GetParNameHierarchy(RefinablePar &par, int max_parents) const
+{
+   if(max_parents<=0) return par.GetName();
+   vector<string> prefixes;
+   prefixes.reserve(max_parents);
+   CollectParentPrefixes(this, 0, max_parents, prefixes);
+   string name;
+   for(long i=(long)prefixes.size()-1;i>=0;i--) name += prefixes[i];
+   name += par.GetName();
+   return name;
+}
+
 RefinablePar& RefinableObj::GetPar(const REAL *p)
 {
    const long i=this->FindPar(p);
@@ -1494,7 +1660,19 @@ void RefinableObj::AddPar(RefinableObj &newRefParList,const bool copyParam)
    for(long i=0;i<newRefParList.GetNbPar();i++)
    {
       if(copyParam) p=new RefinablePar(newRefParList.GetPar(i));
-      else p=&(newRefParList.GetPar(i));
+      else
+      {
+         RefinablePar &src=newRefParList.GetPar(i);
+         string name=newRefParList.GetParNameHierarchy(src,2);
+         if(this->FindPar(name)!=-1)
+         {
+            cerr << "WARNING: RefinableObj::AddPar(..., copyParam=false): "
+                 << "parameter name '" << name << "' is not unique, "
+                 << "appending address suffix." << endl;
+            name += ":" + to_string(reinterpret_cast<size_t>(&src));
+         }
+         p=new RefinableParProxy(src, name);
+      }
       this->AddPar(p);
    }
 }
