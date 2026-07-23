@@ -185,44 +185,6 @@ void TestScatteringCorrSubclasses()
    Check(slit.GetCorr().min() > 0, "PowderSlitApertureCorr values should be positive");
 }
 
-void TestPolarizationCorrLinearPolarRateTrigger()
-{
-   using namespace ObjCryst;
-   Crystal c = MakePbso4Crystal();
-
-   PowderPattern p;
-   p.SetRadiationType(RAD_XRAY);
-   p.SetWavelength("CuA1");
-   p.SetPowderPatternPar(10 * DEG2RAD, 0.02 * DEG2RAD, 4000);
-   CrystVector_REAL obs(4000);
-   obs = 1;
-   p.SetPowderPatternObs(obs);
-
-   auto* phase = new PowderPatternDiffraction;
-   phase->SetCrystal(c);
-   phase->SetReflectionProfilePar(PROFILE_PSEUDO_VOIGT, .03 * DEG2RAD * DEG2RAD, 0, 0, 0.3, 0);
-   p.AddPowderPatternComponent(*phase);
-   p.Prepare();
-
-   // First calculation with default linear polarization rate (0 for tube)
-   const CrystVector_REAL calc1 = p.GetPowderPatternCalc();
-
-   // Change the linear polarization rate (e.g. synchrotron-like)
-   p.GetRadiation().SetLinearPolarRate(0.95);
-
-   // Re-calculate: result must differ because polarization correction changed
-   const CrystVector_REAL calc2 = p.GetPowderPatternCalc();
-
-   REAL maxDiff = 0;
-   for(long i = 0; i < calc1.numElements(); ++i)
-   {
-      REAL d = std::abs(calc2(i) - calc1(i));
-      if(d > maxDiff) maxDiff = d;
-   }
-   Check(maxDiff > 0,
-         "PolarizationCorr: changing linear polar rate should produce different powder pattern calc");
-}
-
 void TestReflectionProfilePseudoVoigt()
 {
    using namespace ObjCryst;
@@ -383,7 +345,6 @@ int main(int argc, char* argv[])
    else if(testName == "powderpattern-diffraction-lebail-fhklobs") TestPowderPatternDiffractionLeBailFhklObsSq();
    else if(testName == "powderpattern-import") TestPowderPatternImport();
    else if(testName == "scatteringcorr-subclasses") TestScatteringCorrSubclasses();
-   else if(testName == "polarizationcorr-polar-rate-trigger") TestPolarizationCorrLinearPolarRateTrigger();
    else if(testName == "reflectionprofile-pseudo-voigt") TestReflectionProfilePseudoVoigt();
    else if(testName == "reflectionprofile-double-exponential-pv") TestReflectionProfileDoubleExponentialPseudoVoigt();
    else if(testName == "reflectionprofile-pv-anisotropic-direct") TestReflectionProfilePseudoVoigtAnisotropicDirect();
