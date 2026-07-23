@@ -252,6 +252,8 @@ class Radiation: public RefinableObj
       const RefinableObjClock& GetClockWavelength()const ;
       /// Last time the nature (X-Rays/Neutron, number of wavelengths)radiation has been changed
       const RefinableObjClock& GetClockRadiation()const ;
+      /// Last time the linear polarization rate has been changed
+      const RefinableObjClock& GetClockLinearPolarRate()const ;
       virtual void XMLOutput(ostream &os,int indent=0)const;
       virtual void XMLInput(istream &is,const XMLCrystTag &tag);
       //virtual void XMLInputOld(istream &is,const IOCrystTag &tag);
@@ -277,6 +279,8 @@ class Radiation: public RefinableObj
       //Clocks
          RefinableObjClock mClockWavelength;
          RefinableObjClock mClockRadiation;
+         /// Clock for the linear polarization rate
+         RefinableObjClock mClockLinearPolarRate;
       /// Linear Polarization Rate (default:0, X-Ray tube unmonochromatized)
       REAL mLinearPolarRate;
    #ifdef __WX__CRYST__

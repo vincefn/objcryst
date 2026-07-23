@@ -6712,6 +6712,9 @@ void PowderPattern::Init()
       tmp.SetDerivStep(1e-4);
       this->AddPar(tmp);
    }
+   // Propagate linear polarization rate changes through mClockPowderPatternRadiation so
+   // PowderPatternDiffraction components see the invalidation via their mClockMaster.
+   mClockPowderPatternRadiation.AddChild(mRadiation.GetClockLinearPolarRate());
 }
 void PowderPattern::PrepareIntegratedRfactor()const
 {

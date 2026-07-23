@@ -152,6 +152,7 @@ mXRayTubeAlpha2Alpha1Ratio(0.5),mLinearPolarRate(0)
    mRadiationType.SetChoice(RAD_XRAY);
    mClockMaster.AddChild(mClockWavelength);
    mClockMaster.AddChild(mClockRadiation);
+   mClockMaster.AddChild(mClockLinearPolarRate);
    this->SetWavelengthType(WAVELENGTH_MONOCHROMATIC);
 }
 
@@ -166,6 +167,7 @@ Radiation::Radiation(const RadiationType rad,const REAL wavelength)
    mLinearPolarRate=0.95;//assume it's synchrotron ?
    mClockMaster.AddChild(mClockWavelength);
    mClockMaster.AddChild(mClockRadiation);
+   mClockMaster.AddChild(mClockLinearPolarRate);
    this->SetWavelengthType(WAVELENGTH_MONOCHROMATIC);
 }
 
@@ -175,6 +177,7 @@ Radiation::Radiation(const string &XRayTubeElementName,const REAL alpha2Alpha2ra
    this->SetWavelength(XRayTubeElementName,alpha2Alpha2ratio);
    mClockMaster.AddChild(mClockWavelength);
    mClockMaster.AddChild(mClockRadiation);
+   mClockMaster.AddChild(mClockLinearPolarRate);
 }
 
 Radiation::Radiation(const Radiation &old):
@@ -189,6 +192,7 @@ mLinearPolarRate(old.mLinearPolarRate)
    mClockWavelength.Click();
    mClockMaster.AddChild(mClockWavelength);
    mClockMaster.AddChild(mClockRadiation);
+   mClockMaster.AddChild(mClockLinearPolarRate);
    this->SetWavelengthType((WavelengthType)old.mWavelengthType.GetChoice());
 }
 
@@ -382,7 +386,13 @@ void Radiation::Print()const
 
 REAL Radiation::GetLinearPolarRate()const{return mLinearPolarRate;}
 
-void Radiation::SetLinearPolarRate(const REAL f){mLinearPolarRate=f;}
+void Radiation::SetLinearPolarRate(const REAL f)
+{
+   mLinearPolarRate=f;
+   mClockLinearPolarRate.Click();
+}
+
+const RefinableObjClock& Radiation::GetClockLinearPolarRate()const{return mClockLinearPolarRate;}
 
 void Radiation::InitOptions()
 {

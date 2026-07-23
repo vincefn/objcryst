@@ -118,7 +118,7 @@ void PolarizationCorr::CalcCorr() const
    const CrystVector_REAL *theta=&(mpData->GetTheta());
    const REAL f=mpData->GetRadiation().GetLinearPolarRate();
    if(    (mpData->GetClockTheta()<mClockCorrCalc)
-       && (fabs(mPolarAfactor-((1-f)/(1+f))) <(mPolarAfactor*.0001)) ) return;
+       && (mpData->GetRadiation().GetClockLinearPolarRate()<mClockCorrCalc) ) return;
    VFN_DEBUG_MESSAGE("PolarizationCorr::CalcCorr()",10)
    TAU_PROFILE("PolarizationCorr::CalcCorr()","void ()",TAU_DEFAULT);
    mPolarAfactor=((1-f)/(1+f));
