@@ -5,6 +5,11 @@ NEW FEATURES
   * Add PowderPatternDiffraction::SetFhklObsSq to set extracted structure
     factors from Le Bail data (PR #76, @clemisch)
 
+IMPROVEMENTS
+  * Indexing (CellExplorer): lower the default minimum unit cell length from
+    4 Å to 2.5 Å, allowing correct indexing of compact structures such as
+    α-Fe, B, or ZRNCl (fixes issue #63)
+
 BUG FIXES
   * Fix CIF rhombohedral symmetry scoring mutating imported lattice
     (PR #70, @clemisch)

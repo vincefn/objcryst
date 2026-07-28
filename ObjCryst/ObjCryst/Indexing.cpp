@@ -1160,7 +1160,7 @@ float Score(const PeakList &dhkl, const RecUnitCell &rpar, const unsigned int nb
 
 CellExplorer::CellExplorer(const PeakList &dhkl, const CrystalSystem lattice, const unsigned int nbSpurious):
 mnpar(3),mpPeakList(&dhkl),
-mLengthMin(4),mLengthMax(25),
+mLengthMin(2.5),mLengthMax(25),
 mAngleMin(M_PI),mAngleMax(2*M_PI/3),
 mVolumeMin(0),mVolumeMax(1600),
 mZeroShiftMin(0),mZeroShiftMax(0),
