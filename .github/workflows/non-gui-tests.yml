@@ -10,20 +10,69 @@ concurrency:
 
 jobs:
   non-gui-tests:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: ubuntu-x64
+            os: ubuntu-latest
+            arch: x64
+            make_cmd: make
+          - label: macos-arm64
+            os: macos-14
+            arch: arm64
+            make_cmd: gmake
+          - label: windows-x64
+            os: windows-latest
+            arch: x64
+            make_cmd: make
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 45
+    name: ${{ matrix.label }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install build dependencies
+      - name: Install build dependencies (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu-')
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential make
 
+      - name: Install build dependencies (macOS)
+        if: startsWith(matrix.os, 'macos-')
+        run: |
+          brew install make
+
+      - name: Set up MSYS2 (Windows)
+        if: startsWith(matrix.os, 'windows-')
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: >-
+            make
+            mingw-w64-x86_64-gcc
+
       - name: Run non-GUI test suite
+        if: startsWith(matrix.os, 'windows-')
+        env:
+          FOX_TEST_TIMEOUT: 30s
+        shell: msys2 {0}
+        run: |
+          ${{ matrix.make_cmd }} -C test all
+
+      - name: Run non-GUI test suite
+        if: startsWith(matrix.os, 'ubuntu-')
         env:
           FOX_TEST_TIMEOUT: 30s
         run: |
-          make -C test all
+          ${{ matrix.make_cmd }} -C test all
+
+      - name: Run non-GUI test suite
+        if: startsWith(matrix.os, 'macos-')
+        env:
+          FOX_TEST_TIMEOUT: 30s
+        run: |
+          ${{ matrix.make_cmd }} -C test all

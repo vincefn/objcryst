@@ -33,7 +33,8 @@ endif
 CFLAGS  = ${DEPENDFLAGS}
 # C++ compiler
 #CXX      := g++
-CXXFLAGS  = ${DEPENDFLAGS} ${PROFILEFLAGS}
+CXX_STD_FLAG ?= -std=gnu++14
+CXXFLAGS  = ${DEPENDFLAGS} ${PROFILEFLAGS} ${CXX_STD_FLAG}
 # FORTRAN compiler
 FC     := f77
 FFLAGS  =
@@ -235,7 +236,7 @@ $(BUILD_DIR)/cctbx.tar.bz2:
 $(DIR_STATIC_LIBS)/lib/libcctbx.a: $(BUILD_DIR)/cctbx.tar.bz2
 	mkdir -p $(DIR_STATIC_LIBS)/lib/ $(DIR_STATIC_LIBS)/include/
 	cd $(BUILD_DIR) && tar -xjf cctbx.tar.bz2
-	$(MAKE) -f gnu.mak -C $(BUILD_DIR)/cctbx install
+	$(MAKE) -f gnu.mak -C $(BUILD_DIR)/cctbx install CXXFLAGS='${CXX_STD_FLAG} -O3 -Wall -pedantic -Iinclude -Wno-long-long'
 	#ln -sf $(BUILD_DIR)/boost $(DIR_STATIC_LIBS)/include/
 	#rm -Rf $(BUILD_DIR)/cctbx
 
