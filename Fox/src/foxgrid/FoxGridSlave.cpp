@@ -322,9 +322,7 @@ void FoxGridSlave::CheckResultsAndSendOne()
         for(int j=0;j<m_jobs[i].results.size();j++) {
             if(m_jobs[i].results[j].data.length()!=0) {
                 if(sendMessage(m_jobs[i].results[j].data)>0) {
-                    //m_jobs[i].results[j].data = "";
-                    //the same as above, but it release the memory for sure
-                    m_jobs[i].results[j].data.swap(wxString());
+                    m_jobs[i].results[j].data.clear();
                 }
                 return;
             }

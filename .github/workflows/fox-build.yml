@@ -1,0 +1,70 @@
+name: Fox build
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: fox-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  fox-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential make \
+            libwxgtk3.2-dev \
+            libfftw3-dev \
+            freeglut3-dev \
+            libnewmat10-dev \
+            libgl1-mesa-dev \
+            libglu1-mesa-dev
+
+      - name: Set up build rules
+        run: ln -sf rules-gnu.mak ObjCryst/rules.mak
+
+      - name: Build Fox
+        run: |
+          make -f gnu.mak -C Fox \
+            shared-wxgtk=1 shared-fftw=1 shared-glut=1 shared-newmat=1 \
+            cod=0
+
+  fox-build-system-cctbx:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential make \
+            libwxgtk3.2-dev \
+            libfftw3-dev \
+            freeglut3-dev \
+            libnewmat10-dev \
+            libcctbx-dev \
+            libboost-math-dev \
+            libgl1-mesa-dev \
+            libglu1-mesa-dev
+
+      - name: Set up build rules
+        run: ln -sf rules-gnu.mak ObjCryst/rules.mak
+
+      - name: Build Fox (system cctbx)
+        run: |
+          make -f gnu.mak -C Fox \
+            shared-wxgtk=1 shared-fftw=1 shared-glut=1 shared-newmat=1 shared-cctbx=1 \
+            cod=0
