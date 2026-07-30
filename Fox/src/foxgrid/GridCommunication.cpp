@@ -1,4 +1,5 @@
 #include <cstring>
+#include <memory>
 #include "GridCommunication.h"
 
 int generateUniqueID() {
