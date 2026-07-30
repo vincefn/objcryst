@@ -33,20 +33,14 @@ endif
 CFLAGS  = ${DEPENDFLAGS}
 # C++ compiler
 #CXX      := g++
-CXXFLAGS  = ${DEPENDFLAGS} ${PROFILEFLAGS}
+CXX_STD_FLAG ?= -std=gnu++14
+CXXFLAGS  = ${DEPENDFLAGS} ${PROFILEFLAGS} ${CXX_STD_FLAG}
 # FORTRAN compiler
 FC     := f77
 FFLAGS  =
 # linker
 LINKER    := ${CXX}
 CRYST_LDFLAGS   = ${LDFLAGS} -L/usr/lib -L/usr/local/lib -L$(DIR_CRYSTVECTOR) -L$(DIR_LIBCRYST) -L$(DIR_REFOBJ) -L$(DIR_STATIC_LIBS)/lib -L$(DIR_VFNQUIRKS) -L$(DIR_WXWCRYST) -L$(DIR_TAU)/x86_64/lib
-
-UNAME_SYSTEM := $(shell uname -s)
-CXX_STD_FLAG :=
-ifeq ($(UNAME_SYSTEM),Darwin)
-CXX_STD_FLAG := -std=gnu++14
-endif
-CXXFLAGS += ${CXX_STD_FLAG}
 
 #to automatically generate dependencies
 MAKEDEPEND = gcc -MM ${CPPFLAGS} ${CXXFLAGS} ${C_BLITZFLAG} $< > $*.dep
@@ -242,13 +236,7 @@ $(BUILD_DIR)/cctbx.tar.bz2:
 $(DIR_STATIC_LIBS)/lib/libcctbx.a: $(BUILD_DIR)/cctbx.tar.bz2
 	mkdir -p $(DIR_STATIC_LIBS)/lib/ $(DIR_STATIC_LIBS)/include/
 	cd $(BUILD_DIR) && tar -xjf cctbx.tar.bz2
-	@if [ "$$(uname -s)" = "Darwin" ]; then \
-		$(MAKE) -f gnu.mak -C $(BUILD_DIR)/cctbx install \
-			CXX='c++ -std=gnu++14' \
-			CXXFLAGS='-std=gnu++14 -O3 -Wall -pedantic -Iinclude -Wno-long-long'; \
-	else \
-		$(MAKE) -f gnu.mak -C $(BUILD_DIR)/cctbx install; \
-	fi
+	$(MAKE) -f gnu.mak -C $(BUILD_DIR)/cctbx install CXXFLAGS='${CXX_STD_FLAG} -O3 -Wall -pedantic -Iinclude -Wno-long-long'
 	#ln -sf $(BUILD_DIR)/boost $(DIR_STATIC_LIBS)/include/
 	#rm -Rf $(BUILD_DIR)/cctbx
 
