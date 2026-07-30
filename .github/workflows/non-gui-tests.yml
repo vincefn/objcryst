@@ -75,4 +75,4 @@ jobs:
         env:
           FOX_TEST_TIMEOUT: 30s
         run: |
-          ${{ matrix.make_cmd }} -C test all CXX='c++ -std=gnu++14'
+          ${{ matrix.make_cmd }} -C test all
