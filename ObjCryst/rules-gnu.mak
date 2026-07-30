@@ -236,7 +236,9 @@ $(DIR_STATIC_LIBS)/lib/libcctbx.a: $(BUILD_DIR)/cctbx.tar.bz2
 	mkdir -p $(DIR_STATIC_LIBS)/lib/ $(DIR_STATIC_LIBS)/include/
 	cd $(BUILD_DIR) && tar -xjf cctbx.tar.bz2
 	@if [ "$$(uname -s)" = "Darwin" ]; then \
-		$(MAKE) -f gnu.mak -C $(BUILD_DIR)/cctbx install CXX='c++ -std=gnu++14'; \
+		$(MAKE) -f gnu.mak -C $(BUILD_DIR)/cctbx install \
+			CXX='c++ -std=gnu++14' \
+			CXXFLAGS='-std=gnu++14 -O3 -Wall -pedantic -Iinclude -Wno-long-long'; \
 	else \
 		$(MAKE) -f gnu.mak -C $(BUILD_DIR)/cctbx install; \
 	fi
