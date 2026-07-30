@@ -41,6 +41,13 @@ FFLAGS  =
 LINKER    := ${CXX}
 CRYST_LDFLAGS   = ${LDFLAGS} -L/usr/lib -L/usr/local/lib -L$(DIR_CRYSTVECTOR) -L$(DIR_LIBCRYST) -L$(DIR_REFOBJ) -L$(DIR_STATIC_LIBS)/lib -L$(DIR_VFNQUIRKS) -L$(DIR_WXWCRYST) -L$(DIR_TAU)/x86_64/lib
 
+UNAME_SYSTEM := $(shell uname -s)
+CXX_STD_FLAG :=
+ifeq ($(UNAME_SYSTEM),Darwin)
+CXX_STD_FLAG := -std=gnu++14
+endif
+CXXFLAGS += ${CXX_STD_FLAG}
+
 #to automatically generate dependencies
 MAKEDEPEND = gcc -MM ${CPPFLAGS} ${CXXFLAGS} ${C_BLITZFLAG} $< > $*.dep
 
