@@ -17,17 +17,14 @@ jobs:
           - label: ubuntu-x64
             os: ubuntu-latest
             arch: x64
-            shell: bash
             make_cmd: make
           - label: macos-arm64
             os: macos-14
             arch: arm64
-            shell: bash
             make_cmd: gmake
           - label: windows-x64
             os: windows-latest
             arch: x64
-            shell: msys2 {0}
             make_cmd: make
     runs-on: ${{ matrix.os }}
     timeout-minutes: 45
@@ -59,8 +56,16 @@ jobs:
             mingw-w64-x86_64-gcc
 
       - name: Run non-GUI test suite
+        if: startsWith(matrix.os, 'windows-')
         env:
           FOX_TEST_TIMEOUT: 30s
-        shell: ${{ matrix.shell }}
+        shell: msys2 {0}
+        run: |
+          ${{ matrix.make_cmd }} -C test all
+
+      - name: Run non-GUI test suite
+        if: ${{ !startsWith(matrix.os, 'windows-') }}
+        env:
+          FOX_TEST_TIMEOUT: 30s
         run: |
           ${{ matrix.make_cmd }} -C test all
