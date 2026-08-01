@@ -11,6 +11,9 @@ IMPROVEMENTS
     α-Fe, B, or ZRNCl (fixes issue #63)
 
 BUG FIXES
+  * Fix single-crystal simulation crashing when showing simulated data or when
+    grouped reflection modes are enabled, and add regression tests for the
+    ungrouped and grouped simulate workflows
   * Fix MonteCarlo refinement actions starting with no attached optimized object
     (#35)
   * Disable Le Bail + Fit Profile entry points when there is no observed powder

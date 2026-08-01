@@ -101,51 +101,15 @@ void TestSingleCrystalGroundTruthNeutron()
                                                "../../test/data/ground_truth/singlecrystal_neutron_pbso4.txt", 1e-2f, 1e-5f);
 }
 
-// Regression test for the crash in WXDiffractionSingleCrystal::OnMenuShowGraph
-// when called after OnMenuSimulate.
+// Regression helper for the single-crystal simulate workflow used by
+// WXDiffractionSingleCrystal::OnMenuSimulate.
 //
-// Before the fix, OnMenuSimulate called only GenHKLFullSpace(), which generated
-// reflections and populated Icalc, but left Iobs empty.  OnMenuShowGraph then
-// called CrystUpdate(), which iterated over Icalc.numElements() entries and
-// read Iobs(i) at each step — a fatal out-of-bounds access.
-//
-// The fix adds SetIobsToIcalc() at the end of OnMenuSimulate so that Iobs is
-// initialised to the simulated intensities.  This test covers that full
-// sequence and asserts that the resulting Iobs and Icalc arrays have the same
-// size, which is the invariant required for safe graph display.
-void TestSingleCrystalSimulateThenShowGraph()
-{
-   using namespace ObjCryst;
-   Crystal c = MakePbso4Crystal();
-   DiffractionDataSingleCrystal sc(c, false);
-   sc.SetRadiationType(RAD_XRAY);
-   sc.SetWavelength(1.54056);
-
-   // Reproduce the OnMenuSimulate action: generate reflections up to 50 degrees
-   // theta (all reflections, no Friedel merging).
-   sc.GenHKLFullSpace(50.0 * DEG2RAD, false);
-   Check(sc.GetNbRefl() > 0, "GenHKLFullSpace produced no reflections");
-
-   // Fixed OnMenuSimulate: set Iobs from the freshly calculated intensities.
-   sc.SetIobsToIcalc();
-
-   // GetIcalc() triggers CalcIcalc() and returns a non-empty array.
-   const long nbCalc = sc.GetIcalc().numElements();
-   Check(nbCalc > 0, "GetIcalc() is empty after GenHKLFullSpace + SetIobsToIcalc");
-
-   // GetIobs() must now have the same size so that the graph-display loop in
-   // CrystUpdate (which iterates nb = Icalc.numElements() times and reads both
-   // arrays) does not go out of bounds.
-   const long nbObs = sc.GetIobs().numElements();
-   Check(nbObs == nbCalc,
-         "GetIobs() size differs from GetIcalc() after simulate workflow");
-
-   // Also verify the values are consistent: Iobs should equal Icalc after
-   // SetIobsToIcalc, so a direct comparison of a few entries should hold.
-   Check(sc.GetIobs()(0) == sc.GetIcalc()(0),
-         "Iobs(0) should equal Icalc(0) immediately after SetIobsToIcalc");
-}
-
+// This covers the exact state that matters for the old Show Graph crash:
+// generate HKLs, populate simulated observations via SetIobsToIcalc(), then
+// verify that observed and calculated intensities stay identical and that the
+// residual statistics collapse to zero. Using groupChoice=0 exercises the same
+// ungrouped path as the former TestSingleCrystalSimulateThenShowGraph, so that
+// dedicated test was fully redundant.
 void TestSingleCrystalSimulateGrouped(const int groupChoice, const char* const label)
 {
    using namespace ObjCryst;
@@ -163,13 +127,23 @@ void TestSingleCrystalSimulateGrouped(const int groupChoice, const char* const l
    Check(nbCalc > 0, "GetIcalc() is empty after grouped simulation");
    Check(sc.GetIobs().numElements() == nbCalc,
          "GetIobs() size differs from GetIcalc() after grouped simulation");
+   for(long i = 0; i < nbCalc; ++i)
+   {
+      CheckNearAbsRel(sc.GetIobs()(i), sc.GetIcalc()(i), 1e-6, 1e-8,
+                      std::string(label) + ": Iobs should match Icalc after SetIobsToIcalc");
+   }
 
    const REAL chi2 = sc.GetChi2();
    const REAL r = sc.GetR();
    const REAL rw = sc.GetRw();
-   Check(std::isfinite(chi2), (std::string(label) + ": Chi2 should be finite").c_str());
-   Check(std::isfinite(r), (std::string(label) + ": R should be finite").c_str());
-   Check(std::isfinite(rw), (std::string(label) + ": Rw should be finite").c_str());
+   CheckNearAbsRel(chi2, 0, 1e-5, 1e-7, std::string(label) + ": Chi2 should be zero");
+   CheckNearAbsRel(r, 0, 1e-5, 1e-7, std::string(label) + ": R should be zero");
+   CheckNearAbsRel(rw, 0, 1e-5, 1e-7, std::string(label) + ": Rw should be zero");
+}
+
+void TestSingleCrystalSimulateUngrouped()
+{
+   TestSingleCrystalSimulateGrouped(0, "ungrouped simulation");
 }
 
 void TestSingleCrystalSimulateGroupedEquallySpaced()
@@ -199,7 +173,7 @@ int main(int argc, char* argv[])
    else if(testName == "diffractiondata-observed") TestDiffractionDataSingleCrystalObservedData();
    else if(testName == "singlecrystal-groundtruth-xray") TestSingleCrystalGroundTruthXray();
    else if(testName == "singlecrystal-groundtruth-neutron") TestSingleCrystalGroundTruthNeutron();
-   else if(testName == "singlecrystal-simulate-show-graph") TestSingleCrystalSimulateThenShowGraph();
+   else if(testName == "singlecrystal-simulate-ungrouped") TestSingleCrystalSimulateUngrouped();
    else if(testName == "singlecrystal-simulate-grouped-equal") TestSingleCrystalSimulateGroupedEquallySpaced();
    else if(testName == "singlecrystal-simulate-grouped-user") TestSingleCrystalSimulateGroupedUserData();
    else
