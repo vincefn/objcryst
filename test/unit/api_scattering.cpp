@@ -146,6 +146,42 @@ void TestSingleCrystalSimulateThenShowGraph()
          "Iobs(0) should equal Icalc(0) immediately after SetIobsToIcalc");
 }
 
+void TestSingleCrystalSimulateGrouped(const int groupChoice, const char* const label)
+{
+   using namespace ObjCryst;
+   Crystal c = MakePbso4Crystal();
+   DiffractionDataSingleCrystal sc(c, false);
+   sc.SetRadiationType(RAD_XRAY);
+   sc.SetWavelength(1.54056);
+   sc.GetOption("Group Reflections").SetChoice(groupChoice);
+
+   sc.GenHKLFullSpace(50.0 * DEG2RAD, false);
+   Check(sc.GetNbRefl() > 0, "GenHKLFullSpace produced no reflections");
+   sc.SetIobsToIcalc();
+
+   const long nbCalc = sc.GetIcalc().numElements();
+   Check(nbCalc > 0, "GetIcalc() is empty after grouped simulation");
+   Check(sc.GetIobs().numElements() == nbCalc,
+         "GetIobs() size differs from GetIcalc() after grouped simulation");
+
+   const REAL chi2 = sc.GetChi2();
+   const REAL r = sc.GetR();
+   const REAL rw = sc.GetRw();
+   Check(std::isfinite(chi2), (std::string(label) + ": Chi2 should be finite").c_str());
+   Check(std::isfinite(r), (std::string(label) + ": R should be finite").c_str());
+   Check(std::isfinite(rw), (std::string(label) + ": Rw should be finite").c_str());
+}
+
+void TestSingleCrystalSimulateGroupedEquallySpaced()
+{
+   TestSingleCrystalSimulateGrouped(1, "equally-spaced grouping");
+}
+
+void TestSingleCrystalSimulateGroupedUserData()
+{
+   TestSingleCrystalSimulateGrouped(2, "user-data grouping");
+}
+
 } // namespace
 
 int main(int argc, char* argv[])
@@ -164,6 +200,8 @@ int main(int argc, char* argv[])
    else if(testName == "singlecrystal-groundtruth-xray") TestSingleCrystalGroundTruthXray();
    else if(testName == "singlecrystal-groundtruth-neutron") TestSingleCrystalGroundTruthNeutron();
    else if(testName == "singlecrystal-simulate-show-graph") TestSingleCrystalSimulateThenShowGraph();
+   else if(testName == "singlecrystal-simulate-grouped-equal") TestSingleCrystalSimulateGroupedEquallySpaced();
+   else if(testName == "singlecrystal-simulate-grouped-user") TestSingleCrystalSimulateGroupedUserData();
    else
    {
       std::cerr << "Unknown test case: " << testName << std::endl;

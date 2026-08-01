@@ -214,12 +214,37 @@ void DiffractionDataSingleCrystal::SetWeight(const CrystVector_REAL& weight)
 void DiffractionDataSingleCrystal::SetIobsToIcalc()
 {
    VFN_DEBUG_MESSAGE("DiffractionDataSingleCrystal::SetIobsToIcalc()",5)
-   mObsIntensity=this->GetIcalc();
+   this->GetFhklCalcSq();
+   mObsIntensity=mFhklCalcSq;
+   mObsIntensity*=mScaleFactor;
    mObsSigma.resize(mNbRefl);
    mWeight.resize(mNbRefl);
    mWeight=1;
-   mObsSigma=0;
+   mObsSigma=1;
    mHasObservedData=true;
+   if(1==mGroupOption.GetChoice())
+   {
+     mClockPrepareTwinningCorr.Reset();
+   }
+   else
+     if(2==mGroupOption.GetChoice())
+     {
+        // Simulated reflections have no imported user grouping metadata.
+        // Keep the "sum according to user data" mode safe by treating each
+        // generated reflection as its own group.
+        mNbGroup=mNbRefl;
+        mGroupIndex.resize(mNbGroup);
+        mGroupIobs.resize(mNbGroup);
+        mGroupSigma.resize(mNbGroup);
+        mGroupWeight.resize(mNbGroup);
+        for(long i=0;i<mNbGroup;i++)
+        {
+           mGroupIndex(i)=i+1;
+           mGroupIobs(i)=mObsIntensity(i);
+           mGroupSigma(i)=mObsSigma(i);
+           mGroupWeight(i)=mWeight(i);
+        }
+     }
    // Keep a copy as squared F(hkl), to enable fourier maps
    // :TODO: stop using mObsIntensity and just keep mFhklObsSq ?
    mFhklObsSq=mObsIntensity;

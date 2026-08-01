@@ -37,6 +37,8 @@ run_test "unit::diffractiondata-observed" "$SCRIPT_DIR/api_scattering" "diffract
 run_test "unit::singlecrystal-groundtruth-xray" "$SCRIPT_DIR/api_scattering" "singlecrystal-groundtruth-xray"
 run_test "unit::singlecrystal-groundtruth-neutron" "$SCRIPT_DIR/api_scattering" "singlecrystal-groundtruth-neutron"
 run_test "unit::singlecrystal-simulate-show-graph" "$SCRIPT_DIR/api_scattering" "singlecrystal-simulate-show-graph"
+run_test "unit::singlecrystal-simulate-grouped-equal" "$SCRIPT_DIR/api_scattering" "singlecrystal-simulate-grouped-equal"
+run_test "unit::singlecrystal-simulate-grouped-user" "$SCRIPT_DIR/api_scattering" "singlecrystal-simulate-grouped-user"
 
 # --- api_cif ---
 run_test "unit::cif-import" "$SCRIPT_DIR/api_cif" "cif-import"
