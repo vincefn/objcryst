@@ -101,6 +101,61 @@ void TestSingleCrystalGroundTruthNeutron()
                                                "../../test/data/ground_truth/singlecrystal_neutron_pbso4.txt", 1e-2f, 1e-5f);
 }
 
+// Regression helper for the single-crystal simulate workflow used by
+// WXDiffractionSingleCrystal::OnMenuSimulate.
+//
+// This covers the exact state that matters for the old Show Graph crash:
+// generate HKLs, populate simulated observations via SetIobsToIcalc(), then
+// verify that observed and calculated intensities stay identical and that the
+// residual statistics collapse to zero. Using groupChoice=0 exercises the same
+// ungrouped path as the former TestSingleCrystalSimulateThenShowGraph, so that
+// dedicated test was fully redundant.
+void TestSingleCrystalSimulateGrouped(const int groupChoice, const char* const label)
+{
+   using namespace ObjCryst;
+   Crystal c = MakePbso4Crystal();
+   DiffractionDataSingleCrystal sc(c, false);
+   sc.SetRadiationType(RAD_XRAY);
+   sc.SetWavelength(1.54056);
+   sc.GetOption("Group Reflections").SetChoice(groupChoice);
+
+   sc.GenHKLFullSpace(50.0 * DEG2RAD, false);
+   Check(sc.GetNbRefl() > 0, "GenHKLFullSpace produced no reflections");
+   sc.SetIobsToIcalc();
+
+   const long nbCalc = sc.GetIcalc().numElements();
+   Check(nbCalc > 0, "GetIcalc() is empty after grouped simulation");
+   Check(sc.GetIobs().numElements() == nbCalc,
+         "GetIobs() size differs from GetIcalc() after grouped simulation");
+   for(long i = 0; i < nbCalc; ++i)
+   {
+      CheckNearAbsRel(sc.GetIobs()(i), sc.GetIcalc()(i), 1e-6, 1e-8,
+                      std::string(label) + ": Iobs should match Icalc after SetIobsToIcalc");
+   }
+
+   const REAL chi2 = sc.GetChi2();
+   const REAL r = sc.GetR();
+   const REAL rw = sc.GetRw();
+   CheckNearAbsRel(chi2, 0, 1e-5, 1e-7, std::string(label) + ": Chi2 should be zero");
+   CheckNearAbsRel(r, 0, 1e-5, 1e-7, std::string(label) + ": R should be zero");
+   CheckNearAbsRel(rw, 0, 1e-5, 1e-7, std::string(label) + ": Rw should be zero");
+}
+
+void TestSingleCrystalSimulateUngrouped()
+{
+   TestSingleCrystalSimulateGrouped(0, "ungrouped simulation");
+}
+
+void TestSingleCrystalSimulateGroupedEquallySpaced()
+{
+   TestSingleCrystalSimulateGrouped(1, "equally-spaced grouping");
+}
+
+void TestSingleCrystalSimulateGroupedUserData()
+{
+   TestSingleCrystalSimulateGrouped(2, "user-data grouping");
+}
+
 } // namespace
 
 int main(int argc, char* argv[])
@@ -118,6 +173,9 @@ int main(int argc, char* argv[])
    else if(testName == "diffractiondata-observed") TestDiffractionDataSingleCrystalObservedData();
    else if(testName == "singlecrystal-groundtruth-xray") TestSingleCrystalGroundTruthXray();
    else if(testName == "singlecrystal-groundtruth-neutron") TestSingleCrystalGroundTruthNeutron();
+   else if(testName == "singlecrystal-simulate-ungrouped") TestSingleCrystalSimulateUngrouped();
+   else if(testName == "singlecrystal-simulate-grouped-equal") TestSingleCrystalSimulateGroupedEquallySpaced();
+   else if(testName == "singlecrystal-simulate-grouped-user") TestSingleCrystalSimulateGroupedUserData();
    else
    {
       std::cerr << "Unknown test case: " << testName << std::endl;
