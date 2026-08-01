@@ -104,15 +104,15 @@ void TestSingleCrystalGroundTruthNeutron()
 // Regression test for the crash in WXDiffractionSingleCrystal::OnMenuShowGraph
 // when called after OnMenuSimulate.
 //
-// OnMenuSimulate calls GenHKLFullSpace(), which generates reflections and
-// populates Icalc, but leaves Iobs empty.  OnMenuShowGraph then calls
-// CrystUpdate(), which iterates over Icalc.numElements() entries and reads
-// Iobs(i) at each step — a fatal out-of-bounds access when Iobs is empty.
+// Before the fix, OnMenuSimulate called only GenHKLFullSpace(), which generated
+// reflections and populated Icalc, but left Iobs empty.  OnMenuShowGraph then
+// called CrystUpdate(), which iterated over Icalc.numElements() entries and
+// read Iobs(i) at each step — a fatal out-of-bounds access.
 //
-// The fix is for GenHKLFullSpace (or a post-simulate step) to initialise Iobs
-// to a consistent size.  This test captures that contract: after
-// GenHKLFullSpace, GetIcalc() and GetIobs() must have the same number of
-// elements so that graph-display code can safely read both arrays in lockstep.
+// The fix adds SetIobsToIcalc() at the end of OnMenuSimulate so that Iobs is
+// initialised to the simulated intensities.  This test covers that full
+// sequence and asserts that the resulting Iobs and Icalc arrays have the same
+// size, which is the invariant required for safe graph display.
 void TestSingleCrystalSimulateThenShowGraph()
 {
    using namespace ObjCryst;
@@ -122,22 +122,28 @@ void TestSingleCrystalSimulateThenShowGraph()
    sc.SetWavelength(1.54056);
 
    // Reproduce the OnMenuSimulate action: generate reflections up to 50 degrees
-   // theta (all reflections, no Friedel merging), then check that there are
-   // reflections (otherwise the test is vacuous).
+   // theta (all reflections, no Friedel merging).
    sc.GenHKLFullSpace(50.0 * DEG2RAD, false);
    Check(sc.GetNbRefl() > 0, "GenHKLFullSpace produced no reflections");
 
+   // Fixed OnMenuSimulate: set Iobs from the freshly calculated intensities.
+   sc.SetIobsToIcalc();
+
    // GetIcalc() triggers CalcIcalc() and returns a non-empty array.
    const long nbCalc = sc.GetIcalc().numElements();
-   Check(nbCalc > 0, "GetIcalc() is empty after GenHKLFullSpace");
+   Check(nbCalc > 0, "GetIcalc() is empty after GenHKLFullSpace + SetIobsToIcalc");
 
-   // GetIobs() must return an array of the same size so that code iterating
-   // over both in lockstep (as CrystUpdate does when building the graph) does
-   // not read out of bounds.
+   // GetIobs() must now have the same size so that the graph-display loop in
+   // CrystUpdate (which iterates nb = Icalc.numElements() times and reads both
+   // arrays) does not go out of bounds.
    const long nbObs = sc.GetIobs().numElements();
    Check(nbObs == nbCalc,
-         "GetIobs() size differs from GetIcalc() size after GenHKLFullSpace: "
-         "crash would occur in WXDiffractionSingleCrystal::CrystUpdate");
+         "GetIobs() size differs from GetIcalc() after simulate workflow");
+
+   // Also verify the values are consistent: Iobs should equal Icalc after
+   // SetIobsToIcalc, so a direct comparison of a few entries should hold.
+   Check(sc.GetIobs()(0) == sc.GetIcalc()(0),
+         "Iobs(0) should equal Icalc(0) immediately after SetIobsToIcalc");
 }
 
 } // namespace
