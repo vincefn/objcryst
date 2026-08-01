@@ -211,13 +211,13 @@ else
 libfreeglut=
 endif
 
-$(BUILD_DIR)/wxWidgets-3.2.5.tar.bz2:
-	cd $(BUILD_DIR) && $(DOWNLOAD_COMMAND) https://github.com/wxWidgets/wxWidgets/releases/download/v3.2.5/wxWidgets-3.2.5.tar.bz2
+$(BUILD_DIR)/wxWidgets-3.2.10.tar.bz2:
+	cd $(BUILD_DIR) && $(DOWNLOAD_COMMAND) https://github.com/wxWidgets/wxWidgets/releases/download/v3.2.10/wxWidgets-3.2.10.tar.bz2
 
-$(BUILD_DIR)/static-libs/include/wx-3.2/wx/wx.h: $(BUILD_DIR)/wxWidgets-3.2.5.tar.bz2
-	cd $(BUILD_DIR) && rm -Rf wxWidgets-3.2.5 && tar -xjf wxWidgets-3.2.5.tar.bz2
-	cd $(BUILD_DIR)/wxWidgets-3.2.5 && ./configure --with-gtk --with-opengl --disable-glcanvasegl --prefix=$(BUILD_DIR)/static-libs --enable-unicode  --enable-optimise --disable-shared --x-includes=/usr/X11R6/include/ && $(MAKE) install
-	rm -Rf $(BUILD_DIR)/wxWidgets-3.2.5
+$(BUILD_DIR)/static-libs/include/wx-3.2/wx/wx.h: $(BUILD_DIR)/wxWidgets-3.2.10.tar.bz2
+	cd $(BUILD_DIR) && rm -Rf wxWidgets-3.2.10 && tar -xjf wxWidgets-3.2.10.tar.bz2
+	cd $(BUILD_DIR)/wxWidgets-3.2.10 && ./configure --with-gtk --with-opengl --disable-glcanvasegl --prefix=$(BUILD_DIR)/static-libs --enable-unicode  --enable-optimise --disable-shared --x-includes=/usr/X11R6/include/ && $(MAKE) install
+	rm -Rf $(BUILD_DIR)/wxWidgets-3.2.10
 
 ifneq ($(wxcryst),0)
 ifneq ($(shared-wxgtk),1)

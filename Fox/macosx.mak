@@ -34,13 +34,13 @@ endif
 libfftw: ../static-libs/lib/libfftw3f.a
 
 
-../wxWidgets-3.2.5.tar.bz2:
-	cd .. && $(DOWNLOAD_COMMAND)  https://github.com/wxWidgets/wxWidgets/releases/download/v3.2.5/wxWidgets-3.2.5.tar.bz2
+../wxWidgets-3.2.10.tar.bz2:
+	cd .. && $(DOWNLOAD_COMMAND)  https://github.com/wxWidgets/wxWidgets/releases/download/v3.2.10/wxWidgets-3.2.10.tar.bz2
 
-../static-libs/bin/wx-config: ../wxWidgets-3.2.5.tar.bz2
-	cd .. && tar -xjf wxWidgets-3.2.5.tar.bz2
-	cd ../wxWidgets-3.2.5 && MACOSX_DEPLOYMENT_TARGET=11.0 ./configure --with-opengl --disable-debug --disable-webviewwebkit --enable-optimise --disable-shared  --enable-monolithic --disable-mediactrl --without-libtiff --enable-cxx11 --enable-universal_binary=x86_64,arm64 --prefix=$(PWD)/../static-libs && make -j4 install
-	rm -Rf ../wxWidgets-3.2.5
+../static-libs/bin/wx-config: ../wxWidgets-3.2.10.tar.bz2
+	cd .. && tar -xjf wxWidgets-3.2.10.tar.bz2
+	cd ../wxWidgets-3.2.10 && MACOSX_DEPLOYMENT_TARGET=11.0 ./configure --with-opengl --disable-debug --disable-webviewwebkit --enable-optimise --disable-shared  --enable-monolithic --disable-mediactrl --without-libtiff --enable-cxx11 --enable-universal_binary=x86_64,arm64 --prefix=$(PWD)/../static-libs && make -j4 install
+	rm -Rf ../wxWidgets-3.2.10
 
 libwx: ../static-libs/bin/wx-config
 
