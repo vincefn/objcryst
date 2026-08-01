@@ -11,12 +11,17 @@ IMPROVEMENTS
     α-Fe, B, or ZRNCl (fixes issue #63)
 
 BUG FIXES
+  * Fix MonteCarlo refinement actions starting with no attached optimized object
+    (#35)
+  * Disable Le Bail + Fit Profile entry points when there is no observed powder
+    data or no PowderPatternDiffraction phase (#37)
   * Fix CIF rhombohedral symmetry scoring mutating imported lattice
     (PR #70, @clemisch)
   * Add per-phase sample-detector displacement ratio support with flat detector
     geometry in powder diffraction (PR #73, @clemisch)
   * Recompute PolarizationCorr when the linear polarization rate changes,
     using a dedicated Radiation clock (related to pyobjcryst issue #38)
+  * Bump bundled wxWidgets to 3.2.10 and FFTW to 3.3.11 in the makefiles
 
 #### 2024.1 (August 2024)
 NEW FEATURES

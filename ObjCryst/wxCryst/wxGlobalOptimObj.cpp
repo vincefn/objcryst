@@ -50,6 +50,20 @@
 
 namespace ObjCryst
 {
+namespace
+{
+bool EnsureHasOptimizedObject(wxWindow *parent, const OptimizationObj &optimObj)
+{
+   if(optimObj.GetRefinedObjList().GetNb()>0) return true;
+   wxMessageDialog noObject(parent,
+                            _T("Cannot launch refinement: no object is attached to this Monte-Carlo optimization.\n")
+                            _T("Use 'Optimized Objects -> Add object to optimize' first."),
+                            _T("No object to optimize"),
+                            wxOK|wxICON_EXCLAMATION);
+   noObject.ShowModal();
+   return false;
+}
+}
 
 ////////////////////////////////////////////////////////////////////////
 //
@@ -507,6 +521,11 @@ void WXMonteCarloObj::OnRunOptimization(wxCommandEvent & event)
 {
    VFN_DEBUG_ENTRY("WXMonteCarloObj::OnRunOptimization()",6)
    WXCrystValidateAllUserInput();
+   if(false==EnsureHasOptimizedObject(this,this->GetOptimizationObj()))
+   {
+      VFN_DEBUG_EXIT("WXMonteCarloObj::OnRunOptimization()",6)
+      return;
+   }
    if(true==this->GetOptimizationObj().IsOptimizing())
    {
       wxMessageDialog dumbUser(this,_T("The optimization is already running !"),_T("Huh ?"),
@@ -571,6 +590,7 @@ void WXMonteCarloObj::OnRunOptimization(wxCommandEvent & event)
 void WXMonteCarloObj::OnLSQRefine(wxCommandEvent &event)
 {
    WXCrystValidateAllUserInput();
+   if(false==EnsureHasOptimizedObject(this,this->GetOptimizationObj())) return;
    if(true==this->GetOptimizationObj().IsOptimizing())
    {
       wxMessageDialog dumbUser(this,_T("An optimization is already running !"),_T("Huh ?"),
