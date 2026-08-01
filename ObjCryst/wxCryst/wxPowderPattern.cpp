@@ -3277,9 +3277,32 @@ void WXPowderPatternGraph::OnChangeScale(wxCommandEvent& event)
 
 void WXPowderPatternGraph::OnLeBail(wxCommandEvent& event)
 {
+   PowderPattern &pattern=this->GetWXPowderPattern().GetPowderPattern();
+   if(pattern.GetNbPoint()==0)
+   {
+      wxMessageDialog noData(this,
+                             _T("Cannot run Le Bail: the powder pattern has no observed data.\n")
+                             _T("Please import observed data first."),
+                             _T("No observed data"),wxOK|wxICON_EXCLAMATION);
+      noData.ShowModal();
+      return;
+   }
+   bool hasDiff=false;
+   for(unsigned int i=0;i<pattern.GetNbPowderPatternComponent();++i)
+      if(pattern.GetPowderPatternComponent(i).GetClassName()==string("PowderPatternDiffraction"))
+      { hasDiff=true; break; }
+   if(!hasDiff)
+   {
+      wxMessageDialog noPhase(this,
+                              _T("Cannot run Le Bail: the powder pattern has no crystalline phase.\n")
+                              _T("Please add a PowderPatternDiffraction component first."),
+                              _T("No crystalline phase"),wxOK|wxICON_EXCLAMATION);
+      noPhase.ShowModal();
+      return;
+   }
    wxFrame *pFrame=new wxFrame(this,-1,_T("Profile Fitting"));
    WXProfileFitting *pFit;
-   pFit=new WXProfileFitting(pFrame,&(this->GetWXPowderPattern().GetPowderPattern()));
+   pFit=new WXProfileFitting(pFrame,&pattern);
    pFrame->Show(true);
 }
 
@@ -5032,6 +5055,16 @@ void WXPowderPatternDiffraction::OnLeBail(wxCommandEvent &event)
    {
       mpPowderPatternDiffraction->SetExtractionMode(false);
       mpPowderPatternDiffraction->GetParentPowderPattern().UpdateDisplay();
+      return;
+   }
+   if(mpPowderPatternDiffraction->GetParentPowderPattern().GetNbPoint()==0)
+   {
+      wxMessageDialog noData(this,
+                             _T("Cannot run Le Bail: the powder pattern has no observed data.\n")
+                             _T("Please import observed data first."),
+                             _T("No observed data"),wxOK|wxICON_EXCLAMATION);
+      noData.ShowModal();
+      if(event.GetId()==ID_POWDERDIFF_PROFILEFITTINGMODE) mpProfileFittingMode->SetValue(false);
       return;
    }
    mpPowderPatternDiffraction->SetExtractionMode(true,false);
