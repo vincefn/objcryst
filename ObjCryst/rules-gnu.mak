@@ -246,13 +246,13 @@ else
 libcctbx=
 endif
 
-$(BUILD_DIR)/fftw-3.3.10.tar.gz:
-	cd $(BUILD_DIR) && $(DOWNLOAD_COMMAND) http://fftw.org/fftw-3.3.10.tar.gz
+$(BUILD_DIR)/fftw-3.3.11.tar.gz:
+	cd $(BUILD_DIR) && $(DOWNLOAD_COMMAND) http://fftw.org/fftw-3.3.11.tar.gz
 
-$(DIR_STATIC_LIBS)/lib/libfftw3f.a: $(BUILD_DIR)/fftw-3.3.10.tar.gz
-	cd $(BUILD_DIR) && tar -xzf fftw-3.3.10.tar.gz
-	cd $(BUILD_DIR)/fftw-3.3.10 && ./configure --enable-single --prefix $(DIR_STATIC_LIBS) && $(MAKE) install
-	rm -Rf $(BUILD_DIR)/fftw-3.3.10
+$(DIR_STATIC_LIBS)/lib/libfftw3f.a: $(BUILD_DIR)/fftw-3.3.11.tar.gz
+	cd $(BUILD_DIR) && tar -xzf fftw-3.3.11.tar.gz
+	cd $(BUILD_DIR)/fftw-3.3.11 && ./configure --enable-single --prefix $(DIR_STATIC_LIBS) && $(MAKE) install
+	rm -Rf $(BUILD_DIR)/fftw-3.3.11
 
 ifneq ($(fftw),0)
 ifneq ($(shared-fftw),1)

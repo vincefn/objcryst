@@ -22,12 +22,12 @@ endif
 ../newmat: ../newmat.tar.bz2
 	cd .. && tar -xjf newmat.tar.bz2
 
-../fftw-3.3.10.tar.gz:
-	cd .. &&  curl -O http://fftw.org/fftw-3.3.10.tar.gz
+../fftw-3.3.11.tar.gz:
+	cd .. &&  curl -O http://fftw.org/fftw-3.3.11.tar.gz
 
-../static-libs/lib/libfftw3f.a: ../fftw-3.3.10.tar.gz
+../static-libs/lib/libfftw3f.a: ../fftw-3.3.11.tar.gz
 	rm -f $(PWD)/../static-libs/lib/*fftw*
-	cd .. && tar -xzf fftw-3.3.10.tar.gz && mv fftw-3.3.10 fftw
+	cd .. && tar -xzf fftw-3.3.11.tar.gz && mv fftw-3.3.11 fftw
 	cd ../fftw && MACOSX_DEPLOYMENT_TARGET=11.0 ./configure --enable-single --prefix $(PWD)/../static-libs CFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=11.0" && MACOSX_DEPLOYMENT_TARGET=11.0 make clean && MACOSX_DEPLOYMENT_TARGET=11.0 make -j4 install
 	rm -Rf ../fftw
 
