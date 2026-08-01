@@ -36,6 +36,7 @@ run_test "unit::scatteringdata-radiation-types" "$SCRIPT_DIR/api_scattering" "sc
 run_test "unit::diffractiondata-observed" "$SCRIPT_DIR/api_scattering" "diffractiondata-observed"
 run_test "unit::singlecrystal-groundtruth-xray" "$SCRIPT_DIR/api_scattering" "singlecrystal-groundtruth-xray"
 run_test "unit::singlecrystal-groundtruth-neutron" "$SCRIPT_DIR/api_scattering" "singlecrystal-groundtruth-neutron"
+run_test "unit::singlecrystal-simulate-show-graph" "$SCRIPT_DIR/api_scattering" "singlecrystal-simulate-show-graph"
 
 # --- api_cif ---
 run_test "unit::cif-import" "$SCRIPT_DIR/api_cif" "cif-import"

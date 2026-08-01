@@ -101,6 +101,45 @@ void TestSingleCrystalGroundTruthNeutron()
                                                "../../test/data/ground_truth/singlecrystal_neutron_pbso4.txt", 1e-2f, 1e-5f);
 }
 
+// Regression test for the crash in WXDiffractionSingleCrystal::OnMenuShowGraph
+// when called after OnMenuSimulate.
+//
+// OnMenuSimulate calls GenHKLFullSpace(), which generates reflections and
+// populates Icalc, but leaves Iobs empty.  OnMenuShowGraph then calls
+// CrystUpdate(), which iterates over Icalc.numElements() entries and reads
+// Iobs(i) at each step — a fatal out-of-bounds access when Iobs is empty.
+//
+// The fix is for GenHKLFullSpace (or a post-simulate step) to initialise Iobs
+// to a consistent size.  This test captures that contract: after
+// GenHKLFullSpace, GetIcalc() and GetIobs() must have the same number of
+// elements so that graph-display code can safely read both arrays in lockstep.
+void TestSingleCrystalSimulateThenShowGraph()
+{
+   using namespace ObjCryst;
+   Crystal c = MakePbso4Crystal();
+   DiffractionDataSingleCrystal sc(c, false);
+   sc.SetRadiationType(RAD_XRAY);
+   sc.SetWavelength(1.54056);
+
+   // Reproduce the OnMenuSimulate action: generate reflections up to 50 degrees
+   // theta (all reflections, no Friedel merging), then check that there are
+   // reflections (otherwise the test is vacuous).
+   sc.GenHKLFullSpace(50.0 * DEG2RAD, false);
+   Check(sc.GetNbRefl() > 0, "GenHKLFullSpace produced no reflections");
+
+   // GetIcalc() triggers CalcIcalc() and returns a non-empty array.
+   const long nbCalc = sc.GetIcalc().numElements();
+   Check(nbCalc > 0, "GetIcalc() is empty after GenHKLFullSpace");
+
+   // GetIobs() must return an array of the same size so that code iterating
+   // over both in lockstep (as CrystUpdate does when building the graph) does
+   // not read out of bounds.
+   const long nbObs = sc.GetIobs().numElements();
+   Check(nbObs == nbCalc,
+         "GetIobs() size differs from GetIcalc() size after GenHKLFullSpace: "
+         "crash would occur in WXDiffractionSingleCrystal::CrystUpdate");
+}
+
 } // namespace
 
 int main(int argc, char* argv[])
@@ -118,6 +157,7 @@ int main(int argc, char* argv[])
    else if(testName == "diffractiondata-observed") TestDiffractionDataSingleCrystalObservedData();
    else if(testName == "singlecrystal-groundtruth-xray") TestSingleCrystalGroundTruthXray();
    else if(testName == "singlecrystal-groundtruth-neutron") TestSingleCrystalGroundTruthNeutron();
+   else if(testName == "singlecrystal-simulate-show-graph") TestSingleCrystalSimulateThenShowGraph();
    else
    {
       std::cerr << "Unknown test case: " << testName << std::endl;
