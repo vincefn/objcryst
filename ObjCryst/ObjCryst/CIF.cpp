@@ -800,13 +800,15 @@ string CIFReadValue(stringstream &in,char &lastc)
 {
    bool vv=false;//very verbose ?
    string value;
-   while(!isgraph(in.peek())) in.get(lastc);
+   while(!in.eof() && !isgraph(in.peek())) in.get(lastc);
+   if(in.eof()) throw ObjCrystException("CIFReadValue: unexpected end of file while reading a value");
    while(in.peek()=='#')
    {//discard these comments for now
       string tmp;
       getline(in,tmp);
       lastc='\r';
-      while(!isgraph(in.peek())) in.get(lastc);
+      while(!in.eof() && !isgraph(in.peek())) in.get(lastc);
+      if(in.eof()) throw ObjCrystException("CIFReadValue: unexpected end of file while reading a value");
    }
    if(in.peek()==';')
    {//SemiColonTextField
@@ -815,12 +817,13 @@ string CIFReadValue(stringstream &in,char &lastc)
          cout<<"WARNING: Trying to read a SemiColonTextField but last char is not an end-of-line char !"<<endl;
       value="";
       in.get(lastc);
-      while(in.peek()!=';')
+      while(!in.eof() && in.peek()!=';')
       {
          string tmp;
          getline(in,tmp);
          value+=tmp+" ";
       }
+      if(in.eof()) throw ObjCrystException("CIFReadValue: unterminated semicolon text field");
       in.get(lastc);
       if(vv) cout<<"SemiColonTextField:"<<value<<endl;
       if(warning && !vv) cout<<"SemiColonTextField:"<<value<<endl;
@@ -833,7 +836,7 @@ string CIFReadValue(stringstream &in,char &lastc)
       value="";
       while(!((lastc==delim)&&(!isgraph(in.peek()))) )
       {
-         in.get(lastc);
+         if(!in.get(lastc)) throw ObjCrystException("CIFReadValue: unterminated quoted string");
          value+=lastc;
       }
       if(vv) cout<<"QuotedString:"<<value<<endl;

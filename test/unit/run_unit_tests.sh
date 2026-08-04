@@ -44,6 +44,7 @@ run_test "unit::singlecrystal-simulate-grouped-user" "$SCRIPT_DIR/api_scattering
 run_test "unit::cif-import" "$SCRIPT_DIR/api_cif" "cif-import"
 run_test "unit::cif-data-fields" "$SCRIPT_DIR/api_cif" "cif-data-fields"
 run_test "unit::cif-coordinate-conversion" "$SCRIPT_DIR/api_cif" "cif-coordinate-conversion"
+run_test "unit::cif-truncated-values" "$SCRIPT_DIR/api_cif" "cif-truncated-values"
 
 # --- api_optimization ---
 run_test "unit::refinablepar" "$SCRIPT_DIR/api_optimization" "refinablepar"
