@@ -72,6 +72,31 @@ void TestCifCoordinateConversion()
    CheckNearAbs(z, z0, 1e-4, "CIF fractional/cartesian round-trip failed for z");
 }
 
+void CheckCifParseFailure(const std::string& contents, const char* const message)
+{
+   using namespace ObjCryst;
+   std::istringstream cifIn(contents);
+   try
+   {
+      CIF cif(cifIn, false, false);
+   }
+   catch(const ObjCrystException&)
+   {
+      return;
+   }
+   Check(false, message);
+}
+
+void TestCifTruncatedValues()
+{
+   CheckCifParseFailure("_a\n", "CIF parser accepted a tag with no value");
+   CheckCifParseFailure("_a\n# no value", "CIF parser accepted a comment instead of a tag value");
+   CheckCifParseFailure("data_x\n_publ_section_title\n;\nunterminated\n",
+                        "CIF parser accepted an unterminated semicolon text field");
+   CheckCifParseFailure("data_x\n_chemical_name_common 'unterminated",
+                        "CIF parser accepted an unterminated quoted string");
+}
+
 } // namespace
 
 int main(int argc, char* argv[])
@@ -87,6 +112,7 @@ int main(int argc, char* argv[])
    if(testName == "cif-import") TestCifImport();
    else if(testName == "cif-data-fields") TestCifDataFields();
    else if(testName == "cif-coordinate-conversion") TestCifCoordinateConversion();
+   else if(testName == "cif-truncated-values") TestCifTruncatedValues();
    else
    {
       std::cerr << "Unknown test case: " << testName << std::endl;
