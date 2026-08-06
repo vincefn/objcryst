@@ -13,7 +13,7 @@ endif
 
 BINARIES := unit_cell_smoke crystallography_workflow \
             api_spacegroup api_crystal api_molecule api_scattering \
-            api_powderpattern api_cif api_optimization api_indexing \
+            api_powderpattern api_cif api_refinableobj api_optimization api_indexing \
             ground_truth
 
 OBJ := $(addsuffix .o,$(BINARIES))
@@ -55,6 +55,9 @@ api_powderpattern: api_powderpattern.o libCrystVector libQuirks libRefinableObj 
 	${LINKER} ${CRYST_LDFLAGS} -o $@ ${filter-out %.h %.a %.so lib%, $^} ${LOADLIBES}
 
 api_cif: api_cif.o libCrystVector libQuirks libRefinableObj $(libcctbx) libCryst
+	${LINKER} ${CRYST_LDFLAGS} -o $@ ${filter-out %.h %.a %.so lib%, $^} ${LOADLIBES}
+
+api_refinableobj: api_refinableobj.o libCrystVector libQuirks libRefinableObj $(libcctbx) libCryst
 	${LINKER} ${CRYST_LDFLAGS} -o $@ ${filter-out %.h %.a %.so lib%, $^} ${LOADLIBES}
 
 api_optimization: api_optimization.o libCrystVector libQuirks libRefinableObj $(libcctbx) libCryst
