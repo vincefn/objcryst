@@ -111,7 +111,7 @@ class ReflectionProfilePseudoVoigt:public ReflectionProfile
       *
       * \param fwhmCagliotiW,fwhmCagliotiU,fwhmCagliotiV : these are the U,V and W
       * parameters in the Caglioti's law :
-      * \f$ fwhm^2= U \tan^2(\theta) + V \tan(\theta) +W \f$
+      * \f$ fwhm^2= U \tan^2(\theta) + V \tan(\theta) +W + \frac{P}{\cos^2\vartheta} \f$
       * if only W is given, the width is constant
       * \param eta0,eta1: these are the mixing parameters.
       */
@@ -119,7 +119,8 @@ class ReflectionProfilePseudoVoigt:public ReflectionProfile
                          const REAL fwhmCagliotiU=0,
                          const REAL fwhmCagliotiV=0,
                          const REAL eta0=0.5,
-                         const REAL eta1=0.);
+                         const REAL eta1=0.,
+                         const REAL scherrerP=0.);
       virtual REAL GetFullProfileWidth(const REAL relativeIntensity, const REAL xcenter,
                                        const REAL h, const REAL k, const REAL l);
       bool IsAnisotropic()const;
@@ -128,8 +129,8 @@ class ReflectionProfilePseudoVoigt:public ReflectionProfile
    private:
       /// Initialize parameters
       void InitParameters();
-      ///FWHM parameters, following Caglioti's law
-      REAL mCagliotiU,mCagliotiV,mCagliotiW;
+      ///FWHM parameters, following Caglioti's law and a Scherrer-like term
+      REAL mCagliotiU,mCagliotiV,mCagliotiW,mScherrerP;
       ///Pseudo-Voigt mixing parameter : eta=eta0 +2*theta*eta1
       /// eta=1 -> pure Lorentzian ; eta=0 -> pure Gaussian
       REAL mPseudoVoigtEta0,mPseudoVoigtEta1;

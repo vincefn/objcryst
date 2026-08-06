@@ -356,7 +356,8 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
                                    const REAL fwhmCagliotiU=0,
                                    const REAL fwhmCagliotiV=0,
                                    const REAL eta0=0.5,
-                                   const REAL eta1=0.);
+                                   const REAL eta1=0.,
+                                   const REAL scherrerP=0.);
       /** Assign a new profile
       *
       */
