@@ -18,14 +18,22 @@ jobs:
             os: ubuntu-latest
             arch: x64
             make_cmd: make
+            make_args: ""
+          - label: ubuntu-x64-double
+            os: ubuntu-latest
+            arch: x64
+            make_cmd: make
+            make_args: real_double=1
           - label: macos-arm64
             os: macos-14
             arch: arm64
             make_cmd: gmake
+            make_args: ""
           - label: windows-x64
             os: windows-latest
             arch: x64
             make_cmd: make
+            make_args: ""
     runs-on: ${{ matrix.os }}
     timeout-minutes: 45
     name: ${{ matrix.label }}
@@ -61,18 +69,18 @@ jobs:
           FOX_TEST_TIMEOUT: 30s
         shell: msys2 {0}
         run: |
-          ${{ matrix.make_cmd }} -C test all
+          ${{ matrix.make_cmd }} -C test all ${{ matrix.make_args }}
 
       - name: Run non-GUI test suite
         if: startsWith(matrix.os, 'ubuntu-')
         env:
           FOX_TEST_TIMEOUT: 30s
         run: |
-          ${{ matrix.make_cmd }} -C test all
+          ${{ matrix.make_cmd }} -C test all ${{ matrix.make_args }}
 
       - name: Run non-GUI test suite
         if: startsWith(matrix.os, 'macos-')
         env:
           FOX_TEST_TIMEOUT: 30s
         run: |
-          ${{ matrix.make_cmd }} -C test all
+          ${{ matrix.make_cmd }} -C test all ${{ matrix.make_args }}

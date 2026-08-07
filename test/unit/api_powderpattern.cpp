@@ -18,6 +18,12 @@ using namespace objcryst_test;
 namespace
 {
 
+constexpr REAL kPowderGroundTruthAbsTol = 1e-2f;
+// Regression fixtures are generated in single precision by default, while
+// libobjcryst/pyobjcryst uses double precision; keep relTol loose enough so
+// the same ground-truth checks remain stable in both build modes.
+constexpr REAL kPowderGroundTruthRelTol = 5e-4f;
+
 void TestPowderPatternBackground()
 {
    using namespace ObjCryst;
@@ -285,7 +291,8 @@ void TestPowderGroundTruthXrayPseudoVoigtGaussian()
    profile->SetProfilePar(.03f * DEG2RAD * DEG2RAD, 0, 0, 0.0f, 0);
    ComparePowderSimulationToGroundTruth(RAD_XRAY, 1.54056f, profile,
                                         "powder-groundtruth-xray-pv-gaussian",
-                                        "../../test/data/ground_truth/powder_xray_pv_gaussian_pbso4.txt", 1e-2f, 1e-5f);
+                                        "../../test/data/ground_truth/powder_xray_pv_gaussian_pbso4.txt",
+                                        kPowderGroundTruthAbsTol, kPowderGroundTruthRelTol);
 }
 
 void TestPowderGroundTruthXrayPseudoVoigtLorentzian()
@@ -295,7 +302,8 @@ void TestPowderGroundTruthXrayPseudoVoigtLorentzian()
    profile->SetProfilePar(.03f * DEG2RAD * DEG2RAD, 0, 0, 1.0f, 0);
    ComparePowderSimulationToGroundTruth(RAD_XRAY, 1.54056f, profile,
                                         "powder-groundtruth-xray-pv-lorentzian",
-                                        "../../test/data/ground_truth/powder_xray_pv_lorentzian_pbso4.txt", 1e-2f, 1e-5f);
+                                        "../../test/data/ground_truth/powder_xray_pv_lorentzian_pbso4.txt",
+                                        kPowderGroundTruthAbsTol, kPowderGroundTruthRelTol);
 }
 
 void TestPowderGroundTruthXrayAnisotropic()
@@ -304,7 +312,8 @@ void TestPowderGroundTruthXrayAnisotropic()
    auto* profile = new ReflectionProfilePseudoVoigtAnisotropic(MakePbso4AnisotropicProfile());
    ComparePowderSimulationToGroundTruth(RAD_XRAY, 1.54056f, profile,
                                         "powder-groundtruth-xray-anisotropic",
-                                        "../../test/data/ground_truth/powder_xray_anisotropic_pbso4.txt", 1e-2f, 1e-5f);
+                                        "../../test/data/ground_truth/powder_xray_anisotropic_pbso4.txt",
+                                        kPowderGroundTruthAbsTol, kPowderGroundTruthRelTol);
 }
 
 void TestPowderGroundTruthNeutronPseudoVoigtGaussian()
@@ -314,7 +323,8 @@ void TestPowderGroundTruthNeutronPseudoVoigtGaussian()
    profile->SetProfilePar(.03f * DEG2RAD * DEG2RAD, 0, 0, 0.0f, 0);
    ComparePowderSimulationToGroundTruth(RAD_NEUTRON, 1.54056f, profile,
                                         "powder-groundtruth-neutron-pv-gaussian",
-                                        "../../test/data/ground_truth/powder_neutron_pv_gaussian_pbso4.txt", 1e-2f, 1e-5f);
+                                        "../../test/data/ground_truth/powder_neutron_pv_gaussian_pbso4.txt",
+                                        kPowderGroundTruthAbsTol, kPowderGroundTruthRelTol);
 }
 
 void TestPowderGroundTruthNeutronPseudoVoigtLorentzian()
@@ -324,7 +334,8 @@ void TestPowderGroundTruthNeutronPseudoVoigtLorentzian()
    profile->SetProfilePar(.03f * DEG2RAD * DEG2RAD, 0, 0, 1.0f, 0);
    ComparePowderSimulationToGroundTruth(RAD_NEUTRON, 1.54056f, profile,
                                         "powder-groundtruth-neutron-pv-lorentzian",
-                                        "../../test/data/ground_truth/powder_neutron_pv_lorentzian_pbso4.txt", 1e-2f, 1e-5f);
+                                        "../../test/data/ground_truth/powder_neutron_pv_lorentzian_pbso4.txt",
+                                        kPowderGroundTruthAbsTol, kPowderGroundTruthRelTol);
 }
 
 } // namespace

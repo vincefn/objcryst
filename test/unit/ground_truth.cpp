@@ -8,6 +8,8 @@
 #include <iomanip>
 #include <iostream>
 #include <string>
+#include <algorithm>
+#include <vector>
 
 #include "ObjCryst/ObjCryst/Crystal.h"
 #include "ObjCryst/ObjCryst/DiffractionDataSingleCrystal.h"
@@ -20,6 +22,72 @@ using namespace objcryst_test;
 
 namespace
 {
+
+std::vector<unsigned long> SelectPowderSampleIndices(const CrystVector_REAL& calc,
+                                                     const unsigned long targetCount)
+{
+   const long n = calc.numElements();
+   const REAL minUsefulIntensity = static_cast<REAL>(1e-8);
+   std::vector<unsigned long> peaks;
+   peaks.reserve(static_cast<size_t>(n));
+   for(long i = 1; i + 1 < n; ++i)
+   {
+      const REAL c = calc(i);
+      if(c <= minUsefulIntensity) continue;
+      if(c >= calc(i - 1) && c >= calc(i + 1)) peaks.push_back(static_cast<unsigned long>(i));
+   }
+   std::sort(peaks.begin(), peaks.end(), [&](const unsigned long a, const unsigned long b)
+   {
+      return calc(a) > calc(b);
+   });
+
+   std::vector<unsigned long> selected;
+   selected.reserve(targetCount);
+   std::vector<char> used(static_cast<size_t>(n), 0);
+   auto addIndex = [&](const long idx)
+   {
+      if(idx < 0 || idx >= n) return;
+      const unsigned long uidx = static_cast<unsigned long>(idx);
+      if(used[uidx] != 0) return;
+      if(calc(uidx) <= minUsefulIntensity) return;
+      used[uidx] = 1;
+      selected.push_back(uidx);
+   };
+
+   for(const unsigned long peak : peaks)
+   {
+      for(long delta = -8; delta <= 8; ++delta) addIndex(static_cast<long>(peak) + delta);
+      if(selected.size() >= targetCount) break;
+   }
+
+   if(selected.size() < targetCount)
+   {
+      std::vector<unsigned long> nonZero;
+      nonZero.reserve(static_cast<size_t>(n));
+      for(long i = 0; i < n; ++i)
+         if(calc(i) > minUsefulIntensity) nonZero.push_back(static_cast<unsigned long>(i));
+      std::sort(nonZero.begin(), nonZero.end(), [&](const unsigned long a, const unsigned long b)
+      {
+         return calc(a) > calc(b);
+      });
+      for(const unsigned long idx : nonZero)
+      {
+         addIndex(static_cast<long>(idx));
+         if(selected.size() >= targetCount) break;
+      }
+   }
+
+   std::sort(selected.begin(), selected.end());
+   return selected;
+}
+
+void DumpPowderGroundTruth(const char* const label, const ObjCryst::PowderPattern& pattern)
+{
+   const auto& calc = pattern.GetPowderPatternCalc();
+   const std::vector<unsigned long> indices = SelectPowderSampleIndices(calc, 80);
+   std::cout << label << "\n";
+   for(const unsigned long idx : indices) std::cout << idx << " " << calc(idx) << "\n";
+}
 
 void DumpGroundTruthData()
 {
@@ -67,8 +135,7 @@ void DumpGroundTruthData()
    phaseXg->SetProfile(pvGx);
    pXg.AddPowderPatternComponent(*phaseXg);
    pXg.Prepare();
-   std::cout << "powder-xray-pseudo-voigt-gaussian\n";
-   for(unsigned long i = 0; i < pXg.GetNbPoint(); i += 12) std::cout << i << " " << pXg.GetPowderPatternCalc()(i) << "\n";
+   DumpPowderGroundTruth("powder-xray-pseudo-voigt-gaussian", pXg);
 
    Crystal cXl = MakePbso4Crystal();
    PowderPattern pXl;
@@ -83,8 +150,7 @@ void DumpGroundTruthData()
    phaseXl->SetProfile(pvLx);
    pXl.AddPowderPatternComponent(*phaseXl);
    pXl.Prepare();
-   std::cout << "powder-xray-pseudo-voigt-lorentzian\n";
-   for(unsigned long i = 0; i < pXl.GetNbPoint(); i += 12) std::cout << i << " " << pXl.GetPowderPatternCalc()(i) << "\n";
+   DumpPowderGroundTruth("powder-xray-pseudo-voigt-lorentzian", pXl);
 
    Crystal cXa = MakePbso4Crystal();
    PowderPattern pXa;
@@ -98,8 +164,7 @@ void DumpGroundTruthData()
    phaseXa->SetProfile(anisoX);
    pXa.AddPowderPatternComponent(*phaseXa);
    pXa.Prepare();
-   std::cout << "powder-xray-anisotropic\n";
-   for(unsigned long i = 0; i < pXa.GetNbPoint(); i += 12) std::cout << i << " " << pXa.GetPowderPatternCalc()(i) << "\n";
+   DumpPowderGroundTruth("powder-xray-anisotropic", pXa);
 
    Crystal cNg = MakePbso4Crystal();
    PowderPattern pNg;
@@ -114,8 +179,7 @@ void DumpGroundTruthData()
    phaseNg->SetProfile(pvGn);
    pNg.AddPowderPatternComponent(*phaseNg);
    pNg.Prepare();
-   std::cout << "powder-neutron-pseudo-voigt-gaussian\n";
-   for(unsigned long i = 0; i < pNg.GetNbPoint(); i += 12) std::cout << i << " " << pNg.GetPowderPatternCalc()(i) << "\n";
+   DumpPowderGroundTruth("powder-neutron-pseudo-voigt-gaussian", pNg);
 
    Crystal cNl = MakePbso4Crystal();
    PowderPattern pNl;
@@ -130,8 +194,7 @@ void DumpGroundTruthData()
    phaseNl->SetProfile(pvLn);
    pNl.AddPowderPatternComponent(*phaseNl);
    pNl.Prepare();
-   std::cout << "powder-neutron-pseudo-voigt-lorentzian\n";
-   for(unsigned long i = 0; i < pNl.GetNbPoint(); i += 12) std::cout << i << " " << pNl.GetPowderPatternCalc()(i) << "\n";
+   DumpPowderGroundTruth("powder-neutron-pseudo-voigt-lorentzian", pNl);
 }
 
 } // namespace
