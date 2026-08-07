@@ -9,6 +9,9 @@ IMPROVEMENTS
   * Indexing (CellExplorer): lower the default minimum unit cell length from
     4 Å to 2.5 Å, allowing correct indexing of compact structures such as
     α-Fe, B, or ZRNCl (fixes issue #63)
+  * Powder ground-truth fixtures for PbSO4 now sample many non-zero points
+    around reflection peaks (instead of sparse mostly-zero bins), making the
+    regression checks more informative
 
 BUG FIXES
   * Fix single-crystal simulation crashing when showing simulated data or when
@@ -25,6 +28,9 @@ BUG FIXES
   * Recompute PolarizationCorr when the linear polarization rate changes,
     using a dedicated Radiation clock (related to pyobjcryst issue #38)
   * Bump bundled wxWidgets to 3.2.10 and FFTW to 3.3.11 in the makefiles
+  * Relax powder ground-truth relative tolerance to 5e-4 so regression tests
+    are stable in both single-precision (default) and double-precision builds
+  * Add a Linux non-GUI CI matrix entry running tests in double precision
 
 #### 2024.1 (August 2024)
 NEW FEATURES
