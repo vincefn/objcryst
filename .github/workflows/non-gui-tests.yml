@@ -23,7 +23,7 @@ jobs:
             os: ubuntu-latest
             arch: x64
             make_cmd: make
-            make_args: real_double=1
+            make_args: real_double=1 sse=0
           - label: macos-arm64
             os: macos-14
             arch: arm64
