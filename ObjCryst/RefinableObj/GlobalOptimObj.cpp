@@ -847,8 +847,14 @@ void MonteCarloObj::MultiRunOptimize(long &nbCycle,long &nbStep,const bool silen
          time_t date=time(0);
          char strDate[40];
          strftime(strDate,sizeof(strDate),"%Y-%m-%d_%H-%M-%S",localtime(&date));//%Y-%m-%dT%H:%M:%S%Z
-         char costAsChar[30];
-         sprintf(costAsChar,"-Run#%ld-Cost-%f",abs(nbCycle),this->GetLogLikelihood());
+         char costAsChar[64];
+         // Use %g (bounded length) rather than %f -- %f expands the full
+         // integer part of the cost, and an unbounded log-likelihood
+         // (e.g. from an overlapping-atoms starting configuration) can
+         // produce a string long enough to overflow this fixed buffer,
+         // which glibc's fortified sprintf (_FORTIFY_SOURCE) turns into a
+         // hard abort() rather than a graceful error.
+         snprintf(costAsChar,sizeof(costAsChar),"-Run#%ld-Cost-%g",abs(nbCycle),this->GetLogLikelihood());
          saveFileName=saveFileName+(string)strDate+(string)costAsChar+(string)".xml";
          XMLCrystFileSaveGlobal(saveFileName);
       }
@@ -857,7 +863,7 @@ void MonteCarloObj::MultiRunOptimize(long &nbCycle,long &nbStep,const bool silen
          ofstream outTracker;
          outTracker.imbue(std::locale::classic());
          char runNum[40];
-         sprintf(runNum,"-Tracker-Run#%ld.dat",abs(nbCycle));
+         snprintf(runNum,sizeof(runNum),"-Tracker-Run#%ld.dat",abs(nbCycle));
          const string outTrackerName=this->GetName()+runNum;
          outTracker.open(outTrackerName.c_str());
          mMainTracker.SaveAll(outTracker);
@@ -1094,9 +1100,12 @@ void MonteCarloObj::RunSimulatedAnnealing(long &nbStep,const bool silent,
          time_t date=time(0);
          char strDate[40];
          strftime(strDate,sizeof(strDate),"%Y-%m-%d_%H-%M-%S",localtime(&date));//%Y-%m-%dT%H:%M:%S%Z
-         char costAsChar[30];
+         char costAsChar[64];
          if(accept!=2) mRefParList.RestoreParamSet(mBestParSavedSetIndex);
-         sprintf(costAsChar,"-Cost-%f",this->GetLogLikelihood());
+         // See the comment at the equivalent site in MultiRunOptimize() above:
+         // %g instead of %f + snprintf avoids a fortified-sprintf abort() on
+         // an unbounded log-likelihood value.
+         snprintf(costAsChar,sizeof(costAsChar),"-Cost-%g",this->GetLogLikelihood());
          saveFileName=saveFileName+(string)strDate+(string)costAsChar+(string)".xml";
          XMLCrystFileSaveGlobal(saveFileName);
          if(accept!=2) mRefParList.RestoreParamSet(lastParSavedSetIndex);
@@ -1295,8 +1304,11 @@ void MonteCarloObj::RunRandomLSQMethod(long &nbCycle)
         time_t date=time(0);
         char strDate[40];
         strftime(strDate,sizeof(strDate),"%Y-%m-%d_%H-%M-%S",localtime(&date));//%Y-%m-%dT%H:%M:%S%Z
-        char costAsChar[30];
-        sprintf(costAsChar,"#Run%ld-Cost-%f",nbCycle, mCurrentCost);
+        char costAsChar[64];
+        // See the comment at the equivalent site in MultiRunOptimize() above:
+        // %g instead of %f + snprintf avoids a fortified-sprintf abort() on
+        // an unbounded log-likelihood value.
+        snprintf(costAsChar,sizeof(costAsChar),"#Run%ld-Cost-%g",nbCycle, mCurrentCost);
         saveFileName=saveFileName+(string)strDate+(string)costAsChar+(string)".xml";
         XMLCrystFileSaveGlobal(saveFileName);
 
@@ -1554,9 +1566,12 @@ void MonteCarloObj::RunParallelTempering(long &nbStep,const bool silent,
                time_t date=time(0);
                char strDate[40];
                strftime(strDate,sizeof(strDate),"%Y-%m-%d_%H-%M-%S",localtime(&date));//%Y-%m-%dT%H:%M:%S%Z
-               char costAsChar[30];
+               char costAsChar[64];
                if(accept!=2) mRefParList.RestoreParamSet(mBestParSavedSetIndex);
-               sprintf(costAsChar,"-Cost-%f",this->GetLogLikelihood());
+               // See the comment at the equivalent site in MultiRunOptimize() above:
+               // %g instead of %f + snprintf avoids a fortified-sprintf abort() on
+               // an unbounded log-likelihood value.
+               snprintf(costAsChar,sizeof(costAsChar),"-Cost-%g",this->GetLogLikelihood());
                saveFileName=saveFileName+(string)strDate+(string)costAsChar+(string)".xml";
                XMLCrystFileSaveGlobal(saveFileName);
                //if(accept!=2) mRefParList.RestoreParamSet(lastParSavedSetIndex);
