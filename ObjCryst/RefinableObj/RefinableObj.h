@@ -266,7 +266,7 @@ class RefinablePar:public Restraint
       /** Copy Constructor
       */
       RefinablePar(const RefinablePar &ref);
-      ~RefinablePar();
+      virtual ~RefinablePar();
       /** \brief Constructor
       *\par name: the name of the parameter
       *\par refPar: the address of the refined parameter
@@ -313,28 +313,28 @@ class RefinablePar:public Restraint
          /** of the parameter. Use the The Mutate() and MutateTo() function
          *  to change this value.
          */
-         REAL GetValue()const;
+         virtual REAL GetValue()const;
 
          /** Access to a const pointer to the refined value
          *
          * This can be used to identify the parameter
          */
-         const REAL* GetPointer()const;
+         virtual const REAL* GetPointer()const;
 
          /** of the parameter. Use the The Mutate() and MutateTo() function
          *  to change this value.
          */
-         void SetValue(const REAL value);
+         virtual void SetValue(const REAL value);
 
          /** \brief Current value of parameter, scaled if necessary (for angles) to a
          * human-understandable value.
          */
-         const REAL& GetHumanValue() const;
+         virtual const REAL& GetHumanValue() const;
 
          /** \brief Current value of parameter, scaled if necessary (for angles) to a
          * human-understandable value.
          */
-         void SetHumanValue(const REAL&) ;
+         virtual void SetHumanValue(const REAL&) ;
 
          /** \brief Add the given amount to the parameter current value.
          *
@@ -343,89 +343,89 @@ class RefinablePar:public Restraint
          * back to allowed values.
          *\warning Will throw an exception if the parameter is defined by an equation.
          */
-         void Mutate(const REAL mutateValue);
+         virtual void Mutate(const REAL mutateValue);
          /**Change the current value to the given one.
          *
          * If the limit is hit, then set to the limit (unless the pameter is periodic,
          * then shift by the period amount back to allowed values).
          *\warning Will throw an exception if the parameter is defined by an equation.
          */
-         void MutateTo(const REAL newValue);
+         virtual void MutateTo(const REAL newValue);
 
-         REAL GetSigma()const;
-         REAL GetHumanSigma()const;
-         void SetSigma(const REAL);
+         virtual REAL GetSigma()const;
+         virtual REAL GetHumanSigma()const;
+         virtual void SetSigma(const REAL);
       //@}
 
       /// \name General info
       //@{
          /// Get the parameter's name
-         string GetName()const;
+         virtual string GetName()const;
          /// Set the name of the parameter. It should be unique in the RefinableObj.
-         void SetName(const string&);
+         virtual void SetName(const string&);
 
-         void Print() const;
+         virtual void Print() const;
 
-         bool IsFixed()const;
-         void SetIsFixed(const bool);
+         virtual bool IsFixed()const;
+         virtual void SetIsFixed(const bool);
 
-         bool IsLimited()const;
-         void SetIsLimited(const bool);
+         virtual bool IsLimited()const;
+         virtual void SetIsLimited(const bool);
 
          /// Is the parameter used (if not, it is simply irrelevant in the model) ?
-         bool IsUsed()const;
+         virtual bool IsUsed()const;
          /// Is the parameter used (if not, it is simply irrelevant in the model) ?
-         void SetIsUsed(const bool);
+         virtual void SetIsUsed(const bool);
 
-         bool IsPeriodic()const;
-         void SetIsPeriodic(const bool,REAL period=1);
+         virtual bool IsPeriodic()const;
+         virtual void SetIsPeriodic(const bool,REAL period=1);
 
          /// Human scale for this parameter : for angles, this is equal to 180/pi.
-         REAL GetHumanScale()const;
+         virtual REAL GetHumanScale()const;
          /// Human scale for this parameter : for angles, this is equal to 180/pi.
-         void SetHumanScale(const REAL);
+         virtual void SetHumanScale(const REAL);
       //@}
 
 
       /// \name Min, max values
       //@{
          /// Minimum value allowed (if limited or periodic)
-         REAL GetMin()const;
+         virtual REAL GetMin()const;
          /// Set the Minimum value allowed (if limited)
-         void  SetMin(const REAL);
+         virtual void  SetMin(const REAL);
 
          ///Get the minimum value allowed (if limited)
-         REAL GetHumanMin()const;
+         virtual REAL GetHumanMin()const;
          ///Set the minimum value allowed (if limited)
-         void  SetHumanMin(const REAL);
+         virtual void  SetHumanMin(const REAL);
 
          ///Get the maximum value allowed (if limited)
-         REAL GetMax()const;
+         virtual REAL GetMax()const;
          ///Get the maximum value allowed (if limited)
-         void  SetMax(const REAL);
+         virtual void  SetMax(const REAL);
 
          ///Get the maximum value allowed (if limited)
-         REAL GetHumanMax()const;
+         virtual REAL GetHumanMax()const;
          ///Get the maximum value allowed (if limited)
-         void  SetHumanMax(const REAL);
+         virtual void  SetHumanMax(const REAL);
 
          ///Get the period (if periodic)
-         REAL GetPeriod()const;
+         virtual REAL GetPeriod()const;
          ///Set the period value (if periodic)
-         void  SetPeriod(const REAL);
+         virtual void  SetPeriod(const REAL);
       //@}
 
       /// \name Steps during refinement
       //@{
          ///Fixed step to use to compute numerical derivative
-         REAL GetDerivStep()const;
+         virtual REAL GetDerivStep()const;
          ///Fixed step to use to compute numerical derivative
-         void  SetDerivStep(const REAL);
+         virtual void  SetDerivStep(const REAL);
 
          ///Maximum step to use during Global Optimization algorithms
-         REAL GetGlobalOptimStep()const;
+         virtual REAL GetGlobalOptimStep()const;
          ///Maximum step to use during Global Optimization algorithms
-         void  SetGlobalOptimStep(const REAL);
+         virtual void  SetGlobalOptimStep(const REAL);
       //@}
 
 
@@ -450,20 +450,20 @@ class RefinablePar:public Restraint
       /// \internal
       /// Assign a clock to this parameter. Any time this parameter is modified,
       /// the clock will be ticked !
-      void AssignClock(RefinableObjClock &clock);
+      virtual void AssignClock(RefinableObjClock &clock);
       //@}
 
       /// \name Change Limits
       //@{
          /// Change the limits for this object, giving absolute new limits
-         void SetLimitsAbsolute(const REAL min, const REAL max);
+         virtual void SetLimitsAbsolute(const REAL min, const REAL max);
          /// Change the limits for this object, giving relative new limits (eg giving -.1
          /// and +.1 will set new limits at the current value + min and current value + max)
          /// Thus min should logically be <0 and max >0.
-         void SetLimitsRelative(const REAL min, const REAL max);
+         virtual void SetLimitsRelative(const REAL min, const REAL max);
          /// Change the limits for this object, proportionnaly to the current value.
          /// min should be < 1. and max > 1.
-         void SetLimitsProportional(const REAL min, const REAL max);
+         virtual void SetLimitsProportional(const REAL min, const REAL max);
       //@}
 
       /** \brief XMLOutput to stream in well-formed XML
@@ -471,20 +471,21 @@ class RefinablePar:public Restraint
       * this will save the fixed & limited flags, as well as limits
       * \param name the name to use instead of the RefPar name.
       */
-      void XMLOutput(ostream &os,const string &name,int indent=0)const;
+      virtual void XMLOutput(ostream &os,const string &name,int indent=0)const;
       /** \brief XMLOutput to stream in well-formed XML.
       *
       * this will save the fixed & limited flags, as well as limits.
       * In this function the name used is that of the RefPar.
       */
-      void XMLOutput(ostream &os,int indent=0)const;
+      virtual void XMLOutput(ostream &os,int indent=0)const;
       /** \brief XMLInput From stream
       *
       */
-      void XMLInput(istream &is,const XMLCrystTag &tag);
-   private:
+      virtual void XMLInput(istream &is,const XMLCrystTag &tag);
+   protected:
       /// Click the Clock ! to telle the RefinableObj it has been modified.
       void Click();
+   private:
       ///name of the refinable parameter
       string mName;
       /// Pointer to the refinable value
@@ -544,6 +545,65 @@ class RefinablePar:public Restraint
       WXFieldRefPar * mpWXFieldRefPar;
    #endif
    friend class RefinableObj;
+};
+
+/** A refinable parameter alias with a local name and delegated attributes/value.
+ *
+ * The proxy keeps its own name, but forwards all other parameter operations
+ * to the referenced source parameter.
+ */
+class RefinableParProxy: public RefinablePar
+{
+   public:
+      RefinableParProxy(RefinablePar &srcPar, const string &proxyName);
+      ~RefinableParProxy();
+
+      REAL GetValue()const;
+      const REAL* GetPointer()const;
+      void SetValue(const REAL value);
+      const REAL& GetHumanValue() const;
+      void SetHumanValue(const REAL&) ;
+      void Mutate(const REAL mutateValue);
+      void MutateTo(const REAL newValue);
+      REAL GetSigma()const;
+      REAL GetHumanSigma()const;
+      void SetSigma(const REAL);
+      string GetName()const;
+      void SetName(const string&);
+      void Print() const;
+      bool IsFixed()const;
+      void SetIsFixed(const bool);
+      bool IsLimited()const;
+      void SetIsLimited(const bool);
+      bool IsUsed()const;
+      void SetIsUsed(const bool);
+      bool IsPeriodic()const;
+      void SetIsPeriodic(const bool,REAL period=1);
+      REAL GetHumanScale()const;
+      void SetHumanScale(const REAL);
+      REAL GetMin()const;
+      void  SetMin(const REAL);
+      REAL GetHumanMin()const;
+      void  SetHumanMin(const REAL);
+      REAL GetMax()const;
+      void  SetMax(const REAL);
+      REAL GetHumanMax()const;
+      void  SetHumanMax(const REAL);
+      REAL GetPeriod()const;
+      void  SetPeriod(const REAL);
+      REAL GetDerivStep()const;
+      void  SetDerivStep(const REAL);
+      REAL GetGlobalOptimStep()const;
+      void  SetGlobalOptimStep(const REAL);
+      const RefParType* GetType()const;
+      void SetType(const RefParType *type);
+      void AssignClock(RefinableObjClock &clock);
+      void SetLimitsAbsolute(const REAL min, const REAL max);
+      void SetLimitsRelative(const REAL min, const REAL max);
+      void SetLimitsProportional(const REAL min, const REAL max);
+   private:
+      RefinablePar *mpSrcPar;
+      string mProxyName;
 };
 /** Base class for options
 *
@@ -842,6 +902,23 @@ class RefinableObj
       RefinablePar& GetPar(const string & name);
       ///Access all parameters from their name
       const RefinablePar& GetPar(const string & name) const;
+      /** Build a hierarchical parameter name with up to \a max_parents parent prefixes.
+      *
+      * Traverses the ancestry chain by following the \e first entry of each
+      * object's client registry (GetClientRegistry().GetObj(0)) up to
+      * \a max_parents levels.  The result has the form:
+      * "GrandParentClass:GrandParentName:ParentClass:ParentName:paramName"
+      *
+      * \note The client registry records objects that \e use this object.
+      * Its first entry is treated by convention as the "real" (canonical)
+      * parent in the composition hierarchy; subsequent entries are secondary
+      * users and are ignored by this function.
+      *
+      * \param par       The parameter whose name should be decorated.
+      * \param max_parents Maximum number of ancestor levels to prepend (default 2).
+      *                    Pass 0 to return the bare parameter name.
+      */
+      string GetParNameHierarchy(RefinablePar &par, int max_parents=2) const;
 
       /// Access parameter from its adress
       RefinablePar& GetPar(const REAL*);
@@ -870,17 +947,13 @@ class RefinableObj
       * its name will be automatically appended with an ~
       */
       void AddPar(RefinablePar *newRefPar);
-      /** Add all the parameters in another RefinableObj. Parameters
-      * are \not copied, so they should be allocated in the heap.
-      *
-      * \warning If a copy of another RefinableObj parameter list is made,
-      * such as in the OptimizationObj class, make sure that upon deletion
-      * of this object the parameters will not be destroyed. To do this
-      * use RefinableObj::SetDeleteRefParInDestructor(false).
+      /** Add all the parameters in another RefinableObj.
       *
       * \param copyParam: if false (default), then parameters are not copied
-      * from the object but just referenced. Use RefinableObj::SetDeleteRefParInDestructor(false)
-      * accordingly. If true, then the parameters are copied, so that any
+      * from the object but proxied, with names prefixed by parent class/name
+      * information ("ParentClass:ParentName:" or
+      * "GrandParentClass:GrandParentName:ParentClass:ParentName:").
+      * If true, then the parameters are copied, so that any
       * modification to the fixed/limited/used attributes do not affect
       * the original parameter. Only the value and the parameter's clock
       * can then be modified by the copied parameter

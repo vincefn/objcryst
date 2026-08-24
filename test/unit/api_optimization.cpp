@@ -3,7 +3,9 @@
 #include <cmath>
 #include <iostream>
 #include <string>
+#include <vector>
 
+#include "ObjCryst/ObjCryst/Atom.h"
 #include "ObjCryst/ObjCryst/PowderPattern.h"
 #include "ObjCryst/RefinableObj/GlobalOptimObj.h"
 #include "ObjCryst/RefinableObj/LSQNumObj.h"
@@ -145,6 +147,75 @@ void TestLsqNumObjResidualStatistics()
    Check(std::isfinite(chiSq), "Manually accumulated Chi^2 from LSQ vectors should be finite");
 }
 
+void TestLsqNumObjPreservesOriginalParameterNames()
+{
+   // Two crystalline phases with overlapping unit-cell parameter names (a, b, c).
+   // After SetRefinedObj / PrepareRefParList, neither crystal's own parameter
+   // names should be mutated by the proxy-based deduplication.
+   using namespace ObjCryst;
+
+   // Phase 1: PbSO4 (orthorhombic Pnma – has independent a, b, c)
+   Crystal c1 = MakePbso4Crystal();
+
+   // Phase 2: a simple orthorhombic crystal with different lattice constants
+   // (shares parameter names a, b, c with phase 1 – the old "~" code would
+   // have mutated one of them)
+   Crystal c2(4.212, 4.212, 4.212, "Pm3m"); // cubic; single independent parameter a
+   auto* sr = new ScatteringPowerAtom("Sr", "Sr", 1.2);
+   c2.AddScatteringPower(sr);
+   c2.AddScatterer(new Atom(0., 0., 0., "Sr1", sr, 1.));
+
+   PowderPattern p;
+   p.SetRadiationType(RAD_XRAY);
+   p.SetWavelength("CuA1");
+   p.SetPowderPatternPar(5 * DEG2RAD, 0.05 * DEG2RAD, 400);
+   CrystVector_REAL obs(400);
+   obs = 10;
+   p.SetPowderPatternObs(obs);
+
+   auto* bg = new PowderPatternBackground;
+   CrystVector_REAL x(2), y(2);
+   x(0) = 0;         x(1) = 3.0 * DEG2RAD;
+   y(0) = 8;         y(1) = 9;
+   bg->SetInterpPoints(x, y);
+   p.AddPowderPatternComponent(*bg);
+
+   auto* phase1 = new PowderPatternDiffraction;
+   phase1->SetCrystal(c1);
+   p.AddPowderPatternComponent(*phase1);
+
+   auto* phase2 = new PowderPatternDiffraction;
+   phase2->SetCrystal(c2);
+   p.AddPowderPatternComponent(*phase2);
+
+   p.Prepare();
+
+   // Snapshot original parameter names from both crystals
+   std::vector<std::string> c1Names, c2Names;
+   c1Names.reserve(c1.GetNbPar());
+   c2Names.reserve(c2.GetNbPar());
+   for(long i=0;i<c1.GetNbPar();++i) c1Names.push_back(c1.GetPar(i).GetName());
+   for(long i=0;i<c2.GetNbPar();++i) c2Names.push_back(c2.GetPar(i).GetName());
+
+   LSQNumObj lsq("lsq-preserve-names");
+   lsq.SetRefinedObj(p, 0, true, false);
+   lsq.PrepareRefParList(true);
+
+   // Verify sizes unchanged
+   Check(static_cast<long>(c1Names.size())==c1.GetNbPar(),
+         "Crystal1 parameter list size changed unexpectedly");
+   Check(static_cast<long>(c2Names.size())==c2.GetNbPar(),
+         "Crystal2 parameter list size changed unexpectedly");
+
+   // Verify names unchanged in both crystals
+   for(long i=0;i<c1.GetNbPar();++i)
+      Check(c1.GetPar(i).GetName()==c1Names[i],
+            "Crystal1 parameter name changed after LSQ SetRefinedObj/PrepareRefParList");
+   for(long i=0;i<c2.GetNbPar();++i)
+      Check(c2.GetPar(i).GetName()==c2Names[i],
+            "Crystal2 parameter name changed after LSQ SetRefinedObj/PrepareRefParList");
+}
+
 } // namespace
 
 int main(int argc, char* argv[])
@@ -163,6 +234,7 @@ int main(int argc, char* argv[])
    else if(testName == "optimizationobj-limits-options") TestOptimizationObjLimitsAndOptions();
    else if(testName == "lsqnumobj") TestLsqNumObj();
    else if(testName == "lsqnumobj-residual-statistics") TestLsqNumObjResidualStatistics();
+   else if(testName == "lsqnumobj-preserve-original-parameter-names") TestLsqNumObjPreservesOriginalParameterNames();
    else
    {
       std::cerr << "Unknown test case: " << testName << std::endl;
