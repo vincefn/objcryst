@@ -13,6 +13,9 @@ NEW FEATURES
     superseding the deterministic-order approach of PR #77).
     `RefinableObj::GetParNameHierarchy(par, max_parents)` is added as a public
     helper to build such hierarchy-prefixed names.
+  * Track Rw history per refinement run in `LSQNumObj`, retrievable with
+    `LSQNumObj::GetRwHistory()`; cleared at the start of each `Refine()` call
+    (PR #90, @clemisch)
 
 IMPROVEMENTS
   * Indexing (CellExplorer): lower the default minimum unit cell length from
