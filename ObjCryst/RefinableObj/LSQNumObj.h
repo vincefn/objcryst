@@ -81,7 +81,8 @@ class LSQNumObj
       *
       * \param nbCycle: number of LSQ cycles - if negative, the algorithm will continue
       * until it reaches (-nbcycle) or until the relative variation in Chi2 is less
-      * than minChi2var
+      * than minChi2var or if the absolute change of Rwp in % is less than minRwpVar
+      * if minRwpVar is not negative.
       * \param useLevenbergMarquardt: enable Levenberg-Marquardt algorithm
       * to ensure that a decrease of Chi^2 will be obtained (actually a 1%
       * increase is allowed)
@@ -92,10 +93,13 @@ class LSQNumObj
       * for objects where that would render derivative calculations imprecise.
       * \param minChi2var: used for termination of the refinement if the relative variation
       * of Chi2 between two successive cyles is less than minChi2var
+      * \param minRwpVar: used for termination of the refinement if the absolute variation
+      * of Rwp between two successive cycles is less than minRwpVar. Unit is percent,
+      * so 0.1 corresponds to a 0.1% change of Rwp. Ignored if negative (default).
       */
       void Refine (int nbCycle=1,bool useLevenbergMarquardt=false,
                    const bool silent=false, const bool callBeginEndOptimization=true,
-                   const float minChi2var=0.01);
+                   const float minChi2var=0.01, const float minRwpVar=-1);
       /** Run a refinement in a 'safe' way: if the Chi2 value increases by more that a given factor
       * the parameters are reverted to their initial values. Moreover, the listed 'new' parameters
       * or parameter types are then fixed.
@@ -112,7 +116,7 @@ class LSQNumObj
                       REAL maxChi2factor=1.01,
                       int nbCycle=1, bool useLevenbergMarquardt=false,
                       const bool silent=false, const bool callBeginEndOptimization=true,
-                      const float minChi2var=0.01);
+                      const float minChi2var=0.01, const float minRwpVar=-1);
       CrystVector_REAL Sigma()const;
       CrystMatrix_REAL CorrelMatrix()const;
       void CalcRfactor()const;
