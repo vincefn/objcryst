@@ -1,21 +1,23 @@
-.tmp/
-unit/unit_cell_smoke
-unit/crystallography_workflow
-unit/api_spacegroup
-unit/api_crystal
-unit/api_molecule
-unit/api_scattering
-unit/api_powderpattern
-unit/api_cif
-unit/api_optimization
-unit/api_indexing
-unit/ground_truth
 unit/ObjCryst*.xml
-unit/*.o
-unit/*.dep
-integration/tutorial_cimetidine
-integration/tutorial_pbso4
-integration/*.o
-integration/*.dep
-integration/.tmp/
+
+# Ignore everything under unit/ and integration/ except recognized
+# source/config files. This catches compiled test binaries generically -
+# extension-less on POSIX, .exe on MinGW (see BINARIES in unit/gnu.mak and
+# integration/gnu.mak) - without listing each one by name, so adding a new
+# test target needs no update here. (A binary named after one of these
+# extensions, e.g. "foo.sh", is not a realistic collision.)
+unit/*
+!unit/*.cpp
+!unit/*.h
+!unit/*.sh
+!unit/*.mak
+!unit/*/
+integration/*
+!integration/*.cpp
+!integration/*.sh
+!integration/*.mak
+!integration/*/
+
+# These come last so they win over the "!.../*/" re-includes above.
+.tmp/
 regression/.tmp/

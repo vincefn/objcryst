@@ -22,6 +22,12 @@ run_test() {
   local name="$1"
   shift
 
+  local bin="$1"
+  if [ -f "$bin.exe" ]; then
+    shift
+    set -- "$bin.exe" "$@"
+  fi
+
   local log
   local timeout_bin=""
   local test_timeout="${TEST_TIMEOUT:-}"
