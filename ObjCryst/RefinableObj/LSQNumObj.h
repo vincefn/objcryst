@@ -125,6 +125,10 @@ class LSQNumObj
       REAL RwFactor()const;
       void CalcChiSquare() const;
       REAL ChiSquare()const;   //uses the weight if specified
+      /// Per-cycle weighted profile R-factor (Rw, as a fraction) recorded during
+      /// the last Refine() call: one entry per completed LM cycle. Cleared at the
+      /// start of each Refine().
+      const std::vector<REAL>& GetRwHistory()const;
       /** Choose the object to refine. The minimization will be done
       * against its LSQ function and its parameters, as well as the LSQ functions
       * and parameters of its sub-objects (if recursive==true)
@@ -234,6 +238,8 @@ class LSQNumObj
       /// File name where refinement info is saved
       std::string mSaveFileName;
       mutable REAL mR,mRw,mChiSq;
+      /// Per-cycle Rw (fraction) history of the last Refine() call. See GetRwHistory().
+      mutable std::vector<REAL> mvRwHistory;
       /// Correlation matrix between all refined parameters.
       CrystMatrix_REAL mCorrelMatrix;
       ///Variance-Covariance matrix, as a std::map
