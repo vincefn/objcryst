@@ -16,6 +16,10 @@ NEW FEATURES
   * Track Rw history per refinement run in `LSQNumObj`, retrievable with
     `LSQNumObj::GetRwHistory()`; cleared at the start of each `Refine()` call
     (PR #90, @clemisch)
+  * Add `minRwpVar` argument to `LSQNumObj::Refine()`, controlling early
+    stopping when the absolute change in Rwp [%] falls below it; like
+    `minChi2var`, it is only checked when `nbCycle` is negative, and defaults
+    to -1 (disabled) to preserve existing behavior (PR #91, @clemisch)
 
 IMPROVEMENTS
   * Indexing (CellExplorer): lower the default minimum unit cell length from
