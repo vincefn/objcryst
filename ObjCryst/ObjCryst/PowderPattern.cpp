@@ -795,6 +795,7 @@ mScale(1.0),
 mMaxSinThetaOvLambda(10)
 {
    mClockMaster.AddChild(mClockHistogram);
+   this->InitRefParList();
 }
 
 PowderPatternBackgroundHist::PowderPatternBackgroundHist(const PowderPatternBackgroundHist &old):
@@ -841,7 +842,6 @@ pair<const CrystVector_REAL*,const RefinableObjClock*>
 void PowderPatternBackgroundHist::SetHistogram(const CrystVector_REAL &histogram)
 {
    mHistogram=histogram;
-   this->InitRefParList();
    mClockHistogram.Click();
 }
 
