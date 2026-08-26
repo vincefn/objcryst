@@ -47,6 +47,7 @@ BUG FIXES
   * Relax powder ground-truth relative tolerance to 5e-4 so regression tests
     are stable in both single-precision (default) and double-precision builds
   * Add a Linux non-GUI CI matrix entry running tests in double precision
+  * Fix constructor of anisotropic Pseudo-Voigt profile (PR #93)
 
 #### 2024.1 (August 2024)
 NEW FEATURES
