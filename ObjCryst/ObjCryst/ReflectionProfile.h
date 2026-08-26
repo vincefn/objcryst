@@ -192,7 +192,7 @@ class ReflectionProfilePseudoVoigtAnisotropic:public ReflectionProfile
                          const REAL fwhmLorentzGammaKL=0,
                          const REAL pseudoVoigtEta0=0,
                          const REAL pseudoVoigtEta1=0,
-                         const REAL asymA0=0,
+                         const REAL asymA0=1,
                          const REAL asymA1=0,
                          const REAL asymA2=0
                          );

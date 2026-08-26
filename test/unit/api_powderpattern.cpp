@@ -233,6 +233,15 @@ void TestReflectionProfileDoubleExponentialPseudoVoigt()
 void TestReflectionProfilePseudoVoigtAnisotropicDirect()
 {
    using namespace ObjCryst;
+   ReflectionProfilePseudoVoigtAnisotropic parameterProfile;
+   const REAL w = 1e-6f;
+   const REAL p = 2e-6f;
+   parameterProfile.SetProfilePar(w, 0, 0, p);
+   CheckNearAbs(parameterProfile.GetPar("P").GetValue(), p, 1e-12,
+                "Anisotropic SetProfilePar should assign Gaussian P");
+   CheckNearAbs(parameterProfile.GetPar("Asym0").GetValue(), 1, 1e-12,
+                "Anisotropic SetProfilePar should default to symmetric Asym0");
+
    const REAL wavelength = 1.54056f;
    const REAL xMin = 10 * DEG2RAD;
    const REAL step = 0.05f * DEG2RAD;
