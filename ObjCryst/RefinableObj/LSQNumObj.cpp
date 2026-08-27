@@ -704,8 +704,8 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
       // check Chi2 and Rwp thresholds
       if(terminateOnThresholds)
       {
-         if( minChi2var>( (ChisSqPreviousCycle-mChiSq)/abs(ChisSqPreviousCycle+1e-6) ) ) break;
-         if( (minRwpVar>=0) && ( (Rw_ini-mRw)*100.0 < minRwpVar ) ) break;
+         if( minChi2var>fabs((ChisSqPreviousCycle-mChiSq)/abs(ChisSqPreviousCycle+1e-6)) ) break;
+         if( (minRwpVar>=0) && ( minRwpVar > (fabs(Rw_ini-mRw)*100.0) ) ) break;
       }
    }
    if(callBeginEndOptimization) this->EndOptimization();

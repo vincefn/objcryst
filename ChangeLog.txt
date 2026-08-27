@@ -29,6 +29,8 @@ IMPROVEMENTS
   * Powder ground-truth fixtures for PbSO4 now sample many non-zero points
     around reflection peaks (instead of sparse mostly-zero bins), making the
     regression checks more informative
+  * Thresholds minChi2var and minRwpVar now act on the magnitude of the change
+    from the latest refinement cycle (#96, fixes #95)
 
 BUG FIXES
   * Fix single-crystal simulation crashing when showing simulated data or when

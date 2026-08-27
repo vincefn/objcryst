@@ -18,6 +18,54 @@ using namespace objcryst_test;
 namespace
 {
 
+class OvershootingLsqModel : public ObjCryst::RefinableObj
+{
+   public:
+      OvershootingLsqModel(): mValue(0.1), mCalc(1), mObs(1), mWeight(1), mDeriv(1)
+      {
+         mObs(0) = 1;
+         mWeight(0) = 1;
+         this->AddPar(new ObjCryst::RefinablePar(
+            "quadratic", &mValue, -100, 100,
+            ObjCryst::gpRefParTypeObjCryst));
+      }
+
+      unsigned int GetNbLSQFunction() const
+      {
+         return 1;
+      }
+
+      const CrystVector_REAL& GetLSQCalc(const unsigned int) const
+      {
+         mCalc(0) = mValue * mValue;
+         return mCalc;
+      }
+
+      const CrystVector_REAL& GetLSQObs(const unsigned int) const
+      {
+         return mObs;
+      }
+
+      const CrystVector_REAL& GetLSQWeight(const unsigned int) const
+      {
+         return mWeight;
+      }
+
+      const CrystVector_REAL& GetLSQDeriv(
+         const unsigned int, ObjCryst::RefinablePar&)
+      {
+         mDeriv(0) = 2 * mValue;
+         return mDeriv;
+      }
+
+   private:
+      REAL mValue;
+      mutable CrystVector_REAL mCalc;
+      CrystVector_REAL mObs;
+      CrystVector_REAL mWeight;
+      CrystVector_REAL mDeriv;
+};
+
 void TestRefinablePar()
 {
    using namespace ObjCryst;
@@ -147,6 +195,33 @@ void TestLsqNumObjResidualStatistics()
    Check(std::isfinite(chiSq), "Manually accumulated Chi^2 from LSQ vectors should be finite");
 }
 
+void TestLsqNumObjThresholdMagnitude()
+{
+   using namespace ObjCryst;
+
+   OvershootingLsqModel chiSqModel;
+   LSQNumObj chiSqLsq("lsq-chi-square-threshold-test");
+   chiSqLsq.SetRefinedObj(chiSqModel, 0, true, false);
+   chiSqLsq.Refine(-2, false, true, true, 0.01, -1);
+   const std::vector<REAL>& chiSqHistory = chiSqLsq.GetRwHistory();
+   Check(!chiSqHistory.empty(), "Chi^2 threshold test completed no cycles");
+   Check(chiSqHistory.front() > 1,
+         "Chi^2 threshold test must produce a large first-cycle increase");
+   Check(chiSqHistory.size() == 2,
+         "A large Chi^2 increase must not satisfy the small-change threshold");
+
+   OvershootingLsqModel rwpModel;
+   LSQNumObj rwpLsq("lsq-rwp-threshold-test");
+   rwpLsq.SetRefinedObj(rwpModel, 0, true, false);
+   rwpLsq.Refine(-2, false, true, true, -1, 0.1);
+   const std::vector<REAL>& rwpHistory = rwpLsq.GetRwHistory();
+   Check(!rwpHistory.empty(), "Rwp threshold test completed no cycles");
+   Check(rwpHistory.front() > 1,
+         "Rwp threshold test must produce a large first-cycle increase");
+   Check(rwpHistory.size() == 2,
+         "A large Rwp increase must not satisfy the small-change threshold");
+}
+
 void TestLsqNumObjPreservesOriginalParameterNames()
 {
    // Two crystalline phases with overlapping unit-cell parameter names (a, b, c).
@@ -234,6 +309,7 @@ int main(int argc, char* argv[])
    else if(testName == "optimizationobj-limits-options") TestOptimizationObjLimitsAndOptions();
    else if(testName == "lsqnumobj") TestLsqNumObj();
    else if(testName == "lsqnumobj-residual-statistics") TestLsqNumObjResidualStatistics();
+   else if(testName == "lsqnumobj-threshold-magnitude") TestLsqNumObjThresholdMagnitude();
    else if(testName == "lsqnumobj-preserve-original-parameter-names") TestLsqNumObjPreservesOriginalParameterNames();
    else
    {
