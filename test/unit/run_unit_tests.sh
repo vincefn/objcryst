@@ -72,6 +72,8 @@ run_test "unit::cellexplorer-dicvol-monoclinic" "$SCRIPT_DIR/api_indexing" "cell
 
 # --- api_powderpattern ---
 run_test "unit::powderpattern-background" "$SCRIPT_DIR/api_powderpattern" "powderpattern-background"
+run_test "unit::powderpattern-background-hist" "$SCRIPT_DIR/api_powderpattern" "powderpattern-background-hist"
+run_test "unit::powderpattern-background-hist-xml" "$SCRIPT_DIR/api_powderpattern" "powderpattern-background-hist-xml"
 run_test "unit::powderpattern-diffraction" "$SCRIPT_DIR/api_powderpattern" "powderpattern-diffraction"
 run_test "unit::powderpattern-diffraction-mur" "$SCRIPT_DIR/api_powderpattern" "powderpattern-diffraction-mur"
 run_test "unit::powderpattern-diffraction-lebail-fhklobs" "$SCRIPT_DIR/api_powderpattern" "powderpattern-diffraction-lebail-fhklobs"

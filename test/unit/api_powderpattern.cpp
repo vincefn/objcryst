@@ -3,6 +3,7 @@
 // ScatteringCorr subclasses.
 #include <cmath>
 #include <iostream>
+#include <sstream>
 #include <string>
 
 #include "ObjCryst/ObjCryst/Crystal.h"
@@ -47,6 +48,101 @@ void TestPowderPatternBackground()
 
    Check(p.GetNbPowderPatternComponent() == 1, "PowderPattern background component not added");
    Check(p.GetPowderPatternCalc().numElements() == p.GetNbPoint(), "PowderPattern calc size mismatch");
+}
+
+void TestPowderPatternBackgroundHist()
+{
+   using namespace ObjCryst;
+   PowderPattern p;
+   p.SetPowderPatternPar(0, 0.01 * DEG2RAD, 5);
+   CrystVector_REAL obs(5);
+   obs = 0;
+   p.SetPowderPatternObs(obs);
+
+   auto* bg = new PowderPatternBackgroundHist;
+   CrystVector_REAL hist(5);
+   for(long i=0;i<hist.numElements();++i) hist(i)=i+1;
+   bg->SetHistogram(hist);
+   p.AddPowderPatternComponent(*bg);
+
+   Check(p.GetNbPowderPatternComponent() == 1,
+         "Histogram background component not added");
+   Check(!bg->IsScalable(),
+         "Histogram background should use its own Scale parameter");
+   Check(bg->GetNbPar() == 1 && bg->GetPar(0L).GetName() == "Scale",
+         "Histogram background should have one Scale parameter");
+
+   const CrystVector_REAL stored = bg->GetHistogram();
+   for(long i=0;i<hist.numElements();++i)
+      CheckNearAbs(stored(i),hist(i),1e-12,
+                   "Histogram background data mismatch");
+
+   bg->GetPar("Scale").SetValue(2.5);
+   const CrystVector_REAL componentCalc = bg->GetPowderPatternCalc();
+   const CrystVector_REAL patternCalc = p.GetPowderPatternCalc();
+   for(long i=0;i<hist.numElements();++i)
+   {
+      const REAL expected=2.5*hist(i);
+      CheckNearAbs(componentCalc(i),expected,1e-12,
+                   "Histogram component scaling mismatch");
+      CheckNearAbs(patternCalc(i),expected,1e-12,
+                   "Histogram contribution to powder pattern mismatch");
+   }
+
+   hist=3;
+   bg->SetHistogram(hist);
+   const CrystVector_REAL updatedCalc = bg->GetPowderPatternCalc();
+   for(long i=0;i<hist.numElements();++i)
+      CheckNearAbs(updatedCalc(i),7.5,1e-12,
+                   "Updated histogram did not invalidate calculation");
+
+   CrystVector_REAL wrongSize(4);
+   wrongSize=1;
+   bg->SetHistogram(wrongSize);
+   bool mismatchThrown=false;
+   try
+   {
+      bg->GetPowderPatternCalc();
+   }
+   catch(const ObjCrystException&)
+   {
+      mismatchThrown=true;
+   }
+   Check(mismatchThrown,
+         "Histogram size mismatch should raise ObjCrystException");
+}
+
+void TestPowderPatternBackgroundHistXML()
+{
+   using namespace ObjCryst;
+   PowderPatternBackgroundHist source;
+   source.SetName("dense background");
+   CrystVector_REAL hist(4);
+   for(long i=0;i<hist.numElements();++i) hist(i)=0.25*(i+1);
+   source.SetHistogram(hist);
+   source.GetPar("Scale").SetValue(3.5);
+   source.GetPar("Scale").SetIsFixed(false);
+
+   std::stringstream xml;
+   source.XMLOutput(xml,0);
+   XMLCrystTag tag(xml);
+   PowderPatternBackgroundHist restored;
+   restored.XMLInput(xml,tag);
+
+   Check(restored.GetName() == source.GetName(),
+         "Histogram background XML did not restore the name");
+   Check(restored.GetNbPar() == 1,
+         "Histogram background XML did not restore the Scale parameter");
+   CheckNearAbs(restored.GetPar("Scale").GetValue(),3.5,1e-12,
+                "Histogram background XML did not restore Scale");
+   Check(!restored.GetPar("Scale").IsFixed(),
+         "Histogram background XML did not restore Scale refinement state");
+   const CrystVector_REAL restoredHist = restored.GetHistogram();
+   Check(restoredHist.numElements() == hist.numElements(),
+         "Histogram background XML restored the wrong histogram size");
+   for(long i=0;i<hist.numElements();++i)
+      CheckNearAbs(restoredHist(i),hist(i),1e-12,
+                   "Histogram background XML data mismatch");
 }
 
 void TestPowderPatternDiffraction()
@@ -360,6 +456,8 @@ int main(int argc, char* argv[])
    const std::string testName = argv[1];
 
    if(testName == "powderpattern-background") TestPowderPatternBackground();
+   else if(testName == "powderpattern-background-hist") TestPowderPatternBackgroundHist();
+   else if(testName == "powderpattern-background-hist-xml") TestPowderPatternBackgroundHistXML();
    else if(testName == "powderpattern-diffraction") TestPowderPatternDiffraction();
    else if(testName == "powderpattern-diffraction-mur") TestPowderPatternDiffractionMuRAbsorption();
    else if(testName == "powderpattern-diffraction-lebail-fhklobs") TestPowderPatternDiffractionLeBailFhklObsSq();

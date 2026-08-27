@@ -20,6 +20,7 @@ NEW FEATURES
     stopping when the absolute change in Rwp [%] falls below it; like
     `minChi2var`, it is only checked when `nbCycle` is negative, and defaults
     to -1 (disabled) to preserve existing behavior (PR #91, @clemisch)
+  * Add PowderPatternBackgroundHist as scaled dense background
 
 IMPROVEMENTS
   * Indexing (CellExplorer): lower the default minimum unit cell length from

@@ -1788,6 +1788,79 @@ void PowderPatternBackground::XMLInput(istream &is,const XMLCrystTag &tagg)
 }
 ////////////////////////////////////////////////////////////////////////
 //
+//    I/O PowderPatternBackgroundHist
+//
+////////////////////////////////////////////////////////////////////////
+void PowderPatternBackgroundHist::XMLOutput(ostream &os,int indent)const
+{
+   for(int i=0;i<indent;i++) os << "  ";
+   XMLCrystTag tag("PowderPatternBackgroundHist");
+   tag.AddAttribute("Name",this->GetName());
+   os <<tag<<endl;
+   indent++;
+
+   this->GetPar("Scale").XMLOutput(os,"Scale",indent);
+   os <<endl;
+
+   XMLCrystTag tag2("HistogramList");
+   for(int i=0;i<indent;i++) os << "  ";
+   os <<tag2<<endl;
+   for(long j=0;j<mHistogram.numElements();j++)
+   {
+      for(int i=0;i<=indent;i++) os << "  ";
+      os << mHistogram(j) <<endl;
+   }
+   tag2.SetIsEndTag(true);
+   for(int i=0;i<indent;i++) os << "  ";
+   os <<tag2<<endl;
+
+   indent--;
+   tag.SetIsEndTag(true);
+   for(int i=0;i<indent;i++) os << "  ";
+   os <<tag<<endl;
+}
+
+void PowderPatternBackgroundHist::XMLInput(istream &is,const XMLCrystTag &tagg)
+{
+   for(unsigned int i=0;i<tagg.GetNbAttribute();i++)
+      if("Name"==tagg.GetAttributeName(i)) this->SetName(tagg.GetAttributeValue(i));
+
+   while(true)
+   {
+      XMLCrystTag tag(is);
+      if(("PowderPatternBackgroundHist"==tag.GetName())&&tag.IsEndTag())
+      {
+         this->UpdateDisplay();
+         return;
+      }
+      if("HistogramList"==tag.GetName())
+      {
+         long nb=0;
+         CrystVector_REAL hist(1000);
+         do
+         {
+            is >> hist(nb);
+            nb++;
+            if(nb==hist.numElements()) hist.resizeAndPreserve(nb+1000);
+            while(0==isgraph(is.peek())) is.get();
+         }
+         while(is.peek()!='<');
+         hist.resizeAndPreserve(nb);
+         this->SetHistogram(hist);
+         XMLCrystTag junkEndTag(is);
+      }
+      if("Par"==tag.GetName())
+      {
+         for(unsigned int i=0;i<tag.GetNbAttribute();i++)
+            if("Name"==tag.GetAttributeName(i))
+               if("Scale"==tag.GetAttributeValue(i))
+                  this->GetPar("Scale").XMLInput(is,tag);
+      }
+   }
+}
+
+////////////////////////////////////////////////////////////////////////
+//
 //    I/O PowderPatternDiffraction
 //
 ////////////////////////////////////////////////////////////////////////
@@ -2349,6 +2422,13 @@ void PowderPattern::XMLInput(istream &is,const XMLCrystTag &tagg)
       if("PowderPatternBackground"==tag.GetName())
       {
          PowderPatternBackground *comp=new PowderPatternBackground;
+         comp->SetParentPowderPattern(*this);
+         comp->XMLInput(is,tag);
+         continue;
+      }
+      if("PowderPatternBackgroundHist"==tag.GetName())
+      {
+         PowderPatternBackgroundHist *comp=new PowderPatternBackgroundHist;
          comp->SetParentPowderPattern(*this);
          comp->XMLInput(is,tag);
          continue;
