@@ -581,6 +581,7 @@ void ReflectionProfilePseudoVoigtAnisotropic::SetProfilePar(const REAL fwhmCagli
    mCagliotiU=fwhmCagliotiU;
    mCagliotiV=fwhmCagliotiV;
    mCagliotiW=fwhmCagliotiW;
+   mScherrerP=fwhmGaussP;
    mLorentzX=fwhmLorentzX;
    mLorentzY=fwhmLorentzY;
    mLorentzGammaHH=fwhmLorentzGammaHH;
