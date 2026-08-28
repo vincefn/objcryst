@@ -1655,6 +1655,12 @@ void RefinableObj::AddPar(RefinablePar *newRefPar)
 
 void RefinableObj::AddPar(RefinableObj &newRefParList,const bool copyParam)
 {
+   this->AddPar(newRefParList,copyParam,true);
+}
+
+void RefinableObj::AddPar(RefinableObj &newRefParList,const bool copyParam,
+                          const bool verbose)
+{
    VFN_DEBUG_MESSAGE("RefinableObj::AddPar(RefParList&)" <<newRefParList.GetNbPar() ,2)
    RefinablePar *p;
    for(long i=0;i<newRefParList.GetNbPar();i++)
@@ -1666,9 +1672,10 @@ void RefinableObj::AddPar(RefinableObj &newRefParList,const bool copyParam)
          string name=newRefParList.GetParNameHierarchy(src,2);
          if(this->FindPar(name)!=-1)
          {
-            cerr << "WARNING: RefinableObj::AddPar(..., copyParam=false): "
-                 << "parameter name '" << name << "' is not unique, "
-                 << "appending address suffix." << endl;
+            if(verbose)
+               cerr << "WARNING: RefinableObj::AddPar(..., copyParam=false): "
+                    << "parameter name '" << name << "' is not unique, "
+                    << "appending address suffix." << endl;
             name += ":" + to_string(reinterpret_cast<size_t>(&src));
          }
          p=new RefinableParProxy(src, name);

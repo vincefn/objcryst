@@ -922,12 +922,17 @@ const std::map<pair<const RefinablePar*,const RefinablePar*>,REAL > & LSQNumObj:
 
 void LSQNumObj::PrepareRefParList(const bool copy_param)
 {
+   this->PrepareRefParList(copy_param,true);
+}
+
+void LSQNumObj::PrepareRefParList(const bool copy_param,const bool verbose)
+{
    mRefParList.ResetParList();
    for(map<RefinableObj*,unsigned int>::iterator pos=mvRefinedObjMap.begin();pos!=mvRefinedObjMap.end();++pos)
    {
       VFN_DEBUG_MESSAGE("LSQNumObj::PrepareRefParList():"<<pos->first->GetName(),4);
       //mRecursiveRefinedObjList.GetObj(i).Print();
-      mRefParList.AddPar(*(pos->first),copy_param);
+      mRefParList.AddPar(*(pos->first),copy_param,verbose);
    }
    //mRefParList.Print();
    if(copy_param) mRefParList.SetDeleteRefParInDestructor(true);

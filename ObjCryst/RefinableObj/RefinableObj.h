@@ -962,6 +962,10 @@ class RefinableObj
       * its name will be automatically appended with an ~
       */
       void AddPar(RefinableObj &newRefParList, const bool copyParam=false);
+      /// Add parameters from another object, optionally warning when hierarchy
+      /// names need an address suffix to remain unique.
+      void AddPar(RefinableObj &newRefParList, const bool copyParam,
+                  const bool verbose);
       /** Remove a refinable parameter.
       *
       * This returns an iterator to the next parameter in the vector.

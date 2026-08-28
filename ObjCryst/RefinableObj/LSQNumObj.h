@@ -197,8 +197,12 @@ class LSQNumObj
       *
       * \note This will be called automatically before starting the refinement only if
       * the parameter list is empty. Otherwise it should be called before refinement.
+      *
+      * The two-argument overload allows warnings about duplicate hierarchy
+      * names to be disabled with verbose=false.
       */
       void PrepareRefParList(const bool copy_param=false);
+      void PrepareRefParList(const bool copy_param, const bool verbose);
 
       /// Get the LSQ calc vector (using either only the top or the hierarchy of object)
       const CrystVector_REAL& GetLSQCalc() const;
