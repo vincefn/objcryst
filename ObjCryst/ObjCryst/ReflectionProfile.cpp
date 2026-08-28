@@ -570,9 +570,9 @@ CrystVector_REAL ReflectionProfilePseudoVoigtTCH::GetProfile
 {
    REAL fwhm,eta;
    this->GetProfilePar(center,fwhm,eta);
-   CrystVector_REAL profile=PowderProfileGauss(x,fwhm,center);
+   CrystVector_REAL profile=PowderProfileGauss(x,fwhm,center,(REAL)1.0);
    profile*=1-eta;
-   CrystVector_REAL lorentz=PowderProfileLorentz(x,fwhm,center);
+   CrystVector_REAL lorentz=PowderProfileLorentz(x,fwhm,center,(REAL)1.0);
    lorentz*=eta;
    profile+=lorentz;
 
