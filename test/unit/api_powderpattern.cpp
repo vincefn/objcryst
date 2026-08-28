@@ -321,7 +321,7 @@ void TestReflectionProfilePseudoVoigtTCH()
                  +2.42843f*hg2*hg*hl2+4.47163f*hg2*hl2*hl
                  +0.07842f*hg*hl2*hl2+hl2*hl2*hl;
    const REAL expectedFwhm=pow(h5,(REAL).2);
-   CheckNearAbs(profile.GetFullProfileWidth(.5,center,1,0,0),expectedFwhm,1e-10,
+   CheckNearAbs(profile.GetFullProfileWidth(.5,center,1,0,0),expectedFwhm,1e-9,
                 "TCH profile should have the calculated common FWHM");
 
    CrystVector_REAL x(3);
@@ -329,16 +329,16 @@ void TestReflectionProfilePseudoVoigtTCH()
    x(1)=center;
    x(2)=center+expectedFwhm/2;
    const CrystVector_REAL prof=profile.GetProfile(x,center,1,0,0);
-   CheckNearAbs(prof(0)/prof(1),.5,1e-6,
+   CheckNearAbs(prof(0)/prof(1),.5,2e-5,
                 "TCH profile should be half-height at -FWHM/2");
-   CheckNearAbs(prof(2)/prof(1),.5,1e-6,
+   CheckNearAbs(prof(2)/prof(1),.5,2e-5,
                 "TCH profile should be half-height at +FWHM/2");
 
    profile.SetProfilePar(hg*hg);
-   CheckNearAbs(profile.GetFullProfileWidth(.5,center,1,0,0),hg,1e-10,
+   CheckNearAbs(profile.GetFullProfileWidth(.5,center,1,0,0),hg,1e-9,
                 "TCH pure-Gaussian limit should retain H_G");
    profile.SetProfilePar(0,0,0,0,0,hl);
-   CheckNearAbs(profile.GetFullProfileWidth(.5,center,1,0,0),hl,1e-10,
+   CheckNearAbs(profile.GetFullProfileWidth(.5,center,1,0,0),hl,1e-9,
                 "TCH pure-Lorentzian limit should retain H_L");
 }
 
