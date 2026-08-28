@@ -21,6 +21,8 @@ NEW FEATURES
     `minChi2var`, it is only checked when `nbCycle` is negative, and defaults
     to -1 (disabled) to preserve existing behavior (PR #91, @clemisch)
   * Add PowderPatternBackgroundHist as scaled dense background
+  * Add profile ReflectionProfilePseudoVoigtTCH for full Pseudo-Voigt parameterization
+    with X,Y,Z,U,V,W and implicit Eta mixing
 
 IMPROVEMENTS
   * Indexing (CellExplorer): lower the default minimum unit cell length from
