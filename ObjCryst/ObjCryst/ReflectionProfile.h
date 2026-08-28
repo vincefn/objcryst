@@ -160,12 +160,15 @@ class ReflectionProfilePseudoVoigt:public ReflectionProfile
 /** Symmetric Thompson-Cox-Hastings pseudo-Voigt reflection profile.
  *
  * The Gaussian and Lorentzian component widths are described by
- * \f[H_G^2=U\tan^2\theta+V\tan\theta+W\f]
+ * \f[H_G^2=U\tan^2\theta+V\tan\theta+W+
+ * ((1-LGmix)P/\cos\theta)^2\f]
  * and
- * \f[H_L=X/\cos\theta+Y\tan\theta+Z\f].
+ * \f[H_L=X/\cos\theta+Y\tan\theta+Z+LGmix P/\cos\theta\f].
  * The common pseudo-Voigt FWHM and mixing fraction are calculated using the
  * Thompson-Cox-Hastings approximation; the mixing fraction is not an
- * independent refinable parameter.
+ * independent refinable parameter. P is the Scherrer width coefficient
+ * K lambda/L in radians, and LGmix distributes that size broadening between
+ * the Gaussian and Lorentzian component widths.
  */
 class ReflectionProfilePseudoVoigtTCH:public ReflectionProfile
 {
@@ -186,6 +189,17 @@ class ReflectionProfilePseudoVoigtTCH:public ReflectionProfile
                          const REAL fwhmLorentzX=0,
                          const REAL fwhmLorentzY=0,
                          const REAL fwhmLorentzZ=0);
+      /** Set all profile parameters, including the Scherrer coefficient P
+       * and its Lorentzian fraction LGmix.
+       */
+      void SetProfilePar(const REAL fwhmCagliotiW,
+                         const REAL fwhmCagliotiU,
+                         const REAL fwhmCagliotiV,
+                         const REAL fwhmLorentzX,
+                         const REAL fwhmLorentzY,
+                         const REAL fwhmLorentzZ,
+                         const REAL fwhmScherrerP,
+                         const REAL scherrerLGmix);
       virtual REAL GetFullProfileWidth(const REAL relativeIntensity, const REAL xcenter,
                                        const REAL h, const REAL k, const REAL l);
       bool IsAnisotropic()const;
@@ -197,6 +211,7 @@ class ReflectionProfilePseudoVoigtTCH:public ReflectionProfile
       void InitParameters();
       REAL mCagliotiU,mCagliotiV,mCagliotiW;
       REAL mLorentzX,mLorentzY,mLorentzZ;
+      REAL mScherrerP,mScherrerLGmix;
 #ifdef __WX__CRYST__
    public:
       virtual WXCrystObjBasic* WXCreate(wxWindow* parent);

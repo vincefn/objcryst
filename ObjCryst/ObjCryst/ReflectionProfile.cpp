@@ -487,7 +487,7 @@ WXCrystObjBasic* ReflectionProfilePseudoVoigt::WXCreate(wxWindow* parent)
 
 ReflectionProfilePseudoVoigtTCH::ReflectionProfilePseudoVoigtTCH():
 mCagliotiU(0),mCagliotiV(0),mCagliotiW(.01*DEG2RAD*DEG2RAD),
-mLorentzX(0),mLorentzY(0),mLorentzZ(0)
+mLorentzX(0),mLorentzY(0),mLorentzZ(0),mScherrerP(0),mScherrerLGmix(1)
 {
    this->InitParameters();
 }
@@ -495,7 +495,8 @@ mLorentzX(0),mLorentzY(0),mLorentzZ(0)
 ReflectionProfilePseudoVoigtTCH::ReflectionProfilePseudoVoigtTCH
    (const ReflectionProfilePseudoVoigtTCH &old):
 mCagliotiU(old.mCagliotiU),mCagliotiV(old.mCagliotiV),mCagliotiW(old.mCagliotiW),
-mLorentzX(old.mLorentzX),mLorentzY(old.mLorentzY),mLorentzZ(old.mLorentzZ)
+mLorentzX(old.mLorentzX),mLorentzY(old.mLorentzY),mLorentzZ(old.mLorentzZ),
+mScherrerP(old.mScherrerP),mScherrerLGmix(old.mScherrerLGmix)
 {
    this->InitParameters();
 }
@@ -528,9 +529,17 @@ void ReflectionProfilePseudoVoigtTCH::GetProfilePar(const REAL center,
    const REAL tantheta=tan(center/2.0);
    const REAL costheta=cos(center/2.0);
    REAL fwhmG2=mCagliotiW+mCagliotiV*tantheta+mCagliotiU*tantheta*tantheta;
+   REAL lgmix=mScherrerLGmix;
+   if(lgmix<0) lgmix=0;
+   if(lgmix>1) lgmix=1;
+   REAL fwhmSize=mScherrerP/costheta;
+   if(fwhmSize<0) fwhmSize=0;
+   const REAL fwhmSizeG=(1-lgmix)*fwhmSize;
+   fwhmG2+=fwhmSizeG*fwhmSizeG;
    if(fwhmG2<0) fwhmG2=0;
    const REAL fwhmG=sqrt(fwhmG2);
-   REAL fwhmL=mLorentzZ+mLorentzX/costheta+mLorentzY*tantheta;
+   REAL fwhmL=mLorentzZ+mLorentzX/costheta+mLorentzY*tantheta
+              +lgmix*fwhmSize;
    if(fwhmL<0) fwhmL=0;
 
    const REAL fwhmG2p=fwhmG*fwhmG;
@@ -575,12 +584,24 @@ void ReflectionProfilePseudoVoigtTCH::SetProfilePar
     const REAL fwhmCagliotiV, const REAL fwhmLorentzX,
     const REAL fwhmLorentzY, const REAL fwhmLorentzZ)
 {
+   this->SetProfilePar(fwhmCagliotiW,fwhmCagliotiU,fwhmCagliotiV,
+                       fwhmLorentzX,fwhmLorentzY,fwhmLorentzZ,0,1);
+}
+
+void ReflectionProfilePseudoVoigtTCH::SetProfilePar
+   (const REAL fwhmCagliotiW, const REAL fwhmCagliotiU,
+    const REAL fwhmCagliotiV, const REAL fwhmLorentzX,
+    const REAL fwhmLorentzY, const REAL fwhmLorentzZ,
+    const REAL fwhmScherrerP, const REAL scherrerLGmix)
+{
    mCagliotiW=fwhmCagliotiW;
    mCagliotiU=fwhmCagliotiU;
    mCagliotiV=fwhmCagliotiV;
    mLorentzX=fwhmLorentzX;
    mLorentzY=fwhmLorentzY;
    mLorentzZ=fwhmLorentzZ;
+   mScherrerP=fwhmScherrerP;
+   mScherrerLGmix=scherrerLGmix;
    mClockMaster.Click();
 }
 
@@ -637,6 +658,8 @@ void ReflectionProfilePseudoVoigtTCH::XMLOutput(ostream &os,int indent)const
    this->GetPar(&mLorentzX).XMLOutput(os,"X",indent); os <<endl;
    this->GetPar(&mLorentzY).XMLOutput(os,"Y",indent); os <<endl;
    this->GetPar(&mLorentzZ).XMLOutput(os,"Z",indent); os <<endl;
+   this->GetPar(&mScherrerP).XMLOutput(os,"P",indent); os <<endl;
+   this->GetPar(&mScherrerLGmix).XMLOutput(os,"LGmix",indent); os <<endl;
    indent--;
    tag.SetIsEndTag(true);
    for(int i=0;i<indent;i++) os << "  ";
@@ -667,6 +690,8 @@ void ReflectionProfilePseudoVoigtTCH::XMLInput(istream &is,const XMLCrystTag &ta
             else if("X"==name) this->GetPar(&mLorentzX).XMLInput(is,tag);
             else if("Y"==name) this->GetPar(&mLorentzY).XMLInput(is,tag);
             else if("Z"==name) this->GetPar(&mLorentzZ).XMLInput(is,tag);
+            else if("P"==name) this->GetPar(&mScherrerP).XMLInput(is,tag);
+            else if("LGmix"==name) this->GetPar(&mScherrerLGmix).XMLInput(is,tag);
             break;
          }
          continue;
@@ -717,6 +742,18 @@ void ReflectionProfilePseudoVoigtTCH::InitParameters()
                        gpRefParTypeScattDataProfileWidth,
                        REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,RAD2DEG);
       tmp.AssignClock(mClockMaster); tmp.SetDerivStep(1e-9); this->AddPar(tmp);
+   }
+   {
+      RefinablePar tmp("P",&mScherrerP,0,1./RAD2DEG,
+                       gpRefParTypeScattDataProfileWidth,
+                       REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,RAD2DEG);
+      tmp.AssignClock(mClockMaster); tmp.SetDerivStep(1e-9); this->AddPar(tmp);
+   }
+   {
+      RefinablePar tmp("LGmix",&mScherrerLGmix,0,1,
+                       gpRefParTypeScattDataProfileType,
+                       REFPAR_DERIV_STEP_ABSOLUTE,true,true,true,false,1);
+      tmp.AssignClock(mClockMaster); tmp.SetDerivStep(1e-4); this->AddPar(tmp);
    }
 }
 
