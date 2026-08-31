@@ -305,6 +305,43 @@ void TestReflectionProfilePseudoVoigt()
       Check(std::isfinite(prof(i)), "PseudoVoigt profile should be finite everywhere");
 }
 
+void TestReflectionProfilePseudoVoigtTCH()
+{
+   using namespace ObjCryst;
+   ReflectionProfilePseudoVoigtTCH profile;
+   Check(!profile.IsAnisotropic(), "TCH pseudo-Voigt should be isotropic");
+
+   const REAL center=30*DEG2RAD;
+   const REAL hg=.08f*DEG2RAD;
+   const REAL hl=.04f*DEG2RAD;
+   profile.SetProfilePar(hg*hg,0,0,0,0,hl);
+   const REAL hg2=hg*hg;
+   const REAL hl2=hl*hl;
+   const REAL h5=hg2*hg2*hg+2.69269f*hg2*hg2*hl
+                 +2.42843f*hg2*hg*hl2+4.47163f*hg2*hl2*hl
+                 +0.07842f*hg*hl2*hl2+hl2*hl2*hl;
+   const REAL expectedFwhm=pow(h5,(REAL).2);
+   CheckNearAbs(profile.GetFullProfileWidth(.5,center,1,0,0),expectedFwhm,1e-9,
+                "TCH profile should have the calculated common FWHM");
+
+   CrystVector_REAL x(3);
+   x(0)=center-expectedFwhm/2;
+   x(1)=center;
+   x(2)=center+expectedFwhm/2;
+   const CrystVector_REAL prof=profile.GetProfile(x,center,1,0,0);
+   CheckNearAbs(prof(0)/prof(1),.5,2e-5,
+                "TCH profile should be half-height at -FWHM/2");
+   CheckNearAbs(prof(2)/prof(1),.5,2e-5,
+                "TCH profile should be half-height at +FWHM/2");
+
+   profile.SetProfilePar(hg*hg);
+   CheckNearAbs(profile.GetFullProfileWidth(.5,center,1,0,0),hg,1e-9,
+                "TCH pure-Gaussian limit should retain H_G");
+   profile.SetProfilePar(0,0,0,0,0,hl);
+   CheckNearAbs(profile.GetFullProfileWidth(.5,center,1,0,0),hl,1e-9,
+                "TCH pure-Lorentzian limit should retain H_L");
+}
+
 void TestReflectionProfileDoubleExponentialPseudoVoigt()
 {
    using namespace ObjCryst;
@@ -464,6 +501,7 @@ int main(int argc, char* argv[])
    else if(testName == "powderpattern-import") TestPowderPatternImport();
    else if(testName == "scatteringcorr-subclasses") TestScatteringCorrSubclasses();
    else if(testName == "reflectionprofile-pseudo-voigt") TestReflectionProfilePseudoVoigt();
+   else if(testName == "reflectionprofile-pseudo-voigt-tch") TestReflectionProfilePseudoVoigtTCH();
    else if(testName == "reflectionprofile-double-exponential-pv") TestReflectionProfileDoubleExponentialPseudoVoigt();
    else if(testName == "reflectionprofile-pv-anisotropic-direct") TestReflectionProfilePseudoVoigtAnisotropicDirect();
    else if(testName == "powder-groundtruth-xray-pv-gaussian") TestPowderGroundTruthXrayPseudoVoigtGaussian();

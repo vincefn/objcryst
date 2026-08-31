@@ -81,6 +81,7 @@ run_test "unit::powderpattern-diffraction-lebail-fhklobs" "$SCRIPT_DIR/api_powde
 run_test "unit::powderpattern-import" "$SCRIPT_DIR/api_powderpattern" "powderpattern-import"
 run_test "unit::scatteringcorr-subclasses" "$SCRIPT_DIR/api_powderpattern" "scatteringcorr-subclasses"
 run_test "unit::reflectionprofile-pseudo-voigt" "$SCRIPT_DIR/api_powderpattern" "reflectionprofile-pseudo-voigt"
+run_test "unit::reflectionprofile-pseudo-voigt-tch" "$SCRIPT_DIR/api_powderpattern" "reflectionprofile-pseudo-voigt-tch"
 run_test "unit::reflectionprofile-double-exponential-pv" "$SCRIPT_DIR/api_powderpattern" "reflectionprofile-double-exponential-pv"
 run_test "unit::powder-groundtruth-xray-pv-gaussian" "$SCRIPT_DIR/api_powderpattern" "powder-groundtruth-xray-pv-gaussian"
 run_test "unit::powder-groundtruth-xray-pv-lorentzian" "$SCRIPT_DIR/api_powderpattern" "powder-groundtruth-xray-pv-lorentzian"

@@ -2091,6 +2091,20 @@ void PowderPatternDiffraction::XMLInput(istream &is,const XMLCrystTag &tagg)
          mpReflectionProfile->XMLInput(is,tag);
          continue;
       }
+      if("ReflectionProfilePseudoVoigtTCH"==tag.GetName())
+      {
+         if(mpReflectionProfile==0)
+         {
+            mpReflectionProfile=new ReflectionProfilePseudoVoigtTCH;
+         }
+         else
+            if(mpReflectionProfile->GetClassName()!="ReflectionProfilePseudoVoigtTCH")
+            {
+               this->SetProfile(new ReflectionProfilePseudoVoigtTCH);
+            }
+         mpReflectionProfile->XMLInput(is,tag);
+         continue;
+      }
       if("ReflectionProfilePseudoVoigtAnisotropic"==tag.GetName())
       {
          if(mpReflectionProfile==0)

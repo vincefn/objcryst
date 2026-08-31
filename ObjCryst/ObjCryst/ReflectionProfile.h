@@ -157,6 +157,67 @@ class ReflectionProfilePseudoVoigt:public ReflectionProfile
 #endif
 };
 
+/** Symmetric Thompson-Cox-Hastings pseudo-Voigt reflection profile.
+ *
+ * The Gaussian and Lorentzian component widths are described by
+ * \f[H_G^2=U\tan^2\theta+V\tan\theta+W+
+ * ((1-LGmix)P/\cos\theta)^2\f]
+ * and
+ * \f[H_L=X/\cos\theta+Y\tan\theta+Z+LGmix P/\cos\theta\f].
+ * The common pseudo-Voigt FWHM and mixing fraction are calculated using the
+ * Thompson-Cox-Hastings approximation; the mixing fraction is not an
+ * independent refinable parameter. P is the Scherrer width coefficient
+ * K lambda/L in radians, and LGmix distributes that size broadening between
+ * the Gaussian and Lorentzian component widths.
+ */
+class ReflectionProfilePseudoVoigtTCH:public ReflectionProfile
+{
+   public:
+      ReflectionProfilePseudoVoigtTCH();
+      ReflectionProfilePseudoVoigtTCH(const ReflectionProfilePseudoVoigtTCH &old);
+      virtual ~ReflectionProfilePseudoVoigtTCH();
+      virtual ReflectionProfilePseudoVoigtTCH* CreateCopy()const;
+      virtual const string& GetClassName()const;
+      CrystVector_REAL GetProfile(const CrystVector_REAL &x, const REAL xcenter,
+                                  const REAL h, const REAL k, const REAL l)const;
+      /** Set the Gaussian Caglioti parameters W, U, V and Lorentzian
+       * parameters X, Y, Z.
+       */
+      void SetProfilePar(const REAL fwhmCagliotiW,
+                         const REAL fwhmCagliotiU=0,
+                         const REAL fwhmCagliotiV=0,
+                         const REAL fwhmLorentzX=0,
+                         const REAL fwhmLorentzY=0,
+                         const REAL fwhmLorentzZ=0);
+      /** Set all profile parameters, including the Scherrer coefficient P
+       * and its Lorentzian fraction LGmix.
+       */
+      void SetProfilePar(const REAL fwhmCagliotiW,
+                         const REAL fwhmCagliotiU,
+                         const REAL fwhmCagliotiV,
+                         const REAL fwhmLorentzX,
+                         const REAL fwhmLorentzY,
+                         const REAL fwhmLorentzZ,
+                         const REAL fwhmScherrerP,
+                         const REAL scherrerLGmix);
+      virtual REAL GetFullProfileWidth(const REAL relativeIntensity, const REAL xcenter,
+                                       const REAL h, const REAL k, const REAL l);
+      bool IsAnisotropic()const;
+      virtual void XMLOutput(ostream &os,int indent=0)const;
+      virtual void XMLInput(istream &is,const XMLCrystTag &tag);
+   private:
+      /// Calculate the common TCH FWHM and derived Lorentzian fraction.
+      void GetProfilePar(const REAL xcenter, REAL &fwhm, REAL &eta)const;
+      void InitParameters();
+      REAL mCagliotiU,mCagliotiV,mCagliotiW;
+      REAL mLorentzX,mLorentzY,mLorentzZ;
+      REAL mScherrerP,mScherrerLGmix;
+#ifdef __WX__CRYST__
+   public:
+      virtual WXCrystObjBasic* WXCreate(wxWindow* parent);
+#endif
+};
+
 /** Pseudo-Voigt reflection profile, with 6-parameters anisotropic Lorentzian broadening and Toraya asymmetric modelling.
  *
  */
