@@ -1388,7 +1388,7 @@ void PowderPatternDiffraction::ExtractLeBail(unsigned int nbcycle)
    obs=mpParentPowderPattern->GetPowderPatternObs();
    obs-=mpParentPowderPattern->GetPowderPatternCalc();
 
-   // Update iextract if number of reflections changed, and set intensities of 
+   // Update iextract if number of reflections changed, and set intensities of
    // new reflections to 100
    const long nbReflSaved=iextract.numElements();
    if(nbReflSaved!=this->GetNbRefl())
