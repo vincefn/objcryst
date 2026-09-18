@@ -1387,6 +1387,18 @@ void PowderPatternDiffraction::ExtractLeBail(unsigned int nbcycle)
    // Get the observed and calculated powder pattern (excluding this diffraction phase)
    obs=mpParentPowderPattern->GetPowderPatternObs();
    obs-=mpParentPowderPattern->GetPowderPatternCalc();
+
+   // Update iextract if number of reflections changed, and set intensities of 
+   // new reflections to 100
+   const long nbReflSaved=iextract.numElements();
+   if(nbReflSaved!=this->GetNbRefl())
+   {
+      VFN_DEBUG_MESSAGE("PowderPatternDiffraction::ExtractLeBail(): reflections changed ("\
+                        <<nbReflSaved<<"->"<<this->GetNbRefl()<<"), resizing extracted intensities",7)
+      iextract.resizeAndPreserve(this->GetNbRefl());
+      for(long i=nbReflSaved;i<this->GetNbRefl();i++) iextract(i)=100;
+   }
+
    mFhklObsSq=iextract;
    mClockFhklObsSq.Click();
    // We take here the reflections which are centered below the max(sin(theta)/lambda)
