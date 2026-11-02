@@ -285,6 +285,29 @@ void TestScatteringCorrSubclasses()
    PowderSlitApertureCorr slit(sc);
    Check(slit.GetCorr().numElements() == sc.GetNbRefl(), "PowderSlitApertureCorr size mismatch");
    Check(slit.GetCorr().min() > 0, "PowderSlitApertureCorr values should be positive");
+
+   TextureEllipsoid ellipsoid(sc, 1, 2, 3, 0.1, 0.2, 0.3);
+   const CrystVector_REAL& ellipsoidCorr = ellipsoid.GetCorr();
+   const long nbReflUsed = sc.GetNbReflBelowMaxSinThetaOvLambda();
+   CrystVector_REAL expectedCorr(nbReflUsed);
+   REAL correctionSum = 0;
+   for(long i = 0; i < nbReflUsed; ++i)
+   {
+      const REAL h = sc.GetH()(i);
+      const REAL k = sc.GetK()(i);
+      const REAL l = sc.GetL()(i);
+      const REAL d = 1.0 / (2 * sc.GetSinThetaOverLambda()(i));
+      REAL argument = (h * h + 2 * k * k + 3 * l * l +
+                       0.2 * h * k + 0.4 * h * l + 0.6 * k * l) *
+                      (0.001 * d * d);
+      if(argument < 0) argument = 0;
+      expectedCorr(i) = std::pow(static_cast<float>(1 + argument), -1.5f);
+      correctionSum += expectedCorr(i);
+   }
+   const REAL normalization = nbReflUsed / correctionSum;
+   for(long i = 0; i < nbReflUsed; ++i)
+      CheckNearAbs(ellipsoidCorr(i), expectedCorr(i) * normalization, 1e-6,
+                   "TextureEllipsoid should use each reflection's H, K, and L indices");
 }
 
 void TestReflectionProfilePseudoVoigt()
