@@ -35,6 +35,7 @@ IMPROVEMENTS
     from the latest refinement cycle (#96, fixes #95)
 
 BUG FIXES
+  * Fix TextureEllipsoid implementation
   * Fix single-crystal simulation crashing when showing simulated data or when
     grouped reflection modes are enabled, and add regression tests for the
     ungrouped and grouped simulate workflows

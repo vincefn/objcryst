@@ -934,8 +934,8 @@ void TextureEllipsoid::CalcCorr() const
    REAL sum=0;
    REAL *pCorr=mCorr.data();
    const REAL *pH=mpData->GetH().data();
-   const REAL *pK=mpData->GetH().data();
-   const REAL *pL=mpData->GetH().data();
+   const REAL *pK=mpData->GetK().data();
+   const REAL *pL=mpData->GetL().data();
    const REAL *pstol=mpData->GetSinThetaOverLambda().data();
    for(long i=0;i<nbReflUsed;i++)
    {
