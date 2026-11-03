@@ -243,6 +243,149 @@ void TestPowderPatternLinearPolarRateRecalc()
    delete p;
 }
 
+ObjCryst::TextureMarchDollase& GetMarchDollase(ObjCryst::PowderPatternDiffraction& diff)
+{
+   using namespace ObjCryst;
+   for(long i = 0; i < diff.GetSubObjRegistry().GetNb(); ++i)
+      if(auto* t = dynamic_cast<TextureMarchDollase*>(&diff.GetSubObjRegistry().GetObj(i)))
+         return *t;
+   throw ObjCrystException("TextureMarchDollase not found");
+}
+
+// Returns a calculated pattern, with nbPhase March-Dollase phases added
+// before the first calculation.
+ObjCryst::PowderPattern* MakeTexturePattern(ObjCryst::Crystal& c, ObjCryst::PowderPatternDiffraction*& diff,
+                                            const int nbPhase)
+{
+   using namespace ObjCryst;
+   auto* p = new PowderPattern;
+   p->SetRadiationType(RAD_XRAY);
+   p->SetWavelength(1.54);
+   p->SetPowderPatternPar(10 * DEG2RAD, 0.05 * DEG2RAD, 2000);
+   CrystVector_REAL obs(2000);
+   obs = 1;
+   p->SetPowderPatternObs(obs);
+   diff = new PowderPatternDiffraction;
+   diff->SetCrystal(c);
+   diff->SetReflectionProfilePar(PROFILE_PSEUDO_VOIGT, .03 * DEG2RAD * DEG2RAD, 0, 0, 0.3, 0);
+   if(nbPhase > 0) GetMarchDollase(*diff).AddPhase(1, 0.6, 0, 0, 1);
+   if(nbPhase > 1) GetMarchDollase(*diff).AddPhase(1, 1.5, 1, 0, 0);
+   p->AddPowderPatternComponent(*diff);
+   p->Prepare();
+   p->GetPowderPatternCalc();
+   return p;
+}
+
+void CheckPatternRecalculated(const CrystVector_REAL& before, const CrystVector_REAL& after,
+                              const CrystVector_REAL& expected, const std::string& what)
+{
+   Check(after.numElements() == expected.numElements(), (what + ": pattern size mismatch").c_str());
+   REAL maxChange = 0, maxDiff = 0;
+   for(long i = 0; i < after.numElements(); ++i)
+   {
+      maxChange = std::max(maxChange, (REAL)std::fabs(after(i) - before(i)));
+      maxDiff = std::max(maxDiff, (REAL)std::fabs(after(i) - expected(i)));
+   }
+   Check(maxChange > 1e-3 * expected.max(), (what + " did not trigger a powder pattern recalculation").c_str());
+   Check(maxDiff <= 1e-5 * expected.max(), (what + ": pattern differs from a freshly built pattern").c_str());
+}
+
+// Regression test for issue #100: changing March-Dollase texture phases after
+// the pattern has been computed must invalidate the cached calculation.
+void TestPowderPatternTextureMarchDollaseRecalc()
+{
+   using namespace ObjCryst;
+   Crystal c = MakePbso4Crystal();
+   PowderPatternDiffraction *diff, *diffFresh;
+
+   PowderPattern* fresh1 = MakeTexturePattern(c, diffFresh, 1);
+   PowderPattern* fresh2 = MakeTexturePattern(c, diffFresh, 2);
+
+   PowderPattern* p = MakeTexturePattern(c, diff, 1);
+   TextureMarchDollase& texture = GetMarchDollase(*diff);
+
+   // SetPhasePar after the first calculation
+   texture.SetPhasePar(0, 1, 1.5, 1, 0, 0);
+   CrystVector_REAL before = p->GetPowderPatternCalc();
+   texture.SetPhasePar(0, 1, 0.6, 0, 0, 1);
+   CheckPatternRecalculated(before, p->GetPowderPatternCalc(), fresh1->GetPowderPatternCalc(),
+                            "TextureMarchDollase::SetPhasePar");
+
+   // AddPhase after the texture correction has been calculated
+   before = p->GetPowderPatternCalc();
+   texture.AddPhase(1, 1.5, 1, 0, 0);
+   CheckPatternRecalculated(before, p->GetPowderPatternCalc(), fresh2->GetPowderPatternCalc(),
+                            "TextureMarchDollase::AddPhase");
+
+   delete p;
+   delete fresh2;
+   delete fresh1;
+}
+
+bool HasPar(const ObjCryst::RefinableObj& obj, const std::string& name)
+{
+   for(long i = 0; i < obj.GetNbPar(); ++i)
+      if(obj.GetPar(i).GetName() == name) return true;
+   return false;
+}
+
+void TestTextureMarchDollaseDeletePhase()
+{
+   using namespace ObjCryst;
+   Crystal c = MakePbso4Crystal();
+   PowderPatternDiffraction *diff, *diffFresh;
+
+   PowderPattern* fresh0 = MakeTexturePattern(c, diffFresh, 0);
+   PowderPattern* fresh1 = MakeTexturePattern(c, diffFresh, 1);
+
+   PowderPattern* p = MakeTexturePattern(c, diff, 2);
+   TextureMarchDollase& texture = GetMarchDollase(*diff);
+   texture.AddPhase(0.5, 0.8, 1, 1, 0);
+   const long nbPar = texture.GetNbPar();
+
+   // Delete the middle phase: the last one must be renamed to index 1
+   CrystVector_REAL before = p->GetPowderPatternCalc();
+   texture.DeletePhase(1);
+   Check(texture.GetNbPhase() == 2, "DeletePhase did not remove the phase");
+   Check(texture.GetNbPar() == nbPar - 5, "DeletePhase did not remove the 5 phase parameters");
+   CheckNearAbs(texture.GetMarchCoeff(1), 0.8, 1e-6, "DeletePhase removed the wrong phase");
+   for(const char* name : {"Fraction_1", "MarchCoeff_1", "H_1", "K_1", "L_1"})
+      Check(HasPar(texture, name), "DeletePhase did not rename the following phase parameters");
+   Check(!HasPar(texture, "Fraction_2"), "DeletePhase left a stale parameter name");
+   CheckNearAbs(texture.GetPar("MarchCoeff_1").GetValue(), 0.8, 1e-6,
+                "Renamed parameter does not point to the right phase");
+   const CrystVector_REAL after = p->GetPowderPatternCalc();
+   REAL maxChange = 0;
+   for(long i = 0; i < after.numElements(); ++i)
+      maxChange = std::max(maxChange, (REAL)std::fabs(after(i) - before(i)));
+   Check(maxChange > 1e-3 * after.max(), "DeletePhase did not trigger a powder pattern recalculation");
+
+   // Adding a phase again must not create '~'-suffixed names
+   texture.AddPhase(0.5, 0.8, 1, 1, 0);
+   Check(HasPar(texture, "Fraction_2"), "AddPhase after DeletePhase used an unexpected name");
+   texture.DeletePhase(2);
+
+   // Delete back down to a single phase, then to no texture at all
+   texture.DeletePhase(1);
+   CheckPatternRecalculated(before, p->GetPowderPatternCalc(), fresh1->GetPowderPatternCalc(),
+                            "TextureMarchDollase::DeletePhase");
+   before = p->GetPowderPatternCalc();
+   texture.DeletePhase(0);
+   Check(texture.GetNbPhase() == 0 && texture.GetNbPar() == 0,
+         "DeletePhase did not remove the last phase");
+   CheckPatternRecalculated(before, p->GetPowderPatternCalc(), fresh0->GetPowderPatternCalc(),
+                            "TextureMarchDollase::DeletePhase (last phase)");
+
+   bool thrown = false;
+   try { texture.DeletePhase(0); }
+   catch(const ObjCrystException&) { thrown = true; }
+   Check(thrown, "DeletePhase with an invalid index should throw");
+
+   delete p;
+   delete fresh1;
+   delete fresh0;
+}
+
 void TestPowderPatternDiffractionLeBailFhklObsSq()
 {
    using namespace ObjCryst;
@@ -571,6 +714,8 @@ int main(int argc, char* argv[])
    else if(testName == "powderpattern-diffraction") TestPowderPatternDiffraction();
    else if(testName == "powderpattern-diffraction-mur") TestPowderPatternDiffractionMuRAbsorption();
    else if(testName == "powderpattern-linear-polar-rate") TestPowderPatternLinearPolarRateRecalc();
+   else if(testName == "powderpattern-texture-march-dollase") TestPowderPatternTextureMarchDollaseRecalc();
+   else if(testName == "texture-march-dollase-delete-phase") TestTextureMarchDollaseDeletePhase();
    else if(testName == "powderpattern-diffraction-lebail-fhklobs") TestPowderPatternDiffractionLeBailFhklObsSq();
    else if(testName == "powderpattern-import") TestPowderPatternImport();
    else if(testName == "scatteringcorr-subclasses") TestScatteringCorrSubclasses();

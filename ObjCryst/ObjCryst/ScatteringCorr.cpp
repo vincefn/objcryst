@@ -400,9 +400,42 @@ void TextureMarchDollase::SetPhasePar(const unsigned int i, const REAL f, const 
                  const REAL h,const REAL k, const REAL l)
 {
    mPhaseRegistry.GetObj(i).SetPar(f,c,h,k,l);
+   mClockTexturePar.Click();
 }
 
-//void DeletePhase(const unsigned int i);
+void TextureMarchDollase::DeletePhase(const unsigned int i)
+{
+   VFN_DEBUG_ENTRY("TextureMarchDollase::DeletePhase()",5)
+   if(i>=this->GetNbPhase())
+      throw ObjCrystException("TextureMarchDollase::DeletePhase(): invalid phase index");
+   TexturePhaseMarchDollase *phase=&(mPhaseRegistry.GetObj(i));
+   RefinablePar *pars[5]={&(this->GetPar(&(phase->mFraction))),
+                          &(this->GetPar(&(phase->mMarchCoeff))),
+                          &(this->GetPar(&(phase->mH))),
+                          &(this->GetPar(&(phase->mK))),
+                          &(this->GetPar(&(phase->mL)))};
+   for(unsigned int j=0;j<5;j++) this->RemovePar(pars[j]);
+   // Delete the phase (and its widgets) before its parameters
+   mPhaseRegistry.DeRegister(*phase);
+   delete phase;
+   for(unsigned int j=0;j<5;j++) delete pars[j];
+   // Rename the parameters of the following phases so that their
+   // suffix keeps matching their index
+   for(unsigned int k=i;k<this->GetNbPhase();k++)
+   {
+      TexturePhaseMarchDollase *p=&(mPhaseRegistry.GetObj(k));
+      char buf [12];
+      snprintf(buf,sizeof(buf),"_%u",k);
+      this->GetPar(&(p->mFraction)).SetName("Fraction"+(string)buf);
+      this->GetPar(&(p->mMarchCoeff)).SetName("MarchCoeff"+(string)buf);
+      this->GetPar(&(p->mH)).SetName("H"+(string)buf);
+      this->GetPar(&(p->mK)).SetName("K"+(string)buf);
+      this->GetPar(&(p->mL)).SetName("L"+(string)buf);
+   }
+   mRefParListClock.Click();
+   mClockTexturePar.Click();
+   VFN_DEBUG_EXIT("TextureMarchDollase::DeletePhase()",5)
+}
 
 unsigned int TextureMarchDollase::GetNbPhase() const {return mPhaseRegistry.GetNb();}
 
@@ -631,7 +664,11 @@ void TextureMarchDollase::CalcCorr() const
 {
    if(this->GetNbPhase()==0)
    {
-      mCorr.resize(0);
+      if(mCorr.numElements()>0)
+      {// Last phase was deleted
+         mCorr.resize(0);
+         mClockCorrCalc.Click();
+      }
       return;
    }
    const long nbReflUsed=mpData->GetNbReflBelowMaxSinThetaOvLambda();

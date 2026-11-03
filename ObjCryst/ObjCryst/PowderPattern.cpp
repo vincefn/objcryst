@@ -2426,11 +2426,8 @@ void PowderPatternDiffraction::CalcIntensityCorr()const
       }
    }
 
-   if(mCorrTextureMarchDollase.GetNbPhase()>0)
-   {
-      mpCorr[3]=&(mCorrTextureMarchDollase.GetCorr());
-      if(mClockIntensityCorr<mCorrTextureMarchDollase.GetClockCorr()) needRecalc=true;
-   }
+   mpCorr[3]=&(mCorrTextureMarchDollase.GetCorr());
+   if(mClockIntensityCorr<mCorrTextureMarchDollase.GetClockCorr()) needRecalc=true;
    mpCorr[4]=&(mCorrTextureEllipsoid.GetCorr());
    if(mClockIntensityCorr<mCorrTextureEllipsoid.GetClockCorr()) needRecalc=true;
 
@@ -2458,7 +2455,7 @@ void PowderPatternDiffraction::CalcIntensityCorr()const
          for(long i=mNbReflUsed;i>0;i--) *pCorr++ *= *p++;
       }
    }
-   if(mCorrTextureMarchDollase.GetNbPhase()>0)
+   if(mpCorr[3]->numElements()>0)
    {
       pCorr=mIntensityCorr.data();
       p=mpCorr[3]->data();

@@ -78,6 +78,8 @@ run_test "unit::powderpattern-background-hist-xml" "$SCRIPT_DIR/api_powderpatter
 run_test "unit::powderpattern-diffraction" "$SCRIPT_DIR/api_powderpattern" "powderpattern-diffraction"
 run_test "unit::powderpattern-diffraction-mur" "$SCRIPT_DIR/api_powderpattern" "powderpattern-diffraction-mur"
 run_test "unit::powderpattern-linear-polar-rate" "$SCRIPT_DIR/api_powderpattern" "powderpattern-linear-polar-rate"
+run_test "unit::powderpattern-texture-march-dollase" "$SCRIPT_DIR/api_powderpattern" "powderpattern-texture-march-dollase"
+run_test "unit::texture-march-dollase-delete-phase" "$SCRIPT_DIR/api_powderpattern" "texture-march-dollase-delete-phase"
 run_test "unit::powderpattern-diffraction-lebail-fhklobs" "$SCRIPT_DIR/api_powderpattern" "powderpattern-diffraction-lebail-fhklobs"
 run_test "unit::powderpattern-import" "$SCRIPT_DIR/api_powderpattern" "powderpattern-import"
 run_test "unit::scatteringcorr-subclasses" "$SCRIPT_DIR/api_powderpattern" "scatteringcorr-subclasses"
