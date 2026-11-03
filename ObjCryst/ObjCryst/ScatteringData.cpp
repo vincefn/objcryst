@@ -213,6 +213,7 @@ void Radiation::operator=(const Radiation &old)
    mXRayTubeDeltaLambda       =old.mXRayTubeDeltaLambda;
    mXRayTubeAlpha2Alpha1Ratio =old.mXRayTubeAlpha2Alpha1Ratio;
    mClockWavelength.Click();
+   this->SetLinearPolarRate(old.mLinearPolarRate);
    mRadiationType.SetChoice(old.mRadiationType.GetChoice());
    this->SetWavelengthType((WavelengthType) old.mWavelengthType.GetChoice());
 }
@@ -223,10 +224,10 @@ RadiationType Radiation::GetRadiationType()const
 void Radiation::SetRadiationType(const RadiationType rad)
 {
    mRadiationType.SetChoice(rad);
-   if(rad == RAD_NEUTRON) mLinearPolarRate=0;
+   if(rad == RAD_NEUTRON) this->SetLinearPolarRate(0);
    if(rad == RAD_ELECTRON)
    {
-      mLinearPolarRate=0;
+      this->SetLinearPolarRate(0);
       this->SetWavelengthType(WAVELENGTH_MONOCHROMATIC);
    }
    else this->UpdateDisplay();
@@ -274,7 +275,7 @@ void Radiation::SetWavelength(const string &XRayTubeElementName,
    mXRayTubeName=XRayTubeElementName;
    this->SetRadiationType(RAD_XRAY);
    mWavelength.resize(1);
-   mLinearPolarRate=0;
+   this->SetLinearPolarRate(0);
 
    if(XRayTubeElementName.length() >=3) //:KLUDGE:
    {
