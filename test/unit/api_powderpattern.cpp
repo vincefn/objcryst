@@ -1,6 +1,7 @@
 // Extended unit tests for PowderPattern, PowderPatternBackground,
 // PowderPatternDiffraction, the ReflectionProfile* classes and the
 // ScatteringCorr subclasses.
+#include <algorithm>
 #include <cmath>
 #include <iostream>
 #include <sstream>
@@ -191,6 +192,55 @@ void TestPowderPatternDiffractionMuRAbsorption()
    CheckNearAbs(p.GetMuR(), 0.5, 1e-6, "PowderPattern::SetMuR/GetMuR mismatch");
    p.Prepare();
    Check(p.GetPowderPatternCalc().max() > 0, "PowderPattern calc with muR absorption should be non-empty");
+}
+
+ObjCryst::PowderPattern* MakePolarRatePattern(ObjCryst::Crystal& c, const REAL polarRate, const bool setBefore)
+{
+   using namespace ObjCryst;
+   auto* p = new PowderPattern;
+   p->SetRadiationType(RAD_XRAY);
+   p->SetWavelength(1.54);
+   if(setBefore) p->GetRadiation().SetLinearPolarRate(polarRate);
+   p->SetPowderPatternPar(10 * DEG2RAD, 0.05 * DEG2RAD, 2000);
+   CrystVector_REAL obs(2000);
+   obs = 1;
+   p->SetPowderPatternObs(obs);
+   auto* phase = new PowderPatternDiffraction;
+   phase->SetCrystal(c);
+   phase->SetReflectionProfilePar(PROFILE_PSEUDO_VOIGT, .03 * DEG2RAD * DEG2RAD, 0, 0, 0.3, 0);
+   p->AddPowderPatternComponent(*phase);
+   p->Prepare();
+   return p;
+}
+
+// Regression test for issue #101: changing the linear polarization rate after
+// the pattern has been computed must invalidate the cached calculation.
+void TestPowderPatternLinearPolarRateRecalc()
+{
+   using namespace ObjCryst;
+   Crystal c = MakePbso4Crystal();
+
+   PowderPattern* p = MakePolarRatePattern(c, 0, false);
+   const CrystVector_REAL before = p->GetPowderPatternCalc();
+   p->GetRadiation().SetLinearPolarRate(0.95);
+   const CrystVector_REAL after = p->GetPowderPatternCalc();
+
+   PowderPattern* fresh = MakePolarRatePattern(c, 0.95, true);
+   const CrystVector_REAL expected = fresh->GetPowderPatternCalc();
+
+   Check(after.numElements() == expected.numElements(), "Polar rate pattern size mismatch");
+   REAL maxChange = 0, maxDiff = 0;
+   for(long i = 0; i < after.numElements(); ++i)
+   {
+      maxChange = std::max(maxChange, (REAL)std::fabs(after(i) - before(i)));
+      maxDiff = std::max(maxDiff, (REAL)std::fabs(after(i) - expected(i)));
+   }
+   Check(maxChange > 1e-3 * expected.max(),
+         "SetLinearPolarRate did not trigger a powder pattern recalculation");
+   Check(maxDiff <= 1e-5 * expected.max(),
+         "Powder pattern after SetLinearPolarRate differs from a freshly built pattern");
+   delete fresh;
+   delete p;
 }
 
 void TestPowderPatternDiffractionLeBailFhklObsSq()
@@ -520,6 +570,7 @@ int main(int argc, char* argv[])
    else if(testName == "powderpattern-background-hist-xml") TestPowderPatternBackgroundHistXML();
    else if(testName == "powderpattern-diffraction") TestPowderPatternDiffraction();
    else if(testName == "powderpattern-diffraction-mur") TestPowderPatternDiffractionMuRAbsorption();
+   else if(testName == "powderpattern-linear-polar-rate") TestPowderPatternLinearPolarRateRecalc();
    else if(testName == "powderpattern-diffraction-lebail-fhklobs") TestPowderPatternDiffractionLeBailFhklObsSq();
    else if(testName == "powderpattern-import") TestPowderPatternImport();
    else if(testName == "scatteringcorr-subclasses") TestScatteringCorrSubclasses();

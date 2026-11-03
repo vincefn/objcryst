@@ -1312,6 +1312,7 @@ void Radiation::XMLInput(istream &is,const XMLCrystTag &tagg)
       if("LinearPolarRate"==tag.GetName())
       {
          is>>mLinearPolarRate;
+         mClockLinearPolarRate.Click();
          XMLCrystTag junk(is);
       }
       if("XRayTubeDeltaLambda"==tag.GetName())

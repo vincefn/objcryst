@@ -49,6 +49,7 @@ BUG FIXES
     geometry in powder diffraction (PR #73, @clemisch)
   * Recompute PolarizationCorr when the linear polarization rate changes,
     using a dedicated Radiation clock (related to pyobjcryst issue #38)
+  * Recalculate powder pattern when the polarization rate changes (fixes #101)
   * Bump bundled wxWidgets to 3.2.10 and FFTW to 3.3.11 in the makefiles
   * Relax powder ground-truth relative tolerance to 5e-4 so regression tests
     are stable in both single-precision (default) and double-precision builds

@@ -2846,6 +2846,9 @@ mStatisticsExcludeBackground(false),mMaxSinThetaOvLambda(10),mNbPointUsed(0)
    mClockMaster.AddChild(mClockNbPointUsed);
    mClockMaster.AddChild(mClockPowderPatternXCorr);
    mClockMaster.AddChild(mClockScaleFactor);
+   // Any change in the Radiation (e.g. linear polarization rate) must
+   // invalidate the components, which only watch mClockPowderPatternRadiation
+   mClockPowderPatternRadiation.AddChild(mRadiation.GetClockMaster());
    mClockMaster.AddChild(mClockPowderPatternRadiation);
    mClockMaster.AddChild(mClockCorrAbs);
 }
@@ -2873,6 +2876,7 @@ mMaxSinThetaOvLambda(old.mMaxSinThetaOvLambda),mNbPointUsed(old.mNbPointUsed)
    mClockMaster.AddChild(mClockNbPointUsed);
    mClockMaster.AddChild(mClockPowderPatternXCorr);
    mClockMaster.AddChild(mClockScaleFactor);
+   mClockPowderPatternRadiation.AddChild(mRadiation.GetClockMaster());
    mClockMaster.AddChild(mClockPowderPatternRadiation);
 }
 
