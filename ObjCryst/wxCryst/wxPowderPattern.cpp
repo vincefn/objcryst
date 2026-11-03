@@ -3936,6 +3936,8 @@ WXRefinableObj(parent,(RefinableObj*)obj),mpTextureMarchDollase(obj)
       mpMenuBar->AddMenu("Phases",ID_REFOBJ_MENU_OBJ);
          mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDERTEXTURE_MENU_ADDPHASE,
                                 "Add Phase");
+         mpMenuBar->AddMenuItem(ID_REFOBJ_MENU_OBJ,ID_POWDERTEXTURE_MENU_DELETEPHASE,
+                                "Delete Phase");
    //existing phases
       WXRegistry<TexturePhaseMarchDollase> *pWXPhaseRegistry
          =mpTextureMarchDollase->mPhaseRegistry.WXCreate(this);
@@ -3958,6 +3960,27 @@ void WXTextureMarchDollase::OnAddTexturePhase(wxCommandEvent & WXUNUSED(event))
 }
 void WXTextureMarchDollase::OnDeleteTexturePhase(wxCommandEvent & WXUNUSED(event))
 {
+   VFN_DEBUG_ENTRY("WXTextureMarchDollase::OnDeleteTexturePhase()",5)
+   WXCrystValidateAllUserInput();
+   const unsigned int nb=mpTextureMarchDollase->GetNbPhase();
+   if(nb==0) return;
+   wxArrayString choices;
+   for(unsigned int i=0;i<nb;i++)
+      choices.Add(wxString::Format(_T("Phase %u: fraction=%.3f, March=%.3f, (%g %g %g)"),i,
+                                   mpTextureMarchDollase->GetFraction(i),
+                                   mpTextureMarchDollase->GetMarchCoeff(i),
+                                   mpTextureMarchDollase->GetPhaseH(i),
+                                   mpTextureMarchDollase->GetPhaseK(i),
+                                   mpTextureMarchDollase->GetPhaseL(i)));
+   wxSingleChoiceDialog dialog(this,_T("Select the texture phase to delete"),
+                               _T("Delete texture phase"),choices);
+   if(wxID_OK!=dialog.ShowModal()) return;
+   mpTextureMarchDollase->DeletePhase(dialog.GetSelection());
+   this->Layout();
+   wxTheApp->GetTopWindow()->Layout();
+   wxTheApp->GetTopWindow()->SendSizeEvent();
+   this->CrystUpdate(true);
+   VFN_DEBUG_EXIT("WXTextureMarchDollase::OnDeleteTexturePhase()",5)
 }
 
 ////////////////////////////////////////////////////////////////////////
