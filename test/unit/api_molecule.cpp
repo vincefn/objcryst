@@ -76,6 +76,47 @@ void TestMoleculeFormulaAndLogLikelihood()
    Check(llk >= 0, "Molecule log-likelihood (restraint cost) should be non-negative");
 }
 
+std::vector<ObjCryst::MolAtom*> gReleasedAtoms;
+int gNbReleasedBonds = 0;
+
+bool KeepReleasedAtom(ObjCryst::MolAtom* atom)
+{
+   gReleasedAtoms.push_back(atom);
+   return true;
+}
+
+bool CountReleasedBond(ObjCryst::MolBond*)
+{
+   ++gNbReleasedBonds;
+   return false;
+}
+
+// Molecule::RemoveAtom(.., true) must release the atom and its bonds through the hooks.
+void TestMoleculeReleaseHook()
+{
+   using namespace ObjCryst;
+   Crystal c(10, 10, 10, "P1");
+   Molecule m = MakeWaterLikeMolecule(c);
+   m.AddBond(m.GetAtom(0), m.GetAtom(1), 1.0, 0.01, 0.02, 1.0, false);
+   MolAtom* const a0 = &m.GetAtom(0);
+
+   gReleasedAtoms.clear();
+   gNbReleasedBonds = 0;
+   const MolAtomReleaseHook previousAtomHook = SetReleaseObjHook(&KeepReleasedAtom);
+   const MolBondReleaseHook previousBondHook = SetReleaseObjHook(&CountReleasedBond);
+   Check(previousAtomHook == 0 && previousBondHook == 0, "No Molecule release hook should be installed by default");
+   m.RemoveAtom(*a0, true);
+   SetReleaseObjHook(MolAtomReleaseHook(0));
+   SetReleaseObjHook(MolBondReleaseHook(0));
+
+   Check(m.GetAtomList().size() == 2, "RemoveAtom should remove the atom from the Molecule");
+   Check(m.GetBondList().empty(), "RemoveAtom should remove the bonds of the atom");
+   Check(gNbReleasedBonds == 1, "RemoveAtom should release the bond through the hook");
+   Check(gReleasedAtoms.size() == 1 && gReleasedAtoms[0] == a0, "RemoveAtom should release the atom through the hook");
+   Check(a0->GetName() == "O1", "Atom kept by the release hook should still be alive");
+   delete a0;
+}
+
 } // namespace
 
 int main(int argc, char* argv[])
@@ -91,6 +132,7 @@ int main(int argc, char* argv[])
    if(testName == "molecule-atoms-bonds") TestMoleculeAtomsAndBonds();
    else if(testName == "molecule-angles-dihedrals") TestMoleculeAnglesAndDihedrals();
    else if(testName == "molecule-formula-loglikelihood") TestMoleculeFormulaAndLogLikelihood();
+   else if(testName == "molecule-release-hook") TestMoleculeReleaseHook();
    else
    {
       std::cerr << "Unknown test case: " << testName << std::endl;

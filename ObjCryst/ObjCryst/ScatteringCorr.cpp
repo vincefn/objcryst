@@ -418,7 +418,7 @@ void TextureMarchDollase::DeletePhase(const unsigned int i)
    // Delete the phase (and its widgets) before its parameters
    mPhaseRegistry.DeRegister(*phase);
    delete phase;
-   for(unsigned int j=0;j<5;j++) delete pars[j];
+   for(unsigned int j=0;j<5;j++) ReleaseObj(pars[j]);
    // Rename the parameters of the following phases so that their
    // suffix keeps matching their index
    for(unsigned int k=i;k<this->GetNbPhase();k++)

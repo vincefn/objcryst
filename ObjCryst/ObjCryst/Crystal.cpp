@@ -202,7 +202,7 @@ void Crystal::RemoveScatterer(Scatterer *scatt, const bool del)
    mScattererRegistry.DeRegister(*scatt);
    scatt->DeRegisterClient(*this);
    this->RemoveSubRefObj(*scatt);
-   if(del) delete scatt;
+   if(del) ReleaseObj(scatt);
    mClockScattererList.Click();
    VFN_DEBUG_MESSAGE("Crystal::RemoveScatterer(&scatt):Finished",5)
 }
@@ -256,7 +256,7 @@ void Crystal::RemoveScatteringPower(ScatteringPower *scattPow, const bool del)
    mClockMaster.RemoveChild(scattPow->GetClockMaster());
    mClockMaster.RemoveChild(scattPow->GetMaximumLikelihoodParClock());
    mMasterClockScatteringPower.RemoveChild(scattPow->GetClockMaster());
-   if(del) delete scattPow;
+   scattPow->DeRegisterClient(*this);
 
    for(Crystal::VBumpMergePar::iterator pos=mvBumpMergePar.begin();pos!=mvBumpMergePar.end();)
    {
@@ -278,6 +278,7 @@ void Crystal::RemoveScatteringPower(ScatteringPower *scattPow, const bool del)
       }
       else ++pos;// See Josuttis Std C++ Lib p.205 for safe method
    }
+   if(del) ReleaseObj(scattPow);
    VFN_DEBUG_EXIT("Crystal::RemoveScatteringPower()",2)
 }
 
@@ -1962,7 +1963,7 @@ void Crystal::ConnectAtoms(const REAL min_relat_dist, const REAL max_relat_dist,
    while(vpAtom.size()>0)
    {
       VFN_DEBUG_MESSAGE("Crystal::ConnectAtoms(...): remove atom:"<<(*vpAtom.begin())->GetName()<<","<<vpAtom.size()<<" remaining...",6)
-      this->RemoveScatterer(*vpAtom.begin(),true);
+      this->RemoveScatterer(*vpAtom.begin(),mDeleteSubObjInDestructor);
       vpAtom.erase(vpAtom.begin());
    }
    VFN_DEBUG_EXIT("Crystal::ConnectAtoms(...)",10)
@@ -2068,7 +2069,7 @@ void Crystal::MergeEqualScatteringPowers(const bool oneScatteringPowerPerElement
          }
       }
       #endif
-      this->RemoveScatteringPower(*pos,true);
+      this->RemoveScatteringPower(*pos,mDeleteSubObjInDestructor);
    }
    this->UpdateDisplay();
    VFN_DEBUG_EXIT("Crystal::MergeEqualScatteringPowers()", 10)

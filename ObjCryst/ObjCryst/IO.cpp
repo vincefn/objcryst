@@ -932,6 +932,21 @@ void Crystal::XMLInput(istream &is,const XMLCrystTag &tagg)
    VFN_DEBUG_ENTRY("Crystal::XMLInput():"<<this->GetName(),5)
    (*fpObjCrystInformUser)("XML: Loading Crystal:");
    //Remove Scatterers and Scattering Powers
+   // Scatterers first, as they reference the scattering powers (same order as ~Crystal)
+      for(long i=0;i<mScattererRegistry.GetNb();i++)
+      {
+         this->RemoveSubRefObj(mScattererRegistry.GetObj(i));
+         mScattererRegistry.GetObj(i).DeRegisterClient(*this);
+      }
+      if(mDeleteSubObjInDestructor)
+      {
+         mScattererRegistry.DeleteAll();
+      }
+      else
+      {
+         mScattererRegistry.DeRegisterAll();
+      }
+
       for(long i=0;i<mScatteringPowerRegistry.GetNb();i++)
       {
          this->RemoveSubRefObj(mScatteringPowerRegistry.GetObj(i));
@@ -953,20 +968,6 @@ void Crystal::XMLInput(istream &is,const XMLCrystTag &tagg)
             vold_scattpow.push_back(dynamic_cast<ScatteringPowerAtom*>(*pos));
          }
          mScatteringPowerRegistry.DeRegisterAll();
-      }
-
-      for(long i=0;i<mScattererRegistry.GetNb();i++)
-      {
-         this->RemoveSubRefObj(mScattererRegistry.GetObj(i));
-         mScattererRegistry.GetObj(i).DeRegisterClient(*this);
-      }
-      if(mDeleteSubObjInDestructor)
-      {
-         mScattererRegistry.DeleteAll();
-      }
-      else
-      {
-         mScattererRegistry.DeRegisterAll();
       }
 
    for(unsigned int i=0;i<tagg.GetNbAttribute();i++)

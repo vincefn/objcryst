@@ -716,6 +716,7 @@ template<class T> class ObjRegistry
       /// De-register \e all objects from the list.
       void DeRegisterAll();
       /// Delete all objects in the registry.. Use with caution !!
+      /// Objects derived from RefinableObj are released using ReleaseObj().
       void DeleteAll();
       /** Get object #i in the registry.
       * \internal
@@ -1430,6 +1431,58 @@ extern ObjRegistry<RefinableObj> gRefinableObjRegistry;
 /// the ObjCryst++ class, this currently includes Crystal, PowderPattern and
 /// DiffractionDataSingleCrystal.
 extern ObjRegistry<RefinableObj> gTopRefinableObjRegistry;
+
+/** \name Release of sub-objects owned by ObjCryst++ objects
+*
+* When an ObjCryst++ object discards a sub-object which it owns (e.g. a
+* PowderPatternDiffraction replacing its ReflectionProfile, a RefinableObj
+* resetting its list of RefinablePar, a Crystal removing a Scatterer...), it does
+* not \c delete it directly but calls ReleaseObj(). By default ReleaseObj() just
+* deletes the object, so the behaviour is unchanged.
+*
+* A client library (e.g. python bindings) can install a hook with SetReleaseObjHook(),
+* e.g. to take over the ownership of an object if it is still referenced by the client.
+* The hook is called with the object about to be released, after it has been detached
+* from its owner:
+* - if the hook returns true, it takes the ownership of the object (or has already
+*   disposed of it), and ObjCryst++ will not access it anymore.
+* - if the hook returns false (or if no hook is installed), the object is deleted.
+*
+* \note The object is passed as a pointer to its base class (RefinableObj, RefinablePar,...).
+* Use \c dynamic_cast<void*>(p) to get the address of the most-derived object (this differs
+* from the base class address for classes using virtual inheritance, e.g. Scatterer,
+* ScatteringPower or PowderPatternComponent), and \c typeid(*p) to get its dynamic type.
+* \note The hook can be called from the destructor of the owner, so it must not
+* access the owner.
+* \note A RefinablePar points to a value stored in its owner (RefinablePar::mpValue),
+* which may be destroyed or reallocated when the parameter is released (e.g. after
+* PowderPatternBackground::SetInterpPoints()). If a RefinablePar hook takes over
+* a parameter, it must make sure the parameter is not used anymore.
+* \note The hook must not throw. There is one global hook per base type, which should be set
+* once (it is not thread-safe). SetReleaseObjHook() returns the previous hook, if any.
+* To restore the default behaviour, pass a typed null pointer, e.g.
+* \c SetReleaseObjHook(RefinableObjReleaseHook(0)) (a plain 0 would be ambiguous).
+* \note Equivalent hooks for MolAtom, MolBond, MolBondAngle, MolDihedralAngle and RigidGroup
+* are declared in Molecule.h.
+*/
+//@{
+/// Hook called when a RefinableObj (or derived) sub-object is released.
+/// Returns true if it takes the ownership of the object, false if it should be deleted.
+typedef bool (*RefinableObjReleaseHook)(RefinableObj *obj);
+/// Hook called when a RefinablePar is released.
+/// Returns true if it takes the ownership of the parameter, false if it should be deleted.
+typedef bool (*RefinableParReleaseHook)(RefinablePar *par);
+/// Set the hook used to release RefinableObj (0 to restore the default). Returns the previous hook.
+RefinableObjReleaseHook SetReleaseObjHook(RefinableObjReleaseHook hook);
+/// Set the hook used to release RefinablePar (0 to restore the default). Returns the previous hook.
+RefinableParReleaseHook SetReleaseObjHook(RefinableParReleaseHook hook);
+/// Release a RefinableObj: pass it to the hook if one is set, and delete it unless the hook
+/// took its ownership. Does nothing if obj is null.
+void ReleaseObj(RefinableObj *obj);
+/// Release a RefinablePar: pass it to the hook if one is set, and delete it unless the hook
+/// took its ownership. Does nothing if par is null.
+void ReleaseObj(RefinablePar *par);
+//@}
 }//namespace
 
 #endif// _VFN_REFINABLE_OBJ_H_

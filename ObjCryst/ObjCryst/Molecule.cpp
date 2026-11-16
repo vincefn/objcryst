@@ -2138,19 +2138,19 @@ Molecule::~Molecule()
    {
        {
           vector<MolAtom*>::iterator pos;
-          for(pos=mvpAtom.begin();pos!=mvpAtom.end();pos++) delete *pos;
+          for(pos=mvpAtom.begin();pos!=mvpAtom.end();pos++) ReleaseObj(*pos);
        }
        {
           vector<MolBond*>::iterator pos;
-          for(pos=mvpBond.begin();pos!=mvpBond.end();pos++) delete *pos;
+          for(pos=mvpBond.begin();pos!=mvpBond.end();pos++) ReleaseObj(*pos);
        }
        {
           vector<MolBondAngle*>::iterator pos;
-          for(pos=mvpBondAngle.begin();pos!=mvpBondAngle.end();pos++) delete *pos;
+          for(pos=mvpBondAngle.begin();pos!=mvpBondAngle.end();pos++) ReleaseObj(*pos);
        }
        {
           vector<MolDihedralAngle*>::iterator pos;
-          for(pos=mvpDihedralAngle.begin();pos!=mvpDihedralAngle.end();pos++) delete *pos;
+          for(pos=mvpDihedralAngle.begin();pos!=mvpDihedralAngle.end();pos++) ReleaseObj(*pos);
        }
    }
    VFN_DEBUG_EXIT("Molecule::~Molecule()",5)
@@ -3973,8 +3973,9 @@ vector<MolAtom*>::iterator Molecule::RemoveAtom(MolAtom &atom, const bool del)
    mClockScatterer.Click();
 
    if(mpCenterAtom==*pos) mpCenterAtom=0;
-   if(del) delete *pos;
+   MolAtom *patom=*pos;
    pos=mvpAtom.erase(pos);
+   if(del) ReleaseObj(patom);
    --mScattCompList;
 
    if(molnameasformula || (this->GetName().size()==0))
@@ -4010,8 +4011,9 @@ vector<MolBond*>::iterator Molecule::RemoveBond(const MolBond &bond, const bool 
    }
    this->RemoveRestraint(*pos);
    mClockBondList.Click();
-   if(del) delete *pos;
+   MolBond *pbond=*pos;
    pos= mvpBond.erase(pos);
+   if(del) ReleaseObj(pbond);
    this->UpdateDisplay();
    VFN_DEBUG_EXIT("Molecule::RemoveBond():",6)
    return pos;
@@ -4062,8 +4064,9 @@ vector<MolBondAngle*>::iterator Molecule::RemoveBondAngle(const MolBondAngle &an
    }
    this->RemoveRestraint(*pos);
    mClockBondAngleList.Click();
-   if(del) delete *pos;
+   MolBondAngle *pangle=*pos;
    pos=mvpBondAngle.erase(pos);
+   if(del) ReleaseObj(pangle);
    this->UpdateDisplay();
    VFN_DEBUG_EXIT("Molecule::RemoveBondAngle():",6)
    return pos;
@@ -4112,8 +4115,9 @@ vector<MolDihedralAngle*>::iterator Molecule::RemoveDihedralAngle(const MolDihed
    }
    this->RemoveRestraint(*pos);
    mClockDihedralAngleList.Click();
-   if(del) delete *pos;
+   MolDihedralAngle *pangle=*pos;
    pos=mvpDihedralAngle.erase(pos);
+   if(del) ReleaseObj(pangle);
    this->UpdateDisplay();
    VFN_DEBUG_ENTRY("Molecule::RemoveDihedralAngle():",6)
    return pos;
@@ -4232,8 +4236,9 @@ vector<RigidGroup*>::iterator Molecule::RemoveRigidGroup(const RigidGroup &g,con
    this->RemovePar(&(this->GetPar(&((*pos)->mQuat.Q2()))));
    this->RemovePar(&(this->GetPar(&((*pos)->mQuat.Q3()))));
    #endif
-   if(del) delete *pos;
+   RigidGroup *pgroup=*pos;
    pos=mvRigidGroup.erase(pos);
+   if(del) ReleaseObj(pgroup);
    if(updateDisplay) this->UpdateDisplay();
    return pos;
 }
@@ -8087,5 +8092,48 @@ Molecule *ZScatterer2Molecule(ZScatterer *scatt)
    VFN_DEBUG_EXIT("ZScatterer2Molecule()",6)
    return mol;
 }
+
+//######################################################################
+//    Release of Molecule sub-objects
+//######################################################################
+namespace
+{
+template<class T> struct MolReleaseHookHolder
+{
+   static bool (*mpHook)(T*);
+};
+template<class T> bool (*MolReleaseHookHolder<T>::mpHook)(T*)=0;
+
+template<class T> bool (*SetMolReleaseHook(bool (*hook)(T*)))(T*)
+{
+   bool (*old)(T*)=MolReleaseHookHolder<T>::mpHook;
+   MolReleaseHookHolder<T>::mpHook=hook;
+   return old;
+}
+
+template<class T> void MolReleaseWithHook(T *obj)
+{
+   if(obj==0) return;
+   if((MolReleaseHookHolder<T>::mpHook!=0) && MolReleaseHookHolder<T>::mpHook(obj)) return;
+   delete obj;
+}
+}
+
+MolAtomReleaseHook SetReleaseObjHook(MolAtomReleaseHook hook)
+{return SetMolReleaseHook<MolAtom>(hook);}
+MolBondReleaseHook SetReleaseObjHook(MolBondReleaseHook hook)
+{return SetMolReleaseHook<MolBond>(hook);}
+MolBondAngleReleaseHook SetReleaseObjHook(MolBondAngleReleaseHook hook)
+{return SetMolReleaseHook<MolBondAngle>(hook);}
+MolDihedralAngleReleaseHook SetReleaseObjHook(MolDihedralAngleReleaseHook hook)
+{return SetMolReleaseHook<MolDihedralAngle>(hook);}
+RigidGroupReleaseHook SetReleaseObjHook(RigidGroupReleaseHook hook)
+{return SetMolReleaseHook<RigidGroup>(hook);}
+
+void ReleaseObj(MolAtom *obj) {MolReleaseWithHook(obj);}
+void ReleaseObj(MolBond *obj) {MolReleaseWithHook(obj);}
+void ReleaseObj(MolBondAngle *obj) {MolReleaseWithHook(obj);}
+void ReleaseObj(MolDihedralAngle *obj) {MolReleaseWithHook(obj);}
+void ReleaseObj(RigidGroup *obj) {MolReleaseWithHook(obj);}
 
 }//namespace

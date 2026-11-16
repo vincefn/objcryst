@@ -822,7 +822,8 @@ class Molecule: public Scatterer
       /** Remove an atom. Returns the iterator to the next atom in the list.
       *
       * This also removes all corresponding bonds, bond angles, etc...
-      * If del is true (default), then the MolAtom object is deleted. The del
+      * If del is true (default), then the MolAtom object is deleted (using
+      * ReleaseObj()). The del
       * flag gets sent to the RemoveXXX functions for the corresponding
       * objects.
       */
@@ -838,7 +839,7 @@ class Molecule: public Scatterer
                    const bool updateDisplay=true);
       /** Remove a bond. Returns the iterator to the next bond in the list.
       *
-      * If del is true (default), then the MolBond object is deleted.
+      * If del is true (default), then the MolBond object is deleted (using ReleaseObj()).
       *
       */
       vector<MolBond*>::iterator RemoveBond(const MolBond&, const bool del = true);
@@ -861,7 +862,7 @@ class Molecule: public Scatterer
                         const bool updateDisplay=true);
       /** Remove a BondAngle
       *
-      * If del is true (default), then the MolBondAngle object is deleted.
+      * If del is true (default), then the MolBondAngle object is deleted (using ReleaseObj()).
       */
       vector<MolBondAngle*>::iterator RemoveBondAngle(const MolBondAngle&, const bool del = true);
       /** Searches whether a bond between three atoms already exists,
@@ -880,7 +881,7 @@ class Molecule: public Scatterer
                             const bool updateDisplay=true);
       /** Remove a dihedral angle
       *
-      * If del is true (default), then the MolDihedralAngle object is deleted.
+      * If del is true (default), then the MolDihedralAngle object is deleted (using ReleaseObj()).
       */
       vector<MolDihedralAngle*>::iterator RemoveDihedralAngle(const MolDihedralAngle&, const bool del = true);
       /** Searches whether a dihedral between four atoms already exists,
@@ -897,7 +898,7 @@ class Molecule: public Scatterer
       void AddRigidGroup(const RigidGroup&,const bool updateDisplay=true);
       /** Remove a rigid group of atoms. See Molecule::mvRigidGroup
       *
-      * If del is true (default), then the RigidGroup object is deleted.
+      * If del is true (default), then the RigidGroup object is deleted (using ReleaseObj()).
       */
       std::vector<RigidGroup*>::iterator RemoveRigidGroup(const RigidGroup &group,const bool updateDisplay=true, const bool del = true);
 
@@ -1448,6 +1449,32 @@ class ZScatterer;
 
 /// Converter from ZScatterer to a Molecule object
 Molecule *ZScatterer2Molecule(ZScatterer *scatt);
+
+/** \name Release of Molecule sub-objects
+*
+* Hooks used by a Molecule to release (delete) its MolAtom, MolBond, MolBondAngle,
+* MolDihedralAngle and RigidGroup sub-objects. These work exactly like
+* SetReleaseObjHook(RefinableObjReleaseHook) and ReleaseObj(RefinableObj*),
+* see RefinableObj.h for details: if the hook returns true it takes the ownership of the
+* object, otherwise (or if no hook is set) the object is deleted.
+*/
+//@{
+typedef bool (*MolAtomReleaseHook)(MolAtom *obj);
+typedef bool (*MolBondReleaseHook)(MolBond *obj);
+typedef bool (*MolBondAngleReleaseHook)(MolBondAngle *obj);
+typedef bool (*MolDihedralAngleReleaseHook)(MolDihedralAngle *obj);
+typedef bool (*RigidGroupReleaseHook)(RigidGroup *obj);
+MolAtomReleaseHook SetReleaseObjHook(MolAtomReleaseHook hook);
+MolBondReleaseHook SetReleaseObjHook(MolBondReleaseHook hook);
+MolBondAngleReleaseHook SetReleaseObjHook(MolBondAngleReleaseHook hook);
+MolDihedralAngleReleaseHook SetReleaseObjHook(MolDihedralAngleReleaseHook hook);
+RigidGroupReleaseHook SetReleaseObjHook(RigidGroupReleaseHook hook);
+void ReleaseObj(MolAtom *obj);
+void ReleaseObj(MolBond *obj);
+void ReleaseObj(MolBondAngle *obj);
+void ReleaseObj(MolDihedralAngle *obj);
+void ReleaseObj(RigidGroup *obj);
+//@}
 
 }//namespace
 #endif

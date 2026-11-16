@@ -5,8 +5,10 @@
 
 #include "ObjCryst/ObjCryst/Atom.h"
 #include "ObjCryst/ObjCryst/Crystal.h"
+#include "ObjCryst/ObjCryst/Molecule.h"
 #include "ObjCryst/ObjCryst/ScatteringPower.h"
 #include "ObjCryst/ObjCryst/UnitCell.h"
+#include "ObjCryst/RefinableObj/IO.h"
 
 #include "test_common.h"
 
@@ -98,6 +100,114 @@ void TestUnitCellGeometry()
    CheckNearAbs(mx, 1, 1e-4, "Miller/orthonormal round-trip failed for h");
 }
 
+std::vector<ObjCryst::RefinableObj*> gReleasedObj;
+bool gKeepReleasedObj = false;
+
+bool RecordReleasedObj(ObjCryst::RefinableObj* obj)
+{
+   gReleasedObj.push_back(obj);
+   return gKeepReleasedObj;
+}
+
+// Crystal::RemoveScatterer(.., true) must go through the release hook.
+void TestCrystalReleaseHookRemoveScatterer()
+{
+   using namespace ObjCryst;
+   Crystal c = MakePbso4Crystal();
+   Scatterer* const o3 = &const_cast<Scatterer&>(c.GetScatt("O3"));
+   gReleasedObj.clear();
+   gKeepReleasedObj = true;
+   const RefinableObjReleaseHook previous = SetReleaseObjHook(&RecordReleasedObj);
+   Check(previous == 0, "No RefinableObj release hook should be installed by default");
+   c.RemoveScatterer(o3, true);
+   SetReleaseObjHook(RefinableObjReleaseHook(0));
+   Check(gReleasedObj.size() == 1, "RemoveScatterer(del=true) should call the release hook once");
+   // Scatterer uses virtual inheritance from RefinableObj: the most-derived
+   // object is recovered with dynamic_cast<void*>.
+   Check(dynamic_cast<void*>(gReleasedObj[0]) == dynamic_cast<void*>(o3),
+         "Release hook should receive the removed scatterer");
+   Check(dynamic_cast<Atom*>(gReleasedObj[0]) != 0, "Released scatterer should still be an Atom");
+   Check(o3->GetName() == "O3", "Scatterer kept by the release hook should still be alive");
+   delete o3;
+}
+
+// Crystal::ConnectAtoms() must respect SetDeleteSubObjInDestructor(false),
+// and release the replaced atoms through the hook otherwise.
+void TestCrystalConnectAtomsRelease(const bool deleteSubObj)
+{
+   using namespace ObjCryst;
+   auto* spC = new ScatteringPowerAtom("C", "C");
+   auto* c = new Crystal(10, 10, 10, "P1");
+   c->SetDeleteSubObjInDestructor(deleteSubObj);
+   c->AddScatteringPower(spC);
+   Atom* atoms[3] = {new Atom(0.10, 0.10, 0.10, "C1", spC),
+                     new Atom(0.25, 0.10, 0.10, "C2", spC),
+                     new Atom(0.25, 0.25, 0.10, "C3", spC)};
+   for(Atom* a : atoms) c->AddScatterer(a);
+
+   gReleasedObj.clear();
+   gKeepReleasedObj = false;
+   SetReleaseObjHook(&RecordReleasedObj);
+   c->ConnectAtoms();
+   SetReleaseObjHook(RefinableObjReleaseHook(0));
+
+   Check(c->GetNbScatterer() == 1, "ConnectAtoms should replace the 3 atoms by a single Molecule");
+   Molecule* const mol = dynamic_cast<Molecule*>(&const_cast<Scatterer&>(c->GetScatt(0)));
+   Check(mol != 0, "ConnectAtoms should create a Molecule");
+   Check(mol->GetNbComponent() == 3, "ConnectAtoms Molecule should have 3 atoms");
+   if(deleteSubObj)
+   {
+      Check(gReleasedObj.size() == 3, "ConnectAtoms should release the 3 atoms through the hook");
+      delete c;
+   }
+   else
+   {
+      Check(gReleasedObj.empty(), "ConnectAtoms should not release atoms if SetDeleteSubObjInDestructor(false)");
+      for(Atom* a : atoms) Check(a->GetName().size() == 2, "Atom should still be alive");
+      delete c;
+      delete mol;
+      for(Atom* a : atoms) delete a;
+      delete spC;
+   }
+}
+
+// Crystal::XMLInput() on a non-empty Crystal must release the scatterers
+// before the scattering powers they reference.
+void TestCrystalXMLInputReleaseOrder()
+{
+   using namespace ObjCryst;
+   std::stringstream xml;
+   MakePbso4Crystal().XMLOutput(xml, 0);
+   const std::string xmlText = xml.str();
+
+   Crystal restored;
+   for(int i = 0; i < 2; ++i)
+   {
+      std::stringstream is(xmlText);
+      XMLCrystTag tag(is);
+      restored.XMLInput(is, tag);
+   }
+   Check(restored.GetNbScatterer() == 5, "Crystal::XMLInput should restore the 5 PbSO4 atoms");
+
+   gReleasedObj.clear();
+   gKeepReleasedObj = true;
+   SetReleaseObjHook(&RecordReleasedObj);
+   {
+      std::stringstream is(xmlText);
+      XMLCrystTag tag(is);
+      restored.XMLInput(is, tag);
+   }
+   SetReleaseObjHook(RefinableObjReleaseHook(0));
+   Check(gReleasedObj.size() == 5 + 3, "Crystal::XMLInput should release 5 atoms and 3 scattering powers");
+   bool seenPower = false;
+   for(RefinableObj* obj : gReleasedObj)
+   {
+      if(dynamic_cast<ScatteringPower*>(obj) != 0) seenPower = true;
+      else Check(!seenPower, "Crystal::XMLInput should release scatterers before scattering powers");
+   }
+   for(RefinableObj* obj : gReleasedObj) delete obj;
+}
+
 } // namespace
 
 int main(int argc, char* argv[])
@@ -114,6 +224,10 @@ int main(int argc, char* argv[])
    else if(testName == "crystal-atom") TestCrystalAndAtom();
    else if(testName == "crystal-scatterer-management") TestCrystalScattererManagement();
    else if(testName == "unitcell-geometry") TestUnitCellGeometry();
+   else if(testName == "crystal-release-hook-remove-scatterer") TestCrystalReleaseHookRemoveScatterer();
+   else if(testName == "crystal-connectatoms-release") TestCrystalConnectAtomsRelease(true);
+   else if(testName == "crystal-connectatoms-no-delete") TestCrystalConnectAtomsRelease(false);
+   else if(testName == "crystal-xmlinput-release-order") TestCrystalXMLInputReleaseOrder();
    else
    {
       std::cerr << "Unknown test case: " << testName << std::endl;

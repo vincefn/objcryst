@@ -696,6 +696,68 @@ void TestPowderGroundTruthNeutronPseudoVoigtLorentzian()
                                         kPowderGroundTruthAbsTol, kPowderGroundTruthRelTol);
 }
 
+std::vector<ObjCryst::RefinableObj*> gReleasedObj;
+int gNbReleasedPar = 0;
+
+bool KeepReleasedObj(ObjCryst::RefinableObj* obj)
+{
+   gReleasedObj.push_back(obj);
+   return true;
+}
+
+bool CountReleasedPar(ObjCryst::RefinablePar*)
+{
+   ++gNbReleasedPar;
+   return false;
+}
+
+// Sub-objects discarded by PowderPatternDiffraction::SetProfile() and
+// PowderPatternBackground::SetInterpPoints() must go through the release hooks.
+void TestPowderPatternReleaseHook()
+{
+   using namespace ObjCryst;
+   gReleasedObj.clear();
+   const RefinableObjReleaseHook previous = SetReleaseObjHook(&KeepReleasedObj);
+   Check(previous == 0, "No RefinableObj release hook should be installed by default");
+   ReflectionProfile* p0 = 0;
+   ReflectionProfile* p1 = 0;
+   {
+      PowderPatternDiffraction d;
+      p0 = &d.GetProfile();
+      d.SetProfile(new ReflectionProfilePseudoVoigt);
+      p1 = &d.GetProfile();
+      Check(gReleasedObj.size() == 1 && gReleasedObj[0] == p0, "SetProfile should release the previous profile");
+      p0->SetName("kept");
+      Check(p0->GetName() == "kept", "Profile kept by the release hook should still be alive");
+   }
+   SetReleaseObjHook(RefinableObjReleaseHook(0));
+   Check(gReleasedObj.size() == 2 && gReleasedObj[1] == p1,
+         "~PowderPatternDiffraction should release its profile");
+   delete p0;
+   delete p1;
+
+   gNbReleasedPar = 0;
+   SetReleaseObjHook(&CountReleasedPar);
+   {
+      PowderPatternBackground bg;
+      CrystVector_REAL x(2), y(2);
+      x(0) = 0;
+      x(1) = 8.0 * DEG2RAD;
+      y = 5;
+      bg.SetInterpPoints(x, y);
+      const int nbPar0 = gNbReleasedPar;
+      x.resize(3);
+      y.resize(3);
+      x(0) = 0;
+      x(1) = 4.0 * DEG2RAD;
+      x(2) = 8.0 * DEG2RAD;
+      y = 6;
+      bg.SetInterpPoints(x, y);
+      Check(gNbReleasedPar > nbPar0, "SetInterpPoints should release the previous parameters");
+   }
+   SetReleaseObjHook(RefinableParReleaseHook(0));
+}
+
 } // namespace
 
 int main(int argc, char* argv[])
@@ -716,6 +778,7 @@ int main(int argc, char* argv[])
    else if(testName == "powderpattern-linear-polar-rate") TestPowderPatternLinearPolarRateRecalc();
    else if(testName == "powderpattern-texture-march-dollase") TestPowderPatternTextureMarchDollaseRecalc();
    else if(testName == "texture-march-dollase-delete-phase") TestTextureMarchDollaseDeletePhase();
+   else if(testName == "powderpattern-release-hook") TestPowderPatternReleaseHook();
    else if(testName == "powderpattern-diffraction-lebail-fhklobs") TestPowderPatternDiffractionLeBailFhklObsSq();
    else if(testName == "powderpattern-import") TestPowderPatternImport();
    else if(testName == "scatteringcorr-subclasses") TestScatteringCorrSubclasses();
