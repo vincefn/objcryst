@@ -30,6 +30,7 @@
    #undef GetClassName // Conflict from wxMSW headers ? (cygwin)
 #endif
 #include <algorithm>
+#include <type_traits>
 
 #define POSSIBLY_UNUSED(expr) (void)(expr)
 
@@ -990,6 +991,47 @@ template<class T> void RefObjOption<T>::Init(const int nbChoice,
 }
 
 //######################################################################
+//    Release of sub-objects
+//######################################################################
+namespace
+{
+template<class T> struct ReleaseHookHolder
+{
+   static bool (*mpHook)(T*);
+};
+template<class T> bool (*ReleaseHookHolder<T>::mpHook)(T*)=0;
+
+template<class T> bool (*SetReleaseHook(bool (*hook)(T*)))(T*)
+{
+   bool (*old)(T*)=ReleaseHookHolder<T>::mpHook;
+   ReleaseHookHolder<T>::mpHook=hook;
+   return old;
+}
+
+template<class T> void ReleaseWithHook(T *obj)
+{
+   if(obj==0) return;
+   if((ReleaseHookHolder<T>::mpHook!=0) && ReleaseHookHolder<T>::mpHook(obj)) return;
+   delete obj;
+}
+
+// Used by ObjRegistry<T>::DeleteAll(): RefinableObj-derived objects are released
+// through ReleaseObj(), other types are simply deleted.
+template<class T> void RegistryReleaseObj(T *obj,std::true_type) {ReleaseObj(obj);}
+template<class T> void RegistryReleaseObj(T *obj,std::false_type) {delete obj;}
+}
+
+RefinableObjReleaseHook SetReleaseObjHook(RefinableObjReleaseHook hook)
+{return SetReleaseHook<RefinableObj>(hook);}
+
+RefinableParReleaseHook SetReleaseObjHook(RefinableParReleaseHook hook)
+{return SetReleaseHook<RefinablePar>(hook);}
+
+void ReleaseObj(RefinableObj *obj) {ReleaseWithHook(obj);}
+
+void ReleaseObj(RefinablePar *par) {ReleaseWithHook(par);}
+
+//######################################################################
 //    ObjRegistry
 //######################################################################
 #ifdef __WX__CRYST__
@@ -1126,7 +1168,8 @@ template<class T> void ObjRegistry<T>::DeleteAll()
    VFN_DEBUG_ENTRY("ObjRegistry("<<mName<<")::DeleteAll():",5)
    vector<T*> reg=mvpRegistry;//mvpRegistry will be modified as objects are deleted, so use a copy
    typename vector<T*>::iterator pos;
-   for(pos=reg.begin();pos!=reg.end();++pos) delete *pos;
+   for(pos=reg.begin();pos!=reg.end();++pos)
+      RegistryReleaseObj(*pos,typename std::is_base_of<RefinableObj,T>::type());
    mvpRegistry.clear();
    mvpRegistryList.clear();
    mListClock.Click();
@@ -1407,7 +1450,7 @@ RefinableObj::~RefinableObj()
       if(true==mDeleteRefParInDestructor)
       {
          vector<RefinablePar*>::iterator pos;
-         for(pos=mvpRefPar.begin();pos!=mvpRefPar.end();pos++) delete *pos;
+         for(pos=mvpRefPar.begin();pos!=mvpRefPar.end();pos++) ReleaseObj(*pos);
       }
    }
    gRefinableObjRegistry.DeRegister(*this);
@@ -2055,12 +2098,14 @@ void RefinableObj::ResetParList()
    VFN_DEBUG_MESSAGE("RefinableObj::ResetParList()",3)
    if(mvpRefPar.size()>0)
    {
+      // Detach the parameters before releasing them
+      vector<RefinablePar*> vpRefPar;
+      vpRefPar.swap(mvpRefPar);
       if(true==mDeleteRefParInDestructor)
       {
          vector<RefinablePar*>::iterator pos;
-         for(pos=mvpRefPar.begin();pos!=mvpRefPar.end();pos++) delete *pos;
+         for(pos=vpRefPar.begin();pos!=vpRefPar.end();pos++) ReleaseObj(*pos);
       }
-      mvpRefPar.clear();
    }
    mNbRefParNotFixed=-1;
 

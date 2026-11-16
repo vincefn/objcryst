@@ -1085,7 +1085,7 @@ PowderPatternDiffraction::~PowderPatternDiffraction()
    if(mpReflectionProfile!=0)
    {
       this->RemoveSubRefObj(*mpReflectionProfile);
-      delete mpReflectionProfile;
+      ReleaseObj(mpReflectionProfile);
    }
 }
 const string& PowderPatternDiffraction::GetClassName() const
@@ -1140,7 +1140,8 @@ void PowderPatternDiffraction::SetProfile(ReflectionProfile *p)
    if(mpReflectionProfile!=0)
    {
       this->RemoveSubRefObj(*mpReflectionProfile);
-      delete mpReflectionProfile;
+      mClockMaster.RemoveChild(mpReflectionProfile->GetClockMaster());
+      ReleaseObj(mpReflectionProfile);
    }
    mpReflectionProfile= p;
    this->AddSubRefObj(*mpReflectionProfile);
@@ -2884,7 +2885,7 @@ PowderPattern::~PowderPattern()
    {
       mPowderPatternComponentRegistry.GetObj(i).DeRegisterClient(*this);
       this->RemoveSubRefObj(mPowderPatternComponentRegistry.GetObj(i));
-      delete &(mPowderPatternComponentRegistry.GetObj(i));
+      ReleaseObj(&(mPowderPatternComponentRegistry.GetObj(i)));
    }
    gTopRefinableObjRegistry.DeRegister(*this);
 }

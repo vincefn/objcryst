@@ -417,6 +417,8 @@ class PowderPatternDiffraction : virtual public PowderPatternComponent,public Sc
                                    const REAL eta1=0.);
       /** Assign a new profile
       *
+      * The PowderPatternDiffraction takes the ownership of the profile. The previous
+      * profile (if any) is released using ReleaseObj().
       */
       void SetProfile(ReflectionProfile *prof);
       /// Get reflection profile

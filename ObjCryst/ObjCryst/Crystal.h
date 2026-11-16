@@ -131,7 +131,7 @@ class Crystal:public UnitCell
       *
       */
       void AddScatterer(Scatterer *scatt);
-      /// Remove a Scatterer. This also deletes the scatterer unless del=false.
+      /// Remove a Scatterer. This also deletes the scatterer (using ReleaseObj()) unless del=false.
       void RemoveScatterer(Scatterer *scatt, const bool del=true);
 
       /// Number of scatterers in the crystal
@@ -169,7 +169,8 @@ class Crystal:public UnitCell
       /// Add a ScatteringPower for this Crystal. It must be allocated in the heap,
       /// and not used by any other Crystal.
       void AddScatteringPower(ScatteringPower *scattPow);
-      /// Remove a ScatteringPower for this Crystal. (the Scattering power is deleted unless del=false).
+      /// Remove a ScatteringPower for this Crystal. (the Scattering power is deleted
+      /// using ReleaseObj() unless del=false).
       /// This function should check that it is not used any more before removing it.
       void RemoveScatteringPower(ScatteringPower *scattPow, const bool del=true);
       /// Find a ScatteringPower from its name. Names must be unique in a given Crystal.
@@ -485,6 +486,10 @@ class Crystal:public UnitCell
 
       /** Set whether to delete the Scatterers and ScatteringPowers in the
        * destructor. By default these sub-objects are deleted.
+       *
+       * This also applies to Scatterers and ScatteringPowers which are discarded by
+       * XMLInput(), ConnectAtoms() and MergeEqualScatteringPowers(). Sub-objects
+       * are deleted using ReleaseObj().
       */
       void SetDeleteSubObjInDestructor(const bool b);
       /** Convert as much as possible the crystal's atoms to molecule(s).

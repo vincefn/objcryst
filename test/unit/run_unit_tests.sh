@@ -24,11 +24,15 @@ run_test "unit::scattering-power-atom" "$SCRIPT_DIR/api_crystal" "scattering-pow
 run_test "unit::crystal-atom" "$SCRIPT_DIR/api_crystal" "crystal-atom"
 run_test "unit::crystal-scatterer-management" "$SCRIPT_DIR/api_crystal" "crystal-scatterer-management"
 run_test "unit::unitcell-geometry" "$SCRIPT_DIR/api_crystal" "unitcell-geometry"
+run_test "unit::crystal-release-hook-remove-scatterer" "$SCRIPT_DIR/api_crystal" "crystal-release-hook-remove-scatterer"
+run_test "unit::crystal-connectatoms-release" "$SCRIPT_DIR/api_crystal" "crystal-connectatoms-release"
+run_test "unit::crystal-connectatoms-no-delete" "$SCRIPT_DIR/api_crystal" "crystal-connectatoms-no-delete"
 
 # --- api_molecule ---
 run_test "unit::molecule-atoms-bonds" "$SCRIPT_DIR/api_molecule" "molecule-atoms-bonds"
 run_test "unit::molecule-angles-dihedrals" "$SCRIPT_DIR/api_molecule" "molecule-angles-dihedrals"
 run_test "unit::molecule-formula-loglikelihood" "$SCRIPT_DIR/api_molecule" "molecule-formula-loglikelihood"
+run_test "unit::molecule-release-hook" "$SCRIPT_DIR/api_molecule" "molecule-release-hook"
 
 # --- api_scattering ---
 run_test "unit::scatteringdata-singlecrystal" "$SCRIPT_DIR/api_scattering" "scatteringdata-singlecrystal"
@@ -80,6 +84,7 @@ run_test "unit::powderpattern-diffraction-mur" "$SCRIPT_DIR/api_powderpattern" "
 run_test "unit::powderpattern-linear-polar-rate" "$SCRIPT_DIR/api_powderpattern" "powderpattern-linear-polar-rate"
 run_test "unit::powderpattern-texture-march-dollase" "$SCRIPT_DIR/api_powderpattern" "powderpattern-texture-march-dollase"
 run_test "unit::texture-march-dollase-delete-phase" "$SCRIPT_DIR/api_powderpattern" "texture-march-dollase-delete-phase"
+run_test "unit::powderpattern-release-hook" "$SCRIPT_DIR/api_powderpattern" "powderpattern-release-hook"
 run_test "unit::powderpattern-diffraction-lebail-fhklobs" "$SCRIPT_DIR/api_powderpattern" "powderpattern-diffraction-lebail-fhklobs"
 run_test "unit::powderpattern-import" "$SCRIPT_DIR/api_powderpattern" "powderpattern-import"
 run_test "unit::scatteringcorr-subclasses" "$SCRIPT_DIR/api_powderpattern" "scatteringcorr-subclasses"
