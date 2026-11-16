@@ -8,6 +8,7 @@
 #include "ObjCryst/ObjCryst/Molecule.h"
 #include "ObjCryst/ObjCryst/ScatteringPower.h"
 #include "ObjCryst/ObjCryst/UnitCell.h"
+#include "ObjCryst/RefinableObj/IO.h"
 
 #include "test_common.h"
 
@@ -170,6 +171,43 @@ void TestCrystalConnectAtomsRelease(const bool deleteSubObj)
    }
 }
 
+// Crystal::XMLInput() on a non-empty Crystal must release the scatterers
+// before the scattering powers they reference.
+void TestCrystalXMLInputReleaseOrder()
+{
+   using namespace ObjCryst;
+   std::stringstream xml;
+   MakePbso4Crystal().XMLOutput(xml, 0);
+   const std::string xmlText = xml.str();
+
+   Crystal restored;
+   for(int i = 0; i < 2; ++i)
+   {
+      std::stringstream is(xmlText);
+      XMLCrystTag tag(is);
+      restored.XMLInput(is, tag);
+   }
+   Check(restored.GetNbScatterer() == 5, "Crystal::XMLInput should restore the 5 PbSO4 atoms");
+
+   gReleasedObj.clear();
+   gKeepReleasedObj = true;
+   SetReleaseObjHook(&RecordReleasedObj);
+   {
+      std::stringstream is(xmlText);
+      XMLCrystTag tag(is);
+      restored.XMLInput(is, tag);
+   }
+   SetReleaseObjHook(RefinableObjReleaseHook(0));
+   Check(gReleasedObj.size() == 5 + 3, "Crystal::XMLInput should release 5 atoms and 3 scattering powers");
+   bool seenPower = false;
+   for(RefinableObj* obj : gReleasedObj)
+   {
+      if(dynamic_cast<ScatteringPower*>(obj) != 0) seenPower = true;
+      else Check(!seenPower, "Crystal::XMLInput should release scatterers before scattering powers");
+   }
+   for(RefinableObj* obj : gReleasedObj) delete obj;
+}
+
 } // namespace
 
 int main(int argc, char* argv[])
@@ -189,6 +227,7 @@ int main(int argc, char* argv[])
    else if(testName == "crystal-release-hook-remove-scatterer") TestCrystalReleaseHookRemoveScatterer();
    else if(testName == "crystal-connectatoms-release") TestCrystalConnectAtomsRelease(true);
    else if(testName == "crystal-connectatoms-no-delete") TestCrystalConnectAtomsRelease(false);
+   else if(testName == "crystal-xmlinput-release-order") TestCrystalXMLInputReleaseOrder();
    else
    {
       std::cerr << "Unknown test case: " << testName << std::endl;

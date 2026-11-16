@@ -27,6 +27,7 @@ run_test "unit::unitcell-geometry" "$SCRIPT_DIR/api_crystal" "unitcell-geometry"
 run_test "unit::crystal-release-hook-remove-scatterer" "$SCRIPT_DIR/api_crystal" "crystal-release-hook-remove-scatterer"
 run_test "unit::crystal-connectatoms-release" "$SCRIPT_DIR/api_crystal" "crystal-connectatoms-release"
 run_test "unit::crystal-connectatoms-no-delete" "$SCRIPT_DIR/api_crystal" "crystal-connectatoms-no-delete"
+run_test "unit::crystal-xmlinput-release-order" "$SCRIPT_DIR/api_crystal" "crystal-xmlinput-release-order"
 
 # --- api_molecule ---
 run_test "unit::molecule-atoms-bonds" "$SCRIPT_DIR/api_molecule" "molecule-atoms-bonds"
