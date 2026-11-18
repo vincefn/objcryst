@@ -57,6 +57,7 @@ run_test "unit::refinableobj-proxy-two-parent-prefix" "$SCRIPT_DIR/api_refinable
 run_test "unit::refinableobj-proxy-delegation" "$SCRIPT_DIR/api_refinableobj" "proxy-delegation"
 run_test "unit::refinableobj-proxy-deep-hierarchy" "$SCRIPT_DIR/api_refinableobj" "proxy-deep-hierarchy"
 run_test "unit::refinableobj-proxy-collision-fallback" "$SCRIPT_DIR/api_refinableobj" "proxy-collision-fallback"
+run_test "unit::refinableobj-lsq-deriv-at-limit" "$SCRIPT_DIR/api_refinableobj" "lsq-deriv-at-limit"
 
 # --- api_optimization ---
 run_test "unit::refinablepar" "$SCRIPT_DIR/api_optimization" "refinablepar"

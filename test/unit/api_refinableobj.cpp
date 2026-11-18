@@ -157,6 +157,52 @@ void TestProxyCollisionFallback()
          "Second proxy should have address suffix appended after hierarchy name");
 }
 
+class LinearLSQObj: public ObjCryst::RefinableObj
+{
+   public:
+      LinearLSQObj(): mCalc(1)
+      {
+         this->AddPar(new ObjCryst::RefinablePar("x",&mX,0.,1.,ObjCryst::gpRefParTypeObjCryst,
+                                                 ObjCryst::REFPAR_DERIV_STEP_ABSOLUTE));
+      }
+      const std::string& GetClassName() const
+      {
+         static const std::string className="LinearLSQObj";
+         return className;
+      }
+      unsigned int GetNbLSQFunction() const {return 1;}
+      const CrystVector_REAL& GetLSQCalc(const unsigned int) const
+      {
+         mCalc(0)=3*mX;
+         return mCalc;
+      }
+   private:
+      REAL mX=0.;
+      mutable CrystVector_REAL mCalc;
+};
+
+void TestLSQDerivAtLimit()
+{
+   // The numerical derivative must stay correct when the -step probe is
+   // clamped to the parameter's lower limit, and the value must be restored.
+   using namespace ObjCryst;
+   LinearLSQObj obj;
+   RefinablePar &x=obj.GetPar("x");
+   x.SetIsFixed(false);
+   x.SetIsLimited(true);
+   // The calc is linear, so any step gives the exact derivative; a large one
+   // keeps the rounding error small also with REAL=float.
+   x.SetDerivStep(1e-2);
+
+   x.SetValue(0.);
+   CheckNearAbs(obj.GetLSQDeriv(0,x)(0), 3., 1e-4, "Derivative at the lower limit");
+   CheckNearAbs(x.GetValue(), 0., 0., "Value restored at the lower limit");
+
+   x.SetValue(0.5);
+   CheckNearAbs(obj.GetLSQDeriv(0,x)(0), 3., 1e-4, "Derivative inside the limits");
+   CheckNearAbs(x.GetValue(), 0.5, 0., "Value restored inside the limits");
+}
+
 } // namespace
 
 int main(int argc, char* argv[])
@@ -174,6 +220,7 @@ int main(int argc, char* argv[])
    else if(testName == "proxy-delegation") TestProxyDelegatesToOriginal();
    else if(testName == "proxy-deep-hierarchy") TestProxyDeepHierarchy();
    else if(testName == "proxy-collision-fallback") TestProxyCollisionFallback();
+   else if(testName == "lsq-deriv-at-limit") TestLSQDerivAtLimit();
    else
    {
       std::cerr << "Unknown test case: " << testName << std::endl;
