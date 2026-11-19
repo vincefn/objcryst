@@ -25,7 +25,7 @@ jobs:
             make_cmd: make
             make_args: real_double=1 sse=0
           - label: macos-arm64
-            os: macos-14
+            os: macos-latest
             arch: arm64
             make_cmd: gmake
             make_args: ""
