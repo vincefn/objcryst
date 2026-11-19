@@ -5574,8 +5574,11 @@ void PowderPattern::BeginOptimization(const bool allowApproximations,
                                       const bool enableRestraints)
 {
    this->Prepare();
-   if(0 == mOptProfileIntegration.GetChoice()) this->FitScaleFactorForIntegratedRw();
-   else this->FitScaleFactorForRw();
+   if(0 == mOptFitScaleFactorBeginOptimization.GetChoice())
+   {
+      if(0 == mOptProfileIntegration.GetChoice()) this->FitScaleFactorForIntegratedRw();
+      else this->FitScaleFactorForRw();
+   }
    this->RefinableObj::BeginOptimization(allowApproximations,enableRestraints);
 }
 
@@ -7177,6 +7180,8 @@ void PowderPattern::InitOptions()
    VFN_DEBUG_MESSAGE("PowderPattern::InitOptions()",5)
    static string OptProfileIntegrationName;
    static string OptProfileIntegrationChoices[2];
+   static string OptFitScaleFactorName;
+   static string OptFitScaleFactorChoices[2];
 
    static bool needInitNames=true;
    if(true==needInitNames)
@@ -7185,10 +7190,16 @@ void PowderPattern::InitOptions()
       OptProfileIntegrationChoices[0]="Yes (recommended)";
       OptProfileIntegrationChoices[1]="No";
 
+      OptFitScaleFactorName="Fit Scale Factors at Beginning of Optimization";
+      OptFitScaleFactorChoices[0]="Yes";
+      OptFitScaleFactorChoices[1]="No";
+
       needInitNames=false;//Only once for the class
    }
    mOptProfileIntegration.Init(2,&OptProfileIntegrationName,OptProfileIntegrationChoices);
    this->AddOption(&mOptProfileIntegration);
+   mOptFitScaleFactorBeginOptimization.Init(2,&OptFitScaleFactorName,OptFitScaleFactorChoices);
+   this->AddOption(&mOptFitScaleFactorBeginOptimization);
 }
 
 #ifdef __WX__CRYST__
