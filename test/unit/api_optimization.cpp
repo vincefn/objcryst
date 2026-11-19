@@ -66,6 +66,49 @@ class OvershootingLsqModel : public ObjCryst::RefinableObj
       CrystVector_REAL mDeriv;
 };
 
+// calc = (g, q): the parameter z in between has no effect on calc
+class SingularMiddleParLsqModel : public ObjCryst::RefinableObj
+{
+   public:
+      SingularMiddleParLsqModel(): mG(0), mZ(0), mQ(0), mCalc(2), mObs(2), mWeight(2)
+      {
+         mObs(0) = 1;
+         mObs(1) = 2;
+         mWeight = 1;
+         this->AddPar(new ObjCryst::RefinablePar("g", &mG, -10, 10, ObjCryst::gpRefParTypeObjCryst));
+         this->AddPar(new ObjCryst::RefinablePar("z", &mZ, -10, 10, ObjCryst::gpRefParTypeObjCryst));
+         this->AddPar(new ObjCryst::RefinablePar("q", &mQ, -10, 10, ObjCryst::gpRefParTypeObjCryst));
+      }
+
+      unsigned int GetNbLSQFunction() const
+      {
+         return 1;
+      }
+
+      const CrystVector_REAL& GetLSQCalc(const unsigned int) const
+      {
+         mCalc(0) = mG;
+         mCalc(1) = mQ;
+         return mCalc;
+      }
+
+      const CrystVector_REAL& GetLSQObs(const unsigned int) const
+      {
+         return mObs;
+      }
+
+      const CrystVector_REAL& GetLSQWeight(const unsigned int) const
+      {
+         return mWeight;
+      }
+
+   private:
+      REAL mG, mZ, mQ;
+      mutable CrystVector_REAL mCalc;
+      CrystVector_REAL mObs;
+      CrystVector_REAL mWeight;
+};
+
 void TestRefinablePar()
 {
    using namespace ObjCryst;
@@ -222,6 +265,25 @@ void TestLsqNumObjThresholdMagnitude()
          "A large Rwp increase must not satisfy the small-change threshold");
 }
 
+void TestLsqNumObjFixSingularMiddlePar()
+{
+   // A parameter with a null derivative is fixed automatically and its line is
+   // removed from the design matrix. The following lines (here: the last
+   // parameter q) must keep their own derivatives.
+   using namespace ObjCryst;
+
+   SingularMiddleParLsqModel model;
+   model.UnFixAllPar();
+
+   LSQNumObj lsq("lsq-fix-singular-middle-par");
+   lsq.SetRefinedObj(model, 0, true, false);
+   lsq.Refine(3, false, true, true);
+   Check(model.GetPar("z").IsFixed(), "Singular parameter z must be fixed automatically");
+   Check(!model.GetPar("q").IsFixed(), "Last parameter q must not be fixed");
+   CheckNearAbs(model.GetPar("g").GetValue(), 1, 1e-4, "Parameter g must be refined");
+   CheckNearAbs(model.GetPar("q").GetValue(), 2, 1e-4, "Last parameter q must be refined");
+}
+
 void TestLsqNumObjPreservesOriginalParameterNames()
 {
    // Two crystalline phases with overlapping unit-cell parameter names (a, b, c).
@@ -311,6 +373,7 @@ int main(int argc, char* argv[])
    else if(testName == "lsqnumobj-residual-statistics") TestLsqNumObjResidualStatistics();
    else if(testName == "lsqnumobj-threshold-magnitude") TestLsqNumObjThresholdMagnitude();
    else if(testName == "lsqnumobj-preserve-original-parameter-names") TestLsqNumObjPreservesOriginalParameterNames();
+   else if(testName == "lsqnumobj-fix-singular-middle-par") TestLsqNumObjFixSingularMiddlePar();
    else
    {
       std::cerr << "Unknown test case: " << testName << std::endl;
