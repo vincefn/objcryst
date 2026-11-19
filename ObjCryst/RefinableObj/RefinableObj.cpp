@@ -2075,6 +2075,10 @@ const CrystVector_REAL& RefinableObj::GetLSQDeriv(const unsigned int n, Refinabl
    // By default, use numerical derivatives
    const REAL step=par.GetDerivStep();
    const REAL v0=par.GetValue();
+   // Throw if limited par is outside of bounds
+   if(par.IsLimited() && ((v0<par.GetMin()) || (v0>par.GetMax())))
+      throw ObjCrystException((string)"RefinableObj::GetLSQDeriv(): parameter "
+                              +par.GetName()+(string)" is outside its limits");
    par.MutateTo(v0+step);
    const REAL vplus=par.GetValue();
    mLSQDeriv  =this->GetLSQCalc(n);

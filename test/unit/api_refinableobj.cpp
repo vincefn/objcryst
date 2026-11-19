@@ -201,6 +201,17 @@ void TestLSQDerivAtLimit()
    x.SetValue(0.5);
    CheckNearAbs(obj.GetLSQDeriv(0,x)(0), 3., 1e-4, "Derivative inside the limits");
    CheckNearAbs(x.GetValue(), 0.5, 0., "Value restored inside the limits");
+
+   // Outside the limits there is no meaningful derivative: throw, value untouched.
+   // SetValue clamps to the limits, so set the value while they are disabled.
+   x.SetIsLimited(false);
+   x.SetValue(-0.1);
+   x.SetIsLimited(true);
+   bool thrown=false;
+   try {obj.GetLSQDeriv(0,x);}
+   catch(const ObjCrystException&) {thrown=true;}
+   Check(thrown, "Derivative outside the limits must throw");
+   CheckNearAbs(x.GetValue(), -0.1, 0., "Value unchanged outside the limits");
 }
 
 } // namespace

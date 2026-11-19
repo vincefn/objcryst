@@ -272,8 +272,11 @@ void TestLsqNumObjStartsWithinLimits()
    LinearLsqModel model;
    RefinablePar &x = model.GetPar("x");
    x.SetIsFixed(false);
-   x.SetIsLimited(true);
+   // SetValue clamps to the limits, so set the value while they are disabled
+   x.SetIsLimited(false);
    x.SetValue(-0.1);
+   x.SetIsLimited(true);
+   Check(x.GetValue() < x.GetMin(), "Test setup: parameter must start outside its limits");
 
    LSQNumObj lsq("lsq-starts-within-limits");
    lsq.SetRefinedObj(model, 0, true, false);
