@@ -67,6 +67,8 @@ run_test "unit::lsqnumobj" "$SCRIPT_DIR/api_optimization" "lsqnumobj"
 run_test "unit::lsqnumobj-residual-statistics" "$SCRIPT_DIR/api_optimization" "lsqnumobj-residual-statistics"
 run_test "unit::lsqnumobj-threshold-magnitude" "$SCRIPT_DIR/api_optimization" "lsqnumobj-threshold-magnitude"
 run_test "unit::lsqnumobj-preserve-original-parameter-names" "$SCRIPT_DIR/api_optimization" "lsqnumobj-preserve-original-parameter-names"
+run_test "unit::lsqnumobj-fix-singular-middle-par" "$SCRIPT_DIR/api_optimization" "lsqnumobj-fix-singular-middle-par"
+run_test "unit::lsqnumobj-fix-singular-par-one-left" "$SCRIPT_DIR/api_optimization" "lsqnumobj-fix-singular-par-one-left"
 
 # --- api_indexing ---
 run_test "unit::peaklist-simulate-volume" "$SCRIPT_DIR/api_indexing" "peaklist-simulate-volume"
