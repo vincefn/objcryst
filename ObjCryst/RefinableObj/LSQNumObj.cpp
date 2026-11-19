@@ -290,12 +290,12 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
                mRefParList.GetParNotFixed(i).SetIsFixed(true);
                mRefParList.PrepareForRefinement();
                nbVar=mRefParList.GetNbParNotFixed();
-               if(nbVar<=1)
+               if(nbVar<1)
                {
                   mRefParList.RestoreParamSet(mIndexValuesSetInitial);
                   if(callBeginEndOptimization) this->EndOptimization();
                   if(!silent) mRefParList.Print();
-                  throw ObjCrystException("LSQNumObj::Refine(): not enough (1) parameters after fixing one...");
+                  throw ObjCrystException("LSQNumObj::Refine(): no parameter left after fixing singular ones...");
                }
                N.resize(nbVar,nbVar);
                deltaVar.resize(nbVar);

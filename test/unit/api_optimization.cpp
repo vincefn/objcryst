@@ -284,6 +284,24 @@ void TestLsqNumObjFixSingularMiddlePar()
    CheckNearAbs(model.GetPar("q").GetValue(), 2, 1e-4, "Last parameter q must be refined");
 }
 
+void TestLsqNumObjFixSingularParOneLeft()
+{
+   // After automatically fixing a singular parameter, a single remaining
+   // parameter must still be refined.
+   using namespace ObjCryst;
+
+   SingularMiddleParLsqModel model;
+   model.UnFixAllPar();
+   model.GetPar("q").SetIsFixed(true);
+
+   LSQNumObj lsq("lsq-fix-singular-par-one-left");
+   lsq.SetRefinedObj(model, 0, true, false);
+   lsq.Refine(3, false, true, true);
+   Check(model.GetPar("z").IsFixed(), "Singular parameter z must be fixed automatically");
+   Check(!model.GetPar("g").IsFixed(), "Remaining parameter g must not be fixed");
+   CheckNearAbs(model.GetPar("g").GetValue(), 1, 1e-4, "Remaining parameter g must be refined");
+}
+
 void TestLsqNumObjPreservesOriginalParameterNames()
 {
    // Two crystalline phases with overlapping unit-cell parameter names (a, b, c).
@@ -374,6 +392,7 @@ int main(int argc, char* argv[])
    else if(testName == "lsqnumobj-threshold-magnitude") TestLsqNumObjThresholdMagnitude();
    else if(testName == "lsqnumobj-preserve-original-parameter-names") TestLsqNumObjPreservesOriginalParameterNames();
    else if(testName == "lsqnumobj-fix-singular-middle-par") TestLsqNumObjFixSingularMiddlePar();
+   else if(testName == "lsqnumobj-fix-singular-par-one-left") TestLsqNumObjFixSingularParOneLeft();
    else
    {
       std::cerr << "Unknown test case: " << testName << std::endl;
