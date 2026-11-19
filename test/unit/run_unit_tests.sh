@@ -81,6 +81,7 @@ run_test "unit::powderpattern-background" "$SCRIPT_DIR/api_powderpattern" "powde
 run_test "unit::powderpattern-background-hist" "$SCRIPT_DIR/api_powderpattern" "powderpattern-background-hist"
 run_test "unit::powderpattern-background-hist-xml" "$SCRIPT_DIR/api_powderpattern" "powderpattern-background-hist-xml"
 run_test "unit::powderpattern-diffraction" "$SCRIPT_DIR/api_powderpattern" "powderpattern-diffraction"
+run_test "unit::powderpattern-fit-scale-begin-optimization" "$SCRIPT_DIR/api_powderpattern" "powderpattern-fit-scale-begin-optimization"
 run_test "unit::powderpattern-diffraction-mur" "$SCRIPT_DIR/api_powderpattern" "powderpattern-diffraction-mur"
 run_test "unit::powderpattern-linear-polar-rate" "$SCRIPT_DIR/api_powderpattern" "powderpattern-linear-polar-rate"
 run_test "unit::powderpattern-texture-march-dollase" "$SCRIPT_DIR/api_powderpattern" "powderpattern-texture-march-dollase"
