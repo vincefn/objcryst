@@ -2074,12 +2074,24 @@ const CrystVector_REAL& RefinableObj::GetLSQDeriv(const unsigned int n, Refinabl
 {
    // By default, use numerical derivatives
    const REAL step=par.GetDerivStep();
-   par.Mutate(step);
+   const REAL v0=par.GetValue();
+   // Throw if limited par is outside of bounds
+   if(par.IsLimited() && ((v0<par.GetMin()) || (v0>par.GetMax())))
+      throw ObjCrystException((string)"RefinableObj::GetLSQDeriv(): parameter "
+                              +par.GetName()+(string)" is outside its limits");
+   par.MutateTo(v0+step);
+   const REAL vplus=par.GetValue();
    mLSQDeriv  =this->GetLSQCalc(n);
-   par.Mutate(-2*step);
+   par.MutateTo(v0-step);
+   const REAL vminus=par.GetValue();
    mLSQDeriv -=this->GetLSQCalc(n);
-   par.Mutate(step);
-   mLSQDeriv /= step*2;
+   par.MutateTo(v0);
+   // Divide by the actual spacing: a probe clamped to a limit turns this into
+   // a one-sided difference. Periodic parameters wrap instead of clamping.
+   REAL spacing=vplus-vminus;
+   if(par.IsPeriodic() && !par.IsLimited()) spacing=2*step;
+   // A fixed parameter does not move: both calcs are equal, the derivative is 0
+   if(spacing!=0) mLSQDeriv /= spacing;
    return mLSQDeriv;
 }
 

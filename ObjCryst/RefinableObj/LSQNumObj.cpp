@@ -133,6 +133,14 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
       mRefParList.PrepareForRefinement();
       //if(!silent) mRefParList.Print();
       if(mRefParList.GetNbPar()==0) throw ObjCrystException("LSQNumObj::Refine():no parameter to refine !");
+      // Clamp limited params to within their limits
+      for(long i=0;i<mRefParList.GetNbParNotFixed();i++)
+      {
+         RefinablePar &par=mRefParList.GetParNotFixed(i);
+         if(!par.IsLimited()) continue;
+         if(par.GetValue()<par.GetMin()) par.MutateTo(par.GetMin());
+         else if(par.GetValue()>par.GetMax()) par.MutateTo(par.GetMax());
+      }
 
    //variables
       long nbVar=mRefParList.GetNbParNotFixed();
