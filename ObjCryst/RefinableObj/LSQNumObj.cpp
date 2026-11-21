@@ -294,25 +294,27 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
                if(!silent) cout << "LSQNumObj::Refine(): Automatically fixing parameter";
                if(!silent) cout << " and re-start cycle..";
                if(!silent) cout << endl;
+               const long nbVarOld=nbVar;
                mRefParList.GetParNotFixed(i).SetIsFixed(true);
                mRefParList.PrepareForRefinement();
                nbVar=mRefParList.GetNbParNotFixed();
-               if(nbVar<=1)
+               if(nbVar<1)
                {
                   mRefParList.RestoreParamSet(mIndexValuesSetInitial);
                   if(callBeginEndOptimization) this->EndOptimization();
                   if(!silent) mRefParList.Print();
-                  throw ObjCrystException("LSQNumObj::Refine(): not enough (1) parameters after fixing one...");
+                  throw ObjCrystException("LSQNumObj::Refine(): no parameter left after fixing singular ones...");
                }
                N.resize(nbVar,nbVar);
                deltaVar.resize(nbVar);
 
-               //Just remove the ith line in the design matrix
+               //Just remove the ith line in the design matrix: shift all following
+               //lines (up to the old number of lines) up by one
                         REAL *p1=designMatrix.data();
                   const REAL *p2=designMatrix.data();
                   p1 += i*nbObs;
                   p2 += i*nbObs+nbObs;
-                  for(long j=i*nbObs+nbObs;j<nbObs*nbVar;j++) *p1++ = *p2++;
+                  for(long j=i*nbObs+nbObs;j<nbObs*nbVarOld;j++) *p1++ = *p2++;
                designMatrix.resizeAndPreserve(nbVar,nbObs);
 
                //:TODO: Make this work...

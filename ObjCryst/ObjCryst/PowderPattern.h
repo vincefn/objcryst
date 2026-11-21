@@ -1204,6 +1204,8 @@ class PowderPattern : public RefinableObj
 
       /// Use Integrated profiles for Chi^2, R, Rwp...
          RefObjOpt mOptProfileIntegration;
+      /// Fit the scale factors in BeginOptimization(), even if they are fixed
+         RefObjOpt mOptFitScaleFactorBeginOptimization;
 
       // Integrated R-factors
          mutable CrystVector_long mIntegratedPatternMin,mIntegratedPatternMax;
