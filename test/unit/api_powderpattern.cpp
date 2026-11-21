@@ -170,6 +170,47 @@ void TestPowderPatternDiffraction()
    Check(p.GetPowderPatternCalc().max() > 0, "PowderPattern diffraction calc is empty");
 }
 
+void TestPowderPatternFitScaleBeginOptimization()
+{
+   // BeginOptimization() fits the scale factors (even fixed ones) unless the
+   // "Fit Scale Factors at Beginning of Optimization" option is set to "No".
+   using namespace ObjCryst;
+   Crystal c = MakePbso4Crystal();
+
+   PowderPattern p;
+   p.SetRadiationType(RAD_XRAY);
+   p.SetWavelength("CuA1");
+   p.SetPowderPatternPar(10 * DEG2RAD, 0.02 * DEG2RAD, 4000);
+   CrystVector_REAL obs(4000);
+   obs = 1;
+   p.SetPowderPatternObs(obs);
+
+   auto* phase = new PowderPatternDiffraction;
+   phase->SetCrystal(c);
+   phase->SetReflectionProfilePar(PROFILE_PSEUDO_VOIGT, .03 * DEG2RAD * DEG2RAD, 0, 0, 0.3, 0);
+   p.AddPowderPatternComponent(*phase);
+   p.Prepare();
+
+   // the observed pattern is the calculated one at twice the scale
+   obs = p.GetPowderPatternCalc();
+   obs *= 2;
+   p.SetPowderPatternObs(obs);
+   CheckNearAbs(p.GetScaleFactor(0), 1, 0, "Initial scale factor");
+
+   RefObjOpt &opt = p.GetOption("Fit Scale Factors at Beginning of Optimization");
+   Check(opt.GetChoice() == 0, "Scale factors should be fitted by default");
+
+   opt.SetChoice(1);
+   p.BeginOptimization();
+   p.EndOptimization();
+   CheckNearAbs(p.GetScaleFactor(0), 1, 0, "Scale factor must not be fitted with option 'No'");
+
+   opt.SetChoice(0);
+   p.BeginOptimization();
+   p.EndOptimization();
+   CheckNearAbs(p.GetScaleFactor(0), 2, 1e-3, "Scale factor must be fitted with option 'Yes'");
+}
+
 void TestPowderPatternDiffractionMuRAbsorption()
 {
    using namespace ObjCryst;
@@ -774,6 +815,7 @@ int main(int argc, char* argv[])
    else if(testName == "powderpattern-background-hist") TestPowderPatternBackgroundHist();
    else if(testName == "powderpattern-background-hist-xml") TestPowderPatternBackgroundHistXML();
    else if(testName == "powderpattern-diffraction") TestPowderPatternDiffraction();
+   else if(testName == "powderpattern-fit-scale-begin-optimization") TestPowderPatternFitScaleBeginOptimization();
    else if(testName == "powderpattern-diffraction-mur") TestPowderPatternDiffractionMuRAbsorption();
    else if(testName == "powderpattern-linear-polar-rate") TestPowderPatternLinearPolarRateRecalc();
    else if(testName == "powderpattern-texture-march-dollase") TestPowderPatternTextureMarchDollaseRecalc();
