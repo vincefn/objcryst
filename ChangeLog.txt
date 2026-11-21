@@ -23,6 +23,7 @@ NEW FEATURES
   * Add PowderPatternBackgroundHist as scaled dense background
   * Add profile ReflectionProfilePseudoVoigtTCH for full Pseudo-Voigt parameterization
     with X,Y,Z,U,V,W and implicit Eta mixing
+  * Add PowderPattern option to disable scale factors fit at beginning of optimization (#111)
 
 IMPROVEMENTS
   * Indexing (CellExplorer): lower the default minimum unit cell length from
@@ -56,6 +57,7 @@ BUG FIXES
     are stable in both single-precision (default) and double-precision builds
   * Add a Linux non-GUI CI matrix entry running tests in double precision
   * Fix constructor of anisotropic Pseudo-Voigt profile (PR #93)
+  * Fix LSQ design matrix after automatically fixing a singular parameter (#113)
 
 #### 2024.1 (August 2024)
 NEW FEATURES
