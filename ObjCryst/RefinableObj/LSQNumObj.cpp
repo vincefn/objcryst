@@ -714,7 +714,7 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
       if(!silent) this->PrintRefResults();
       TAU_PROFILE_STOP(timer7);
 
-      // check Chi2 and Rwp thresholds. 
+      // check Chi2 and Rwp thresholds.
       // (not after a rejected LM step: step was small from damping, not convergence)
       if(terminateOnThresholds && !stepRejected)
       {
