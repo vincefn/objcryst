@@ -105,6 +105,46 @@ class LinearLsqModel : public ObjCryst::RefinableObj
       CrystVector_REAL mWeight;
 };
 
+// calc = x^3, obs = 1: from x=0.1 the undamped first step overshoots to x~33
+class CubicLsqModel : public ObjCryst::RefinableObj
+{
+   public:
+      CubicLsqModel(): mValue(0.1), mCalc(1), mObs(1), mWeight(1)
+      {
+         mObs(0) = 1;
+         mWeight(0) = 1;
+         this->AddPar(new ObjCryst::RefinablePar(
+            "x", &mValue, -100, 100, ObjCryst::gpRefParTypeObjCryst));
+      }
+
+      unsigned int GetNbLSQFunction() const
+      {
+         return 1;
+      }
+
+      const CrystVector_REAL& GetLSQCalc(const unsigned int) const
+      {
+         mCalc(0) = mValue * mValue * mValue;
+         return mCalc;
+      }
+
+      const CrystVector_REAL& GetLSQObs(const unsigned int) const
+      {
+         return mObs;
+      }
+
+      const CrystVector_REAL& GetLSQWeight(const unsigned int) const
+      {
+         return mWeight;
+      }
+
+   private:
+      REAL mValue;
+      mutable CrystVector_REAL mCalc;
+      CrystVector_REAL mObs;
+      CrystVector_REAL mWeight;
+};
+
 // calc = (g, q): the parameter z in between has no effect on calc
 class SingularMiddleParLsqModel : public ObjCryst::RefinableObj
 {
@@ -365,6 +405,29 @@ void TestLsqNumObjFixSingularParOneLeft()
    CheckNearAbs(model.GetPar("g").GetValue(), 1, 1e-4, "Remaining parameter g must be refined");
 }
 
+void TestLsqNumObjThresholdsSkipRejectedStep()
+{
+   // The thresholds must not stop the refinement after a cycle with a rejected
+   // Levenberg-Marquardt step. With a huge minRwpVar every checked cycle stops.
+   using namespace ObjCryst;
+
+   // Control: no rejected step, stop after the first cycle
+   LinearLsqModel linear;
+   linear.UnFixAllPar();
+   LSQNumObj lsqLinear("lsq-thresholds-linear");
+   lsqLinear.SetRefinedObj(linear, 0, true, false);
+   lsqLinear.Refine(-10, true, true, true, 0, 1e9);
+   Check(lsqLinear.GetRwHistory().size() == 1, "Without rejected step, stop after the first cycle");
+
+   // The first cycle rejects the overshooting undamped step: check from the second cycle
+   CubicLsqModel cubic;
+   cubic.UnFixAllPar();
+   LSQNumObj lsqCubic("lsq-thresholds-cubic");
+   lsqCubic.SetRefinedObj(cubic, 0, true, false);
+   lsqCubic.Refine(-10, true, true, true, 0, 1e9);
+   Check(lsqCubic.GetRwHistory().size() == 2, "After a rejected step, continue to the next cycle");
+}
+
 void TestLsqNumObjPreservesOriginalParameterNames()
 {
    // Two crystalline phases with overlapping unit-cell parameter names (a, b, c).
@@ -457,6 +520,7 @@ int main(int argc, char* argv[])
    else if(testName == "lsqnumobj-starts-within-limits") TestLsqNumObjStartsWithinLimits();
    else if(testName == "lsqnumobj-fix-singular-middle-par") TestLsqNumObjFixSingularMiddlePar();
    else if(testName == "lsqnumobj-fix-singular-par-one-left") TestLsqNumObjFixSingularParOneLeft();
+   else if(testName == "lsqnumobj-thresholds-skip-rejected-step") TestLsqNumObjThresholdsSkipRejectedStep();
    else
    {
       std::cerr << "Unknown test case: " << testName << std::endl;
