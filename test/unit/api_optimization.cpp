@@ -66,6 +66,45 @@ class OvershootingLsqModel : public ObjCryst::RefinableObj
       CrystVector_REAL mDeriv;
 };
 
+class LinearLsqModel : public ObjCryst::RefinableObj
+{
+   public:
+      LinearLsqModel(): mValue(0), mCalc(1), mObs(1), mWeight(1)
+      {
+         mObs(0) = 1.5;
+         mWeight(0) = 1;
+         this->AddPar(new ObjCryst::RefinablePar(
+            "x", &mValue, 0, 1, ObjCryst::gpRefParTypeObjCryst));
+      }
+
+      unsigned int GetNbLSQFunction() const
+      {
+         return 1;
+      }
+
+      const CrystVector_REAL& GetLSQCalc(const unsigned int) const
+      {
+         mCalc(0) = 3 * mValue;
+         return mCalc;
+      }
+
+      const CrystVector_REAL& GetLSQObs(const unsigned int) const
+      {
+         return mObs;
+      }
+
+      const CrystVector_REAL& GetLSQWeight(const unsigned int) const
+      {
+         return mWeight;
+      }
+
+   private:
+      REAL mValue;
+      mutable CrystVector_REAL mCalc;
+      CrystVector_REAL mObs;
+      CrystVector_REAL mWeight;
+};
+
 // calc = (g, q): the parameter z in between has no effect on calc
 class SingularMiddleParLsqModel : public ObjCryst::RefinableObj
 {
@@ -265,6 +304,30 @@ void TestLsqNumObjThresholdMagnitude()
          "A large Rwp increase must not satisfy the small-change threshold");
 }
 
+void TestLsqNumObjStartsWithinLimits()
+{
+   // A parameter below its lower limit with a relative derivative step (negative
+   // for a negative value) must be moved into its limits before refining:
+   // otherwise both derivative probes clamp to the limit, the derivative is null
+   // and the parameter gets fixed automatically.
+   using namespace ObjCryst;
+
+   LinearLsqModel model;
+   RefinablePar &x = model.GetPar("x");
+   x.SetIsFixed(false);
+   // SetValue clamps to the limits, so set the value while they are disabled
+   x.SetIsLimited(false);
+   x.SetValue(-0.1);
+   x.SetIsLimited(true);
+   Check(x.GetValue() < x.GetMin(), "Test setup: parameter must start outside its limits");
+
+   LSQNumObj lsq("lsq-starts-within-limits");
+   lsq.SetRefinedObj(model, 0, true, false);
+   lsq.Refine(3, false, true, true);
+   Check(!x.IsFixed(), "Parameter outside its limits must not be fixed automatically");
+   CheckNearAbs(x.GetValue(), 0.5, 1e-4, "Parameter outside its limits must be refined");
+}
+
 void TestLsqNumObjFixSingularMiddlePar()
 {
    // A parameter with a null derivative is fixed automatically and its line is
@@ -391,6 +454,7 @@ int main(int argc, char* argv[])
    else if(testName == "lsqnumobj-residual-statistics") TestLsqNumObjResidualStatistics();
    else if(testName == "lsqnumobj-threshold-magnitude") TestLsqNumObjThresholdMagnitude();
    else if(testName == "lsqnumobj-preserve-original-parameter-names") TestLsqNumObjPreservesOriginalParameterNames();
+   else if(testName == "lsqnumobj-starts-within-limits") TestLsqNumObjStartsWithinLimits();
    else if(testName == "lsqnumobj-fix-singular-middle-par") TestLsqNumObjFixSingularMiddlePar();
    else if(testName == "lsqnumobj-fix-singular-par-one-left") TestLsqNumObjFixSingularParOneLeft();
    else

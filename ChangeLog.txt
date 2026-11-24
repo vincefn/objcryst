@@ -34,6 +34,7 @@ IMPROVEMENTS
     regression checks more informative
   * Thresholds minChi2var and minRwpVar now act on the magnitude of the change
     from the latest refinement cycle (#96, fixes #95)
+  * Clamp limited params to within their bounds before refinement
 
 BUG FIXES
   * Fix TextureEllipsoid implementation
@@ -58,6 +59,7 @@ BUG FIXES
   * Add a Linux non-GUI CI matrix entry running tests in double precision
   * Fix constructor of anisotropic Pseudo-Voigt profile (PR #93)
   * Fix LSQ design matrix after automatically fixing a singular parameter (#113)
+  * Fix the numerical LSQ derivative of a limited parameter at its bound
 
 #### 2024.1 (August 2024)
 NEW FEATURES
