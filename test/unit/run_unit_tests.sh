@@ -71,6 +71,7 @@ run_test "unit::lsqnumobj-preserve-original-parameter-names" "$SCRIPT_DIR/api_op
 run_test "unit::lsqnumobj-starts-within-limits" "$SCRIPT_DIR/api_optimization" "lsqnumobj-starts-within-limits"
 run_test "unit::lsqnumobj-fix-singular-middle-par" "$SCRIPT_DIR/api_optimization" "lsqnumobj-fix-singular-middle-par"
 run_test "unit::lsqnumobj-fix-singular-par-one-left" "$SCRIPT_DIR/api_optimization" "lsqnumobj-fix-singular-par-one-left"
+run_test "unit::lsqnumobj-thresholds-skip-rejected-step" "$SCRIPT_DIR/api_optimization" "lsqnumobj-thresholds-skip-rejected-step"
 
 # --- api_indexing ---
 run_test "unit::peaklist-simulate-volume" "$SCRIPT_DIR/api_indexing" "peaklist-simulate-volume"

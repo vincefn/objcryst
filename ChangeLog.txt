@@ -60,6 +60,8 @@ BUG FIXES
   * Fix constructor of anisotropic Pseudo-Voigt profile (PR #93)
   * Fix LSQ design matrix after automatically fixing a singular parameter (#113)
   * Fix the numerical LSQ derivative of a limited parameter at its bound
+  * Don't stop LSQ refinement on minChi2var/minRwpVar after a rejected
+    Levenberg-Marquardt step
 
 #### 2024.1 (August 2024)
 NEW FEATURES

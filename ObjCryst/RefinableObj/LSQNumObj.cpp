@@ -169,6 +169,8 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
    {
       TAU_PROFILE_START(timer2);
       const REAL ChisSqPreviousCycle=mChiSq;
+      // Whether a Levenberg-Marquardt step was rejected during this cycle
+      bool stepRejected=false;
       mRefParList.SaveParamSet(mIndexValuesSetLast);// end of last cycle
       if(!silent) cout << "LSQNumObj::Refine():Cycle#"<< cycle <<endl;
       //initial value of function
@@ -638,6 +640,7 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
                {
                   mRefParList.RestoreParamSet(mIndexValuesSetLast);
                   increaseMarquardt=true;
+                  stepRejected=true;
                   if(!silent)
                   {
                      cout << "LSQNumObj::Refine(Chi^2="<<oldChiSq<<"->"<<mChiSq
@@ -711,8 +714,9 @@ void LSQNumObj::Refine (int nbCycle,bool useLevenbergMarquardt,
       if(!silent) this->PrintRefResults();
       TAU_PROFILE_STOP(timer7);
 
-      // check Chi2 and Rwp thresholds
-      if(terminateOnThresholds)
+      // check Chi2 and Rwp thresholds. 
+      // (not after a rejected LM step: step was small from damping, not convergence)
+      if(terminateOnThresholds && !stepRejected)
       {
          if( minChi2var>fabs((ChisSqPreviousCycle-mChiSq)/abs(ChisSqPreviousCycle+1e-6)) ) break;
          if( (minRwpVar>=0) && ( minRwpVar > (fabs(Rw_ini-mRw)*100.0) ) ) break;
